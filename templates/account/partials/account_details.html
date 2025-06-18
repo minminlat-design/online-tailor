@@ -1,0 +1,62 @@
+<div class="my-account-content account-edit">
+    <div>
+        {% include "includes/alerts.html" %}
+        
+
+        <form id="form-password-change" method="post" action="{% url 'account_details' %}">
+            {% csrf_token %}
+            <div class="tf-field style-1 mb_15">
+                <input class="tf-field-input tf-input" placeholder=" " type="text" id="property1" name="first_name" value="{{ form.first_name.value|default_if_none:'' }}">
+                <label class="tf-field-label fw-4 text_black-2" for="property1">First name</label>
+                {% if form.first_name.errors %}
+        <div class="text-danger small mt-1">
+            {{ form.first_name.errors.0 }}
+        </div>
+    {% endif %}
+            </div>
+            <div class="tf-field style-1 mb_15">
+                <input class="tf-field-input tf-input" placeholder=" " type="text" id="property2" name="last_name" value="{{ form.last_name.value|default_if_none:'' }}">
+                <label class="tf-field-label fw-4 text_black-2" for="property2">Last name</label>
+                {% if form.last_name.errors %}
+        <div class="text-danger small mt-1">
+            {{ form.last_name.errors.0 }}
+        </div>
+    {% endif %}
+            </div>
+            <div class="tf-field style-1 mb_15">
+                <input class="tf-field-input tf-input" placeholder=" " type="email" id="property3" name="email" value="{{ form.email.value|default_if_none:'' }}">
+                <label class="tf-field-label fw-4 text_black-2" for="property3">Email</label>
+                {% if form.email.errors %}
+                <div class="text-danger small mt-1">
+                    {{ form.email.errors.0 }}
+                </div>
+            {% endif %}
+
+ 
+            </div>
+            <h6 class="mb_20">Password Change (optional)</h6>
+            <div class="tf-field style-1 mb_30">
+                <input class="tf-field-input tf-input" placeholder=" " type="password" id="property4" name="old_password">
+                <label class="tf-field-label fw-4 text_black-2" for="property4">Current password</label>
+                {% if form.old_password.errors %}
+        <div class="text-danger small mt-1">
+            {{ form.old_password.errors.0 }}
+        </div>
+    {% endif %}
+            </div>
+            <div class="tf-field style-1 mb_30">
+                <input class="tf-field-input tf-input" placeholder=" " type="password" id="property5" name="new_password1">
+                <label class="tf-field-label fw-4 text_black-2" for="property5">New password</label>
+            </div>
+            <div class="tf-field style-1 mb_30">
+                <input class="tf-field-input tf-input" placeholder=" " type="password" id="property6" name="new_password2">
+                <label class="tf-field-label fw-4 text_black-2" for="property6">Confirm password</label>
+            </div>
+            <div class="mb_20">
+                <button type="submit" class="tf-btn w-100 radius-3 btn-fill animate-hover-btn justify-content-center">
+                    Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

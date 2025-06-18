@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Gallery{% endblock title %}
+
+{% block content %}
+
+
+<!-- page-title -->
+        <div class="tf-page-title">
+            <div class="container-full">
+                <div class="heading text-center" style="color:white;">Gallery</div>
+                
+            </div>
+        </div>
+        <!-- /page-title -->
+
+        <!-- Section Product -->
+        <section class="flat-spacing-2">
+            <div class="container">
+                <div class="tf-shop-control grid-3 align-items-center">
+                    
+                   
+                    
+                </div>
+                <div class="wrapper-control-shop">
+                    
+                   
+                       
+                    <div class="tf-grid-layout wrapper-shop tf-col-4" id="gridLayout">
+
+
+{% comment "" %}
+
+
+                        <!-- card product 1 -->
+                        <div class="card-product grid" data-availability="In stock" data-brand="Ecomus">
+                            <div class="card-product-wrapper">
+                                <a href="#" class="product-img">
+                                    <img class="lazyload img-product" data-src="{% static 'images/products/orange-1.jpg' %}"
+                                        src="{% static 'images/products/orange-1.jpg' %}" alt="image-product">
+                                    <img class="lazyload img-hover" data-src="{% static 'images/products/white-1.jpg' %}"
+                                        src="{% static 'images/products/white-1.jpg' %}" alt="image-product">
+                                </a>
+                                <div class="list-product-btn absolute-2">
+                                    
+                                   
+                                </div>
+                            </div>
+                            <div class="card-product-info">
+                                <a href="product-detail.html" class="title link">Ribbed Tank Top</a>
+                                
+                                
+                            </div>
+                        </div>
+
+{% endcomment %}
+
+
+
+{% for image in page_obj %}
+<div class="card-product grid" data-availability="In stock">
+    <div class="card-product-wrapper">
+        <!-- Use a button or link to trigger modal, add data-bs-toggle and data-bs-target -->
+        <a href="#" class="product-img" data-bs-toggle="modal" data-bs-target="#modal{{ image.id }}">
+            <img class="lazyload img-product"
+                 data-src="{{ image.image.url }}"
+                 src="{{ image.image.url }}"
+                 alt="{{ image.title }}">
+            <img class="lazyload img-hover"
+                 data-src="{{ image.image.url }}"
+                 src="{{ image.image.url }}"
+                 alt="{{ image.title }}">
+        </a>
+        <div class="list-product-btn absolute-2"></div>
+    </div>
+    <div class="card-product-info">
+        <a href="#" class="title link">{{ image.title }}</a>
+        {% if image.caption %}
+            <p class="caption">{{ image.caption }}</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="modal{{ image.id }}" tabindex="-1" aria-labelledby="modalLabel{{ image.id }}" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalLabel{{ image.id }}">{{ image.title }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <img src="{{ image.image.url }}" alt="{{ image.title }}" class="img-fluid" id="zoom-image-{{ image.id }}" style="max-height: 80vh; cursor: zoom-in;">
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}
+
+
+
+
+<!-- pagination -->
+{% if page_obj.has_other_pages %}
+<ul class="wg-pagination tf-pagination-list">
+    {% if page_obj.has_previous %}
+    <li>
+        <a href="?page={{ page_obj.previous_page_number }}" class="pagination-link animate-hover-btn">
+            <span class="icon icon-arrow-left"></span>
+        </a>
+    </li>
+    {% else %}
+    <li class="disabled">
+        <span class="pagination-link"><span class="icon icon-arrow-left"></span></span>
+    </li>
+    {% endif %}
+
+    {% for num in page_obj.paginator.page_range %}
+        {% if num == page_obj.number %}
+        <li class="active"><span class="pagination-link">{{ num }}</span></li>
+        {% elif num >= page_obj.number|add:'-2' and num <= page_obj.number|add:'2' %}
+        <li><a href="?page={{ num }}" class="pagination-link animate-hover-btn">{{ num }}</a></li>
+        {% endif %}
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+    <li>
+        <a href="?page={{ page_obj.next_page_number }}" class="pagination-link animate-hover-btn">
+            <span class="icon icon-arrow-right"></span>
+        </a>
+    </li>
+    {% else %}
+    <li class="disabled">
+        <span class="pagination-link"><span class="icon icon-arrow-right"></span></span>
+    </li>
+    {% endif %}
+</ul>
+{% endif %}
+
+
+
+
+
+
+
+
+
+                    </div>
+
+                </div>
+            </div>
+        </section>
+        <!-- /Section Product -->
+
+
+
+
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // Simple zoom toggle for modal images
+  document.querySelectorAll('[id^="zoom-image-"]').forEach(img => {
+    img.addEventListener('click', function () {
+      if (this.style.transform === "scale(2)") {
+        this.style.transform = "scale(1)";
+        this.style.cursor = "zoom-in";
+      } else {
+        this.style.transform = "scale(2)";
+        this.style.cursor = "zoom-out";
+      }
+      this.style.transition = "transform 0.3s ease";
+    });
+  });
+});
+</script>
+
+
+
+
+{% endblock content %}

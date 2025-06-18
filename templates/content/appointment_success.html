@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block title %}Appointment Success{% endblock title %}
+
+{% block content %}
+
+
+<!-- page-title -->
+<div class="tf-page-title style-2">
+  <div class="container-full">
+    <div class="heading text-center text-white">Appointment Success</div>
+  </div>
+</div>
+<!-- /page-title -->
+
+
+<div class="container py-5">
+  <div class="row justify-content-center text-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="bg-dark text-white p-5 rounded-4 shadow">
+        <h2 class="fw-bold mb-3" style="color:white;">Thank You!</h2>
+        <p class="lead mb-4">Your appointment request has been successfully submitted.<br>
+          Our team will contact you shortly to confirm the details.</p>
+        <a href="{% url 'content:static_page_detail' slug='make-an-appointment' %}" class="btn btn-outline-light btn-lg px-4">
+          Make Another Appointment
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}

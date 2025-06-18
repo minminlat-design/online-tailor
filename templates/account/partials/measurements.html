@@ -1,0 +1,112 @@
+
+
+{% comment "" %}
+
+
+{% load custom_filters %}
+
+<form method="post" enctype="multipart/form-data" action="{% url 'update_measurements' %}" class="form-horizontal">
+  {% csrf_token %}
+
+  <div class="row">
+    {% for field in form %}
+      <div class="col-sm-6">
+        <div class="form-group">
+          <label class="col-sm-4 control-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          <div class="col-sm-8">
+
+            {# Show image preview if this is a file/image field and has a saved image #}
+            {% if field.name == "photo_front" and form.instance.photo_front %}
+              <img src="{{ form.instance.photo_front.url }}" class="img-thumbnail mb-2" style="max-height:150px;">
+            {% elif field.name == "photo_side" and form.instance.photo_side %}
+              <img src="{{ form.instance.photo_side.url }}" class="img-thumbnail mb-2" style="max-height:150px;">
+            {% elif field.name == "photo_back" and form.instance.photo_back %}
+              <img src="{{ form.instance.photo_back.url }}" class="img-thumbnail mb-2" style="max-height:150px;">
+            {% endif %}
+
+            {{ field }}
+
+            {% if field.help_text %}
+              <small class="form-text text-muted">{{ field.help_text }}</small>
+            {% endif %}
+
+            {% for error in field.errors %}
+              <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <input type="hidden" name="from_section" value="measurements" />
+
+  {% if form.non_field_errors %}
+    <div class="text-danger text-center">
+      {% for error in form.non_field_errors %}
+        <div>{{ error }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <div class="text-center">
+    <button type="submit" class="tf-btn btn-fill mt-4">Save Measurements</button>
+  </div>
+</form>
+{% endcomment %}
+{% load form_tags %}
+
+
+<form method="post" enctype="multipart/form-data" action="{% url 'update_measurements' %}" class="form-horizontal">
+  {% csrf_token %}
+
+  <div class="row">
+    {% for field in form %}
+      <div class="col-md-6 mb-4">
+        <div class="form-group">
+          <label for="{{ field.id_for_label }}" class="form-label fw-semibold">
+            {{ field.label }}
+          </label>
+
+          {% if field.name == "photo_front" and form.instance.photo_front %}
+            <div class="mb-2">
+              <img src="{{ form.instance.photo_front.url }}" alt="Front view" class="img-thumbnail" style="max-height: 150px;">
+            </div>
+          {% elif field.name == "photo_side" and form.instance.photo_side %}
+            <div class="mb-2">
+              <img src="{{ form.instance.photo_side.url }}" alt="Side view" class="img-thumbnail" style="max-height: 150px;">
+            </div>
+          {% elif field.name == "photo_back" and form.instance.photo_back %}
+            <div class="mb-2">
+              <img src="{{ form.instance.photo_back.url }}" alt="Back view" class="img-thumbnail" style="max-height: 150px;">
+            </div>
+          {% endif %}
+
+          {{ field|add_class:"form-control" }}
+
+          {% if field.help_text %}
+            <small class="form-text text-muted d-block mt-1">{{ field.help_text }}</small>
+          {% endif %}
+
+          {% for error in field.errors %}
+            <div class="text-danger small mt-1">{{ error }}</div>
+          {% endfor %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <input type="hidden" name="from_section" value="measurements" />
+
+  {% if form.non_field_errors %}
+    <div class="alert alert-danger text-center mt-3">
+      {% for error in form.non_field_errors %}
+        <div>{{ error }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <div class="text-center mt-4">
+    <button type="submit" class="tf-btn btn-fill">Save Measurements</button>
+  </div>
+</form>

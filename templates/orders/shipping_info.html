@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+{% load form_tags %}
+{% comment "" %}
+
+
+
+{% extends "base.html" %}
+{% block title %}Shipping Info{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 grid grid-cols-1 md:grid-cols-3 gap-8">
+
+  <!-- Left: Shipping Form -->
+  <div class="col-span-2 bg-white p-6 rounded shadow">
+    <h2 class="text-2xl font-bold mb-4">Enter Your Shipping Details</h2>
+    <form method="post">
+      {% csrf_token %}
+      {% for field in form %}
+        <div class="mb-4">
+          <label class="font-semibold block">{{ field.label }}</label>
+          {{ field }}
+        </div>
+      {% endfor %}
+      <button type="submit" class="btn btn-success mt-4">Save and Continue to Checkout</button>
+    </form>
+  </div>
+
+  <!-- Right: Cart Summary (same as your existing layout) -->
+  <div class="col-span-1 bg-gray-50 p-4 rounded shadow-sm">
+    <h2 class="text-lg font-semibold mb-4">Cart Summary</h2>
+    {% for item in cart_items %}
+      <div class="border-b pb-4 mb-4">
+        <strong>{{ item.product.name }}</strong><br>
+        Unit Price: ${{ item.unit_price|floatformat:2 }}<br>
+        Quantity: {{ item.quantity }}<br>
+        Total: ${{ item.total_price|floatformat:2 }}<br>
+        {% if item.gift_wrap %}
+          <small>Includes $5.00 gift wrap</small><br>
+        {% endif %}
+      </div>
+    {% endfor %}
+    <div class="mt-4">
+      <p class="font-semibold text-lg">Subtotal: ${{ subtotal|floatformat:2 }}</p>
+    </div>
+    <a href="{% url 'cart:cart_detail' %}" class="btn btn-outline w-full mt-2">Edit Cart</a>
+  </div>
+
+</div>
+
+
+{% endblock %}
+
+{% endcomment %}
+
+
+
+{% block title %}Shipping Info{% endblock %}
+
+{% block content %}
+<!-- Page Title -->
+<div class="tf-page-title">
+    <div class="container-full">
+        <div class="heading text-center" style="color: white;">Check Out</div>
+    </div>
+</div>
+<br/>
+
+{% include "includes/alerts.html" %}
+
+<section class="flat-spacing-11">
+  <div class="container">
+    <form method="post" class="form-checkout" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="tf-page-cart-wrap layout-2">
+        
+       <!-- Left: Shipping/Billing Form -->
+<div class="tf-page-cart-item">
+  <h5 class="fw-5 mb_30">Shipping Details</h5>
+  <div class="row g-3">
+    {% for field in form.visible_fields %}
+      <div class="col-md-6">
+        <div class="form-group">
+          <label for="{{ field.id_for_label }}" class="form-label fw-5 mb-2">{{ field.label }}</label>
+          {{ field|add_class:"form-control" }}
+          {% if field.errors %}
+            <small class="text-danger d-block mt-1">{{ field.errors|striptags }}</small>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+
+        <!-- Cart Summary -->
+<div class="tf-page-cart-footer bg-light rounded shadow-sm p-4 mt-4">
+  <div class="tf-cart-footer-inner">
+
+    <h5 class="fw-bold mb-4 border-bottom pb-2 text-dark">Your Order</h5>
+
+    <ul class="wrap-checkout-product list-unstyled">
+      {% for item in cart_items %}
+        <li class="checkout-product-item d-flex mb-3 pb-3 border-bottom">
+          <figure class="img-product me-3 position-relative" style="width: 80px;">
+            {% with item.product.first_image as image %}
+              {% if image %}
+                <img src="{{ image.image.url }}" alt="{{ item.product.name }}" class="img-fluid rounded">
+              {% else %}
+                <img src="/static/images/default-product.jpg" alt="No image" class="img-fluid rounded">
+              {% endif %}
+            {% endwith %}
+            <span class="badge bg-secondary position-absolute top-0 start-100 translate-middle">
+              {{ item.quantity }}
+            </span>
+          </figure>
+
+          <div class="content flex-grow-1">
+            <div class="info">
+              <p class="name fw-semibold mb-1 text-dark">{{ item.product.name }}</p>
+              {% if item.selected_options %}
+                <ul class="text-muted small mb-1 ps-3">
+                  {% for key, val in item.selected_options.items %}
+                    <li>
+                      {{ key|capfirst }}:
+                      {% if val.name %}
+                        {{ val.name }}
+                      {% elif val.items %}
+                        {{ val.items.name }}
+                      {% else %}
+                        {% for subkey, subval in val.items %}
+                          {{ subkey|capfirst }} - {{ subval.name }},
+                        {% endfor %}
+                      {% endif %}
+                    </li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            </div>
+            <span class="price fw-semibold text-dark">${{ item.total_price|floatformat:2 }}</span>
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+
+    <!-- Order Total -->
+    <div class="d-flex justify-content-between align-items-center mt-4 border-top pt-3">
+      <h6 class="fw-semibold mb-0">Total</h6>
+      <h6 class="total fw-bold text-success mb-0">${{ subtotal|floatformat:2 }}</h6>
+    </div>
+
+    <!-- Terms -->
+    <div class="wd-check-payment mt-4">
+      <p class="small text-muted">
+        Your personal data will be used to process your order, support your experience throughout this website,
+        and for other purposes described in our
+        <a href="#" class="text-decoration-underline">privacy policy</a>.
+      </p>
+      <div class="form-check mt-3">
+        <input class="form-check-input" type="checkbox" id="check-agree" name="agree_terms" required>
+        <label class="form-check-label" for="check-agree">
+          I have read and agree to the website <a href="#" class="text-decoration-underline">terms and conditions</a>.
+        </label>
+      </div>
+    </div>
+
+    <!-- Submit Button -->
+    <div class="text-center mt-4">
+      <button type="submit" class="tf-btn radius-3 btn-fill btn-icon animate-hover-btn w-100">
+        Save & Continue to Checkout
+      </button>
+    </div>
+
+  </div>
+</div>
+
+
+
+
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}
+
+
+
+

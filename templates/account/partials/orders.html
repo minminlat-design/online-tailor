@@ -1,0 +1,36 @@
+<div class="my-account-content account-order">
+    <div class="wrap-account-order">
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th class="fw-6">Order</th>
+                        <th class="fw-6">Date</th>
+                        <th class="fw-6">Status</th>
+                        <th class="fw-6">Total</th>
+                        <th class="fw-6">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr class="tf-order-item">
+                        <td>#{{ order.id }}</td>
+                        <td>{{ order.created|date:"F j, Y" }}</td>
+                        <td>{{ order.get_status_display }}</td>
+                        <td>${{ order.total_price }} for {{ order.items.count }} item{{ order.items.count|pluralize }}</td>
+                        <td>
+                            <a href="javascript:void(0);"
+                               onclick="loadSection('order_detail_{{ order.id }}')"
+                               class="tf-btn btn-fill animate-hover-btn rounded-0 justify-content-center">
+                                <span>View</span>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5">You have no orders.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

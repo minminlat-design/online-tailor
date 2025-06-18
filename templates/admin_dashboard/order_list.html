@@ -1,0 +1,21 @@
+<h2>All Orders</h2>
+<table>
+  <tr>
+    <th>ID</th>
+    <th>User</th>
+    <th>Status</th>
+    <th>Paid</th>
+    <th>Created</th>
+    <th>Actions</th>
+  </tr>
+  {% for order in orders %}
+  <tr>
+    <td>{{ order.id }}</td>
+    <td>{{ order.first_name }} {{ order.last_name }}</td>
+    <td>{{ order.status }}</td>
+    <td>{{ order.paid }}</td>
+    <td>{{ order.created }}</td>
+    <td><a href="{% url 'admin_dashboard:order_detail' order.id %}">View</a></td>
+  </tr>
+  {% endfor %}
+</table>

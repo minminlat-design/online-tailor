@@ -1,0 +1,91 @@
+<div class="wd-form-order">
+    <div class="order-head">
+        <figure class="img-product">
+            {% with order.items.first as item %}
+                {% with item.product.first_image as image %}
+                    {% if image %}
+                        <img src="{{ image.image.url }}" alt="{{ item.product_name }}">
+                    {% else %}
+                        <img src="/static/images/default-product.jpg" alt="No image">
+                    {% endif %}
+                {% endwith %}
+
+            {% endwith %}
+        </figure>
+        <div class="content">
+            <div class="badge">{{ order.get_status_display }}</div>
+            <h6 class="mt-8 fw-5">Order #{{ order.id }}</h6>
+        </div>
+    </div>
+    <div class="tf-grid-layout md-col-2 gap-15">
+        <div class="item">
+            <div class="text-2 text_black-2">Item</div>
+            <div class="text-2 mt_4 fw-6">{{ order.items.count }} item(s)</div>
+        </div>
+        <div class="item">
+            <div class="text-2 text_black-2">Start Time</div>
+            <div class="text-2 mt_4 fw-6">{{ order.created|date:"d F Y, H:i:s" }}</div>
+        </div>
+        <div class="item">
+            <div class="text-2 text_black-2">Address</div>
+            <div class="text-2 mt_4 fw-6">
+                {{ order.address }}, {{ order.city }} {{ order.postal_code }}
+            </div>
+        </div>
+    </div>
+
+    <div class="widget-tabs style-has-border widget-order-tab">
+        <ul class="widget-menu-tab">
+            <li class="item-title">
+                <span class="inner">Item Details</span>
+            </li>
+        </ul>
+
+        <div class="widget-content-tab">
+            {% for item in order.items.all %}
+            <div class="widget-content-inner active">
+                <div class="order-head">
+                    <figure class="img-product">
+                        {% with item.product.first_image as image %}
+                            {% if image %}
+                                <img src="{{ image.image.url }}" alt="{{ item.product_name }}">
+                            {% else %}
+                                <img src="/static/images/default-product.jpg" alt="No image">
+                            {% endif %}
+                        {% endwith %}
+
+                    </figure>
+                    <div class="content">
+                        <div class="text-2 fw-6">{{ item.product_name }}</div>
+                        <div class="mt_4"><span class="fw-6">Price:</span> ${{ item.base_price }}</div>
+                        <div class="mt_4">
+                            <span class="fw-6">Size:</span>
+                            {{ item.selected_options.size|default:"N/A" }}
+                        </div>
+                    </div>
+                </div>
+                <ul>
+                    <li class="d-flex justify-content-between text-2">
+                        <span>Total Price</span>
+                        <span class="fw-6">${{ item.total_price }}</span>
+                    </li>
+                </ul>
+            </div>
+            {% endfor %}
+            <ul class="mt-4">
+                <li class="d-flex justify-content-between text-2 mt_8">
+                    <span>Order Total</span>
+                    <span class="fw-6">${{ order.total_price }}</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <br/>
+    <div style="text-align: center;">
+    <a href="javascript:void(0);" 
+   onclick="loadSection('orders')"
+   class="tf-btn btn-border animate-hover-btn rounded-0 justify-content-center">
+    <span>Back to Orders</span>
+</a>
+</div>
+</div>

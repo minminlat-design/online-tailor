@@ -1,0 +1,107 @@
+
+
+{% block title %}Order {{ order.id }} Details{% endblock %}
+
+{% block content %}
+<h1>Order {{ order.id }} Details</h1>
+
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+
+  <h2>Customer Info</h2>
+  <p><strong>Name:</strong> {{ order.first_name }} {{ order.last_name }}</p>
+  <p><strong>Email:</strong> <a href="mailto:{{ order.email }}">{{ order.email }}</a></p>
+  <p><strong>Address:</strong> {{ order.address }}, {{ order.postal_code }} {{ order.city }}</p>
+
+  <h2>Order Status</h2>
+{{ status_form.non_field_errors }}
+<div>
+  {{ status_form.status.label_tag }}
+  {{ status_form.status }}
+  {{ status_form.status.errors }}
+</div>
+
+
+  <p><strong>Paid:</strong> {{ order.paid|yesno:"Yes,No" }}</p>
+  <p><strong>Total:</strong> ${{ order.get_total_cost }}</p>
+
+  <hr>
+
+  <h2>Items</h2>
+  <table border="1" cellpadding="5" cellspacing="0" style="width:100%;">
+    <thead>
+      <tr>
+        <th>Product</th>
+        <th>Image</th>
+        <th>Base Price</th>
+        <th>Quantity</th>
+        <th>Total Price</th>
+        <th>Gift Wrap</th>
+        <th>Selected Options</th>
+        <th>Customizations</th>
+        <th>Measurement Data (Editable)</th>
+      </tr>
+    </thead>
+
+
+    <tbody>
+  {{ formset.management_form }}
+  {% for form in formset.forms %}
+  {% with item=form.instance %}
+  <tr>
+    <!-- rest of your row -->
+
+    <td>{{ item.product_name }}</td>
+    <td>
+      {% if item.product.image.url %}
+        <img src="{{ item.product.image.url }}" alt="{{ item.product_name }}" style="max-height:100px;">
+      {% else %}
+        No Image
+      {% endif %}
+    </td>
+    <td>${{ item.base_price }}</td>
+    <td>{{ item.quantity }}</td>
+    <td>${{ item.total_price }}</td>
+    <td>{{ item.gift_wrap|yesno:"Yes,No" }}</td>
+
+    <td>
+      {% if item.selected_options %}
+        <ul>
+          {% for key, value in item.selected_options.items %}
+            <li><strong>{{ key|capfirst }}:</strong> {{ value }}</li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        None
+      {% endif %}
+    </td>
+
+    <td>
+      {% if item.customizations %}
+        <ul>
+          {% for key, value in item.customizations.items %}
+            <li><strong>{{ key|capfirst }}:</strong> {{ value }}</li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        None
+      {% endif %}
+    </td>
+
+    <td>
+      {{ form.frozen_measurement_data }}
+    </td>
+  </tr>
+  {% endwith %}
+  {% endfor %}
+</tbody>
+
+
+
+
+    
+  </table>
+
+  <button type="submit" style="margin-top: 20px;">Save Changes</button>
+</form>
+{% endblock %}

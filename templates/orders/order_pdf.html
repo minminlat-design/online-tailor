@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: sans-serif; }
+        img { max-width: 120px; height: auto; margin-right: 10px; }
+        .photos { display: flex; margin-top: 10px; }
+        .item { margin-bottom: 30px; }
+        ul { margin: 0; padding-left: 20px; }
+        li { margin-bottom: 4px; }
+    </style>
+</head>
+<body>
+    <h1>Order #{{ order.id }}</h1>
+    <p><strong>Date:</strong> {{ order.created|date:"Y-m-d" }}</p>
+    <p><strong>Customer:</strong> {{ order.first_name }} {{ order.last_name }} | <strong>Email:</strong> {{ order.email }}</p>
+    <hr/>
+
+    {% for item in order.items.all %}
+        <div class="item">
+            <h2>{{ item.product_name }}</h2>
+            <h4>Selected Options:</h4>
+            <ul>
+                {% for section, options_dict in item.selected_options.items %}
+                    {% if section == 'set' %}
+                        {% with single_item=options_dict.items %}
+                            <li><strong>{{ section|capfirst }}:</strong> 
+                                {{ single_item.name }}
+                                {% if single_item.price_difference and single_item.price_difference != '0.00' %}
+                                    (+{{ single_item.price_difference }})
+                                {% endif %}
+                            </li>
+                        {% endwith %}
+                    {% else %}
+                        {% for label, option in options_dict.items %}
+                            <li><strong>{{ label|capfirst }}:</strong> 
+                                {{ option.name }}
+                                {% if option.price_difference and option.price_difference != '0.00' %}
+                                    (+{{ option.price_difference }})
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
+            </ul>
+
+            {% if item.user_measurement %}
+                <p><strong>Fit Type:</strong> {{ item.user_measurement.get_fit_type_display }}</p>
+                <div class="photos">
+                    {% if item.photo_front_url %}
+                        <img src="{{ item.photo_front_url }}" alt="Front" />
+                    {% endif %}
+                    {% if item.photo_side_url %}
+                        <img src="{{ item.photo_side_url }}" alt="Side" />
+                    {% endif %}
+                    {% if item.photo_back_url %}
+                        <img src="{{ item.photo_back_url }}" alt="Back" />
+                    {% endif %}
+                </div>
+                <h4>Measurements:</h4>
+                <ul>
+                    {% for key, value in item.user_measurement.measurement_data.items %}
+                        <li><strong>{{ key|capfirst }}:</strong> {{ value }} cm</li>
+                    {% endfor %}
+                </ul>
+            {% elif item.frozen_measurement_data %}
+                <h4>Measurements (Frozen):</h4>
+                <ul>
+                    {% for key, value in item.frozen_measurement_data.items %}
+                        <li><strong>{{ key|capfirst }}:</strong> {{ value }} cm</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+    {% endfor %}
+</body>
+</html>

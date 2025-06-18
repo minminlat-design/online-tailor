@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Invoice #{{ order.id }}</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0 auto;
+            padding: 40px;
+            max-width: 800px;
+            color: #333;
+            background: #fff;
+        }
+
+        header {
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 32px;
+        }
+
+        .invoice-meta {
+            text-align: right;
+        }
+
+        .invoice-meta span {
+            display: block;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section h3 {
+            margin-bottom: 5px;
+            font-size: 18px;
+        }
+
+        .section p {
+            margin: 5px 0;
+            line-height: 1.4;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+
+        table thead {
+            background: #f5f5f5;
+        }
+
+        table th, table td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        table th {
+            font-weight: bold;
+        }
+
+        .total-row {
+            font-weight: bold;
+            background: #f0f0f0;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 5px;
+            font-weight: bold;
+            color: white;
+            font-size: 14px;
+        }
+
+        .paid {
+            background-color: #28a745;
+        }
+
+        .pending {
+            background-color: #dc3545;
+        }
+
+        footer {
+            border-top: 1px solid #ddd;
+            padding-top: 15px;
+            font-size: 13px;
+            color: #777;
+            text-align: center;
+        }
+
+        @media print {
+        .no-print {
+            display: none;
+        }
+    }
+    </style>
+</head>
+<body>
+
+<header>
+    <div style="display: flex; justify-content: space-between;">
+        <div>
+            <h1>My Shop</h1>
+        </div>
+        <div class="invoice-meta">
+            <span><strong>Invoice #{{ order.id }}</strong></span>
+            <span>Date: {{ order.created|date:"M d, Y" }}</span>
+        </div>
+    </div>
+</header>
+
+<div class="section">
+    <h3>Bill To:</h3>
+    <p>
+        {{ order.first_name }} {{ order.last_name }}<br>
+        {{ order.email }}<br>
+        {{ order.address }}<br>
+        {{ order.postal_code }}, {{ order.city }}
+    </p>
+</div>
+
+<div class="section">
+    <h3>Items Purchased</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Cost</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in order.items.all %}
+            <tr>
+                <td>{{ item.product.name }}</td>
+                <td>${{ item.price }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>${{ item.get_cost }}</td>
+            </tr>
+            {% endfor %}
+            <tr class="total-row">
+                <td colspan="3">Total</td>
+                <td>${{ order.get_total_cost }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div>
+        <strong>Status: </strong>
+        <span class="status {% if order.paid %}paid{% else %}pending{% endif %}">
+            {% if order.paid %}Paid{% else %}Pending{% endif %}
+        </span>
+    </div>
+</div>
+
+<!-- Print Button -->
+<div style="text-align: center; margin-top: 40px;">
+    <button class="no-print" onclick="window.print()" style="padding: 10px 20px; font-size: 16px;">Print Invoice</button>
+</div>
+
+<footer>
+    Thank you for your purchase!<br>
+    For any inquiries, contact us at support@myshop.com
+</footer>
+
+</body>
+</html>

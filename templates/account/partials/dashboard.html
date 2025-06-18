@@ -1,0 +1,22 @@
+<div class="mb_60">
+    <div class="col-md-6 mx-auto">
+        <div class="card shadow border-0 rounded-3 text-center">
+            <div class="card-body p-4">
+                <h5 class="fw-6 text-dark mb_10">Total Orders</h5>
+                <h2 class="fw-bold text-secondary mb_20">{{ orders_count }}</h2>
+
+
+                <a href="javascript:void(0);" 
+                   onclick="loadSection('orders')"
+                   class="tf-btn btn-fill animate-hover-btn radius-3 justify-content-center w-100 mb_20">
+                    <span>View Orders</span>
+                </a>
+
+                <div class="text-muted">
+                    <small>Email:</small><br/>
+                    <strong>{{ user.email }}</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

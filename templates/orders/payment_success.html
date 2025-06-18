@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Payment Successful{% endblock %}
+
+{% block content %}
+
+<!-- Page Title -->
+<div class="tf-page-title">
+    <div class="container-full">
+        <div class="heading text-center" style="color: white;">Payment Successful</div>
+    </div>
+</div>
+
+<!-- Payment Success Section -->
+<section class="flat-spacing-11">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-xl-4 col-lg-6 col-md-8">
+                <div class="tf-page-cart-checkout text-center">
+
+                    <!-- Checkmark Icon -->
+                    <div class="d-flex justify-content-center mb_20">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="text-success" width="48" height="48" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                        </svg>
+                    </div>
+
+                    <h5 class="fw-5 mb_10">Payment Successful!</h5>
+                    <p class="mb_20">
+                        Thank you for your purchase! Your order has been received and we’ve started processing it.
+                    </p>
+
+                    <a href="{% url 'store:store' %}"
+                       class="tf-btn mb_20 w-100 btn-fill animate-hover-btn radius-3 justify-content-center">
+                        <span>Return to Home</span>
+                    </a>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

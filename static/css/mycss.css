@@ -1,0 +1,9 @@
+.custom-checkbox {
+  border: 2px solid black;
+}
+
+.custom-checkbox:checked {
+  background-color: black;
+  border-color: black;
+}
+

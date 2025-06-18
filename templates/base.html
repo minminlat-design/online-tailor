@@ -1,0 +1,913 @@
+{% load static %}
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-US" lang="en-US">
+
+<head>
+    <meta charset="utf-8">
+    <title>{% block title %}Home{% endblock title %}</title>
+
+    <meta name="author" content="themesflat.com">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <!-- font -->
+    <link rel="stylesheet" href="{% static 'fonts/fonts.css' %}">
+    <link rel="stylesheet" href="{% static 'fonts/font-icons.css' %}">
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/drift-basic.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/photoswipe.css' %}">
+    <link rel="stylesheet" href="{% static 'css/swiper-bundle.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/animate.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'css/mycss.css' %}" />
+
+    <!-- Favicon and Touch Icons  -->
+    <link rel="shortcut icon" href="{% static 'images/logo/favicon.png' %}">
+    <link rel="apple-touch-icon-precomposed" href="{% static 'images/logo/favicon.png' %}">
+
+    <!-- Optional CSS -->
+
+
+<style>
+  input.variation-radio:checked + img,
+  input.variation-radio:checked + div.bg-secondary {
+    outline: 3px solid #0d6efd;
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  .modal-body img {
+    object-fit: contain;
+    max-height: 80vh;
+  }
+
+  #variationModalCaption {
+    font-size: 1rem;
+    text-transform: capitalize;
+  }
+
+  
+  input[type="radio"]:checked + label img {
+    border: 3px solid #007bff;
+  }
+
+
+
+/* Reset outer label styling */
+label.style-option,
+label.color-option {
+    border: none;
+    background: none;
+    padding: 0;
+    box-shadow: none;
+}
+
+/* Wrap the image to apply selected style */
+.option-img-wrapper {
+    border: 2px solid transparent;
+    border-radius: 8px;
+    padding: 5px;
+    transition: all 0.2s ease;
+}
+
+/* Style when selected */
+input[type="radio"]:checked + label.style-option .option-img-wrapper {
+    border: 2px solid #007bff;
+    background-color: #e6f0ff;
+    box-shadow: 0 0 5px #007bff;
+}
+
+input[type="radio"]:checked + label.color-option .option-img-wrapper {
+    border: 2px solid #28a745;
+    background-color: #eaffea;
+    box-shadow: 0 0 5px #28a745;
+}
+
+
+.zoom-wrapper {
+  overflow: hidden;
+  display: inline-block;
+  max-height: 80vh;
+  cursor: grab;
+}
+.zoom-wrapper img:active {
+  cursor: grabbing;
+}
+
+
+
+  
+
+
+
+  
+</style>
+
+
+
+</head>
+
+<body class="preload-wrapper popup-loader">
+
+
+    <!-- header -->
+    {% include "includes/navbar.html" %}
+    <!-- end header -->
+
+    
+    {% block content %}
+    
+    {% endblock content %}
+
+
+    <!-- footer -->
+    {% include "includes/footer.html" %}
+    <!-- footer -->
+
+
+    <!-- Javascript -->
+    <script type="text/javascript" src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/jquery.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/swiper-bundle.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/carousel.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/bootstrap-select.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/drift.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/lazysize.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/count-down.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/wow.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/multiple-modal.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/nouislider.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/shop.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/main.js' %}"></script>
+
+    <script type="text/javascript" src="{% static 'js/appointment.js' %}"></script>
+    
+
+    <script type="module" src="{% static 'js/model-viewer.min.js' %}"></script>
+    <script type="module" src="{% static 'js/zoom.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@panzoom/panzoom@9.4.0/dist/panzoom.min.js"></script>
+
+
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const setItemsSelect = document.getElementById("set-items");
+  const customizeToggle = document.getElementById("customize-toggle");
+  const customizationFields = document.getElementById("customization-fields");
+  const customizationGroups = document.querySelectorAll(".customization-group");
+
+  const monogramCheckbox = document.getElementById("enable-jacket-monogram");
+  const monogramFields = document.getElementById("jacket-monogram-fields");
+
+  const vestCheckbox = document.getElementById("enable-vest-customization");
+  const vestFields = document.getElementById("vest-customization-fields");
+
+  const shirtCheckbox = document.getElementById("enable-shirt-customization");
+  const shirtFields = document.getElementById("shirt-customization-fields");
+
+  const shirtMonogramCheckbox = document.getElementById("enable-shirt-monogram");
+  const shirtMonogramFields = document.getElementById("shirt-monogram-fields");
+
+  const totalPriceEl = document.getElementById("total-price");
+
+  const basePrice = parseFloat("{% if product.discounted_price %}{{ product.discounted_price|floatformat:2 }}{% else %}{{ product.price|floatformat:2 }}{% endif %}");
+
+  const MONOGRAM_PRICE = parseFloat("{{ monogram_price }}");
+  const VEST_PRICE = parseFloat("{{ vest_price }}");
+  const SHIRT_PRICE = parseFloat("{{ shirt_price }}");
+
+  let currentTarget = "";
+
+  // Show/hide shirt monogram
+  if (shirtMonogramCheckbox && shirtMonogramFields) {
+    shirtMonogramCheckbox.addEventListener("change", () => {
+      shirtMonogramFields.style.display = shirtMonogramCheckbox.checked ? "block" : "none";
+      calculateTotal();
+    });
+  }
+
+  // Show/hide jacket monogram
+  if (monogramCheckbox && monogramFields) {
+    monogramCheckbox.addEventListener("change", () => {
+      monogramFields.style.display = monogramCheckbox.checked ? "block" : "none";
+      calculateTotal();
+    });
+  }
+
+  // Show/hide vest section
+  if (vestCheckbox && vestFields) {
+    vestCheckbox.addEventListener("change", () => {
+      vestFields.style.display = vestCheckbox.checked ? "block" : "none";
+      calculateTotal();
+    });
+  }
+
+  // Show/hide shirt section
+  if (shirtCheckbox && shirtFields) {
+    shirtCheckbox.addEventListener("change", () => {
+      shirtFields.style.display = shirtCheckbox.checked ? "block" : "none";
+      calculateTotal();
+    });
+  }
+
+  // Toggle main customization panel
+  customizeToggle.addEventListener("click", function () {
+    const isHidden = customizationFields.style.display === "none";
+    customizationFields.style.display = isHidden ? "block" : "none";
+    updateCustomizationGroups();
+    calculateTotal();
+  });
+
+  // Switch customization group by set item
+  function updateCustomizationGroups() {
+    const selectedSet = setItemsSelect.options[setItemsSelect.selectedIndex];
+    currentTarget = selectedSet.dataset.target;
+
+    customizationGroups.forEach((group) => {
+      group.style.display = group.dataset.target === currentTarget ? "block" : "none";
+    });
+
+    if (currentTarget === "jacket") {
+      monogramFields.style.display = monogramCheckbox.checked ? "block" : "none";
+    } else {
+      monogramFields.style.display = "none";
+      if (monogramCheckbox) monogramCheckbox.checked = false;
+    }
+  }
+
+  function calculateTotal() {
+    let total = basePrice;
+
+    // Get hidden inputs
+    const monogramPriceInput = document.getElementById("monogram-price-hidden");
+    const shirtMonogramPriceInput = document.getElementById("shirt-monogram-price-hidden");
+    const vestPriceInput = document.getElementById("vest-price-hidden");
+    const shirtPriceInput = document.getElementById("shirt-price-hidden");
+
+    // Reset all to 0
+    if (monogramPriceInput) monogramPriceInput.value = 0;
+    if (shirtMonogramPriceInput) shirtMonogramPriceInput.value = 0;
+    if (vestPriceInput) vestPriceInput.value = 0;
+    if (shirtPriceInput) shirtPriceInput.value = 0;
+
+    // Add set item base price
+    const selectedSet = setItemsSelect.options[setItemsSelect.selectedIndex];
+    total += parseFloat(selectedSet.dataset.price || 0);
+
+
+
+
+    // Customization options for active set item
+    if (customizationFields.style.display !== "none") {
+      const activeGroup = document.querySelector(`.customization-group[data-target="${currentTarget}"]`);
+     
+      if (activeGroup) {
+        const checkedRadios = activeGroup.querySelectorAll('input[type="radio"]:checked');
+        checkedRadios.forEach((radio) => {
+          const extra = parseFloat(radio.dataset.price || 0);
+          total += extra;
+        });
+      }
+
+
+     
+      
+
+      // Jacket monogram
+      if (currentTarget === "jacket" && monogramCheckbox && monogramCheckbox.checked) {
+        total += MONOGRAM_PRICE;
+        if (monogramPriceInput) monogramPriceInput.value = MONOGRAM_PRICE;
+
+        const monogramRadios = monogramFields.querySelectorAll('input[type="radio"]:checked');
+        monogramRadios.forEach((radio) => {
+          const extra = parseFloat(radio.dataset.price || 0);
+          total += extra;
+          if (monogramPriceInput) {
+            monogramPriceInput.value = (parseFloat(monogramPriceInput.value) + extra).toFixed(2);
+          }
+        });
+      }
+
+      // Shirt monogram
+      if (currentTarget === "shirt" && shirtMonogramCheckbox && shirtMonogramCheckbox.checked) {
+        total += MONOGRAM_PRICE;
+        if (shirtMonogramPriceInput) shirtMonogramPriceInput.value = MONOGRAM_PRICE;
+
+        const shirtMonogramRadios = shirtMonogramFields.querySelectorAll('input[type="radio"]:checked');
+        shirtMonogramRadios.forEach((radio) => {
+          const extra = parseFloat(radio.dataset.price || 0);
+          total += extra;
+          if (shirtMonogramPriceInput) {
+            shirtMonogramPriceInput.value = (parseFloat(shirtMonogramPriceInput.value) + extra).toFixed(2);
+          }
+        });
+      }
+    }
+
+    // Vest
+    if (vestCheckbox && vestCheckbox.checked) {
+      total += VEST_PRICE;
+      if (vestPriceInput) vestPriceInput.value = VEST_PRICE;
+    }
+
+    // Shirt
+    if (shirtCheckbox && shirtCheckbox.checked) {
+      total += SHIRT_PRICE;
+      if (shirtPriceInput) shirtPriceInput.value = SHIRT_PRICE;
+    }
+
+    totalPriceEl.textContent = total.toFixed(2);
+  }
+
+  // Events
+  setItemsSelect.addEventListener("change", function () {
+    updateCustomizationGroups();
+    calculateTotal();
+  });
+
+  // Updated this line to use your variation-radio class:
+  document.querySelectorAll('.variation-radio').forEach((radio) => {
+    radio.addEventListener("change", calculateTotal);
+  });
+
+  // Init
+  updateCustomizationGroups();
+  calculateTotal();
+});
+</script>
+
+
+
+
+
+
+<script>
+  const form = document.getElementById("product-form");
+
+
+
+if (form) {
+  form.addEventListener("submit", function(e) {
+    console.log("Form submitted");
+  });
+} else {
+  console.warn("Form element not found!");
+}
+
+</script>
+
+
+{% comment "mini side bar mini cart" %}
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const form = document.getElementById("product-form");
+  
+  if (form) {
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();  // Prevent traditional form submission
+
+      const url = form.action;
+      const formData = new FormData(form);
+
+      fetch(url, {
+        method: "POST",
+        headers: {
+          "X-Requested-With": "XMLHttpRequest"
+        },
+        body: formData,
+      })
+      .then(response => {
+        if (response.ok) {
+          return response.json(); // You may want your Django view to return JSON
+        }
+        throw new Error("Network response was not ok.");
+      })
+      .then(data => {
+        // Optionally: update cart items / quantity here via data
+        // Then show the Bootstrap modal
+        const modalElement = document.getElementById("shoppingCart");
+        const cartModal = bootstrap.Modal.getOrCreateInstance(modalElement);
+        cartModal.show();
+
+      })
+      .catch(error => {
+        console.error("There was a problem with the fetch operation:", error);
+      });
+    });
+  }
+});
+</script>
+
+{% endcomment %}
+
+
+
+
+<!-- cart detail js code block-->
+
+<script>
+   function updateShippingProgress() {
+  fetch("{% url 'cart:cart_shipping_info' %}")
+    .then(response => response.json())
+    .then(data => {
+      const progressFill = document.getElementById('progress-fill');
+      const progressCar = document.querySelector('.progress-car');
+      const progressMsg = document.getElementById('progress-msg');
+
+      let progressPercent = Math.min(Math.max(data.progress * 100, 0), 100);
+      progressFill.style.width = progressPercent + '%';
+      progressCar.style.left = progressPercent + '%';
+
+      if (data.qualified) {
+        progressMsg.textContent = "Congratulations! You qualify for free shipping.";
+      } else {
+        progressMsg.textContent = `Add $${data.remaining} more to qualify for free shipping.`;
+      }
+    })
+    .catch(err => {
+      console.error('Failed to fetch shipping progress:', err);
+    });
+}
+
+// ✅ Move this OUTSIDE
+document.addEventListener('DOMContentLoaded', () => {
+  updateShippingProgress();
+});
+
+</script>
+
+
+
+<!-- remove buttton with ajax -->
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".remove-cart").forEach(btn => {
+        btn.addEventListener("click", function () {
+            const productId = this.dataset.productId;
+            const url = this.dataset.url;
+            const csrfToken = this.dataset.csrf;
+
+            fetch(url, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": csrfToken,
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: "quantity=1"  // can be empty, your backend ignores it
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Find the closest parent row element to remove
+                    const row = this.closest(".tf-cart-item"); // adjust selector to your cart item container
+                    if (row) row.remove();
+
+                    // Update the cart total display
+                    const totalCartPrice = document.getElementById("cart-total");
+                    if (totalCartPrice) {
+                        totalCartPrice.textContent = `$${parseFloat(data.total_price).toFixed(2)}`;
+                    }
+
+                    // Optional: show empty cart message if needed
+                    if (data.item_count === 0) {
+                        // Show your empty cart message, e.g.:
+                        // document.getElementById("empty-cart-message").style.display = "block";
+                    }
+                    updateShippingProgress();
+
+                } else {
+                    console.error("Failed to remove item.");
+                }
+            })
+            .catch(error => console.error("AJAX error:", error));
+        });
+    });
+});
+
+</script>
+
+
+<!-- Ajax updating quantity, item total price, cart total price, and remove item -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Helper: get CSRF token from cookie or hidden input
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i=0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || getCookie('csrftoken');
+
+    // --- Quantity update using cart_key ---
+    document.querySelectorAll(".btn-quantity[data-cart-key]").forEach(button => {
+        button.addEventListener("click", function () {
+            const isIncrement = this.classList.contains("btnincrease");
+            const cartKey = this.dataset.cartKey;
+            if (!cartKey) {
+                alert("Missing cart key!");
+                return;
+            }
+
+            const container = this.closest(".wg-quantity");
+            const input = container.querySelector(".quantity-input");
+            let currentQuantity = parseInt(input.value);
+            const newQuantity = isIncrement ? currentQuantity + 1 : Math.max(1, currentQuantity - 1);
+
+            fetch(`/cart/update-quantity/`, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": csrfToken,
+                    "X-Requested-With": "XMLHttpRequest",
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    cart_key: cartKey,
+                    quantity: newQuantity
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    input.value = newQuantity;
+
+                    const itemRow = container.closest("[data-cart-key]");
+                    if (itemRow) {
+                        const itemTotalElement = itemRow.querySelector(".item-total");
+                        if (itemTotalElement && data.item_total !== undefined) {
+                            itemTotalElement.textContent = `$${parseFloat(data.item_total).toFixed(2)}`;
+                        }
+                    }
+
+                    const totalCartPrice = document.querySelector("#cart-total, #cart-total-price");
+                    if (totalCartPrice && data.total_price !== undefined) {
+                        totalCartPrice.textContent = `$${parseFloat(data.total_price).toFixed(2)}`;
+                    }
+
+
+                    // ✅ Update cart count in navbar
+                    const cartCountElem = document.querySelector('.nav-cart .count-box');
+                    if (cartCountElem && data.item_count !== undefined) {
+                        cartCountElem.textContent = data.item_count;
+                    }
+
+
+
+                    
+
+                    if (typeof updateShippingProgress === "function") {
+                        updateShippingProgress();
+                    }
+                } else {
+                    alert(`Failed to update quantity: ${data.error}`);
+                }
+            })
+            .catch(err => console.error("Error updating quantity:", err));
+        });
+    });
+
+    // --- Remove item from cart ---
+    document.querySelectorAll('.remove-cart').forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.dataset.productId;
+            const url = this.dataset.url;
+
+            if (!productId || !url) {
+                alert("Missing product ID or URL for removal.");
+                return;
+            }
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Remove product row from DOM
+                    const row = document.querySelector(`[data-product-id="${productId}"]`);
+                    if (row) row.remove();
+
+                    // Update cart total price display
+                    const totalPriceElem = document.querySelector('#cart-total, #cart-total-price');
+                    if (totalPriceElem && data.total_price !== undefined) {
+                        totalPriceElem.textContent = `$${parseFloat(data.total_price).toFixed(2)}`;
+                    }
+
+                    // ✅ Update cart item count in navbar
+                    const cartCountElem = document.querySelector('.nav-cart .count-box');
+                    if (cartCountElem && data.item_count !== undefined) {
+                        cartCountElem.textContent = data.item_count;
+                    }
+
+                    // Remove note block if cart is empty
+                    if (data.item_count === 0) {
+                        const noteBlock = document.getElementById('cart-note-block');
+                        if (noteBlock) {
+                            noteBlock.remove();
+                        }
+                    }
+                    
+
+                    if (typeof updateShippingProgress === "function") {
+                        updateShippingProgress();
+                    }
+                } else {
+                    alert('Failed to remove item from cart.');
+                }
+            })
+            .catch(error => console.error('Error removing item:', error));
+        });
+    });
+
+    // --- Quantity update using product_id ---
+    function updateQuantityByProductId(productId, newQuantity) {
+        if (!productId) return;
+
+        fetch(`/cart/update-quantity/`, {  // Adjust URL if needed
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            body: JSON.stringify({
+                product_id: productId,
+                quantity: newQuantity
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const row = document.querySelector(`[data-product-id="${productId}"]`);
+                if (row) {
+                    const qtyInput = row.querySelector('.quantity-input');
+                    if (qtyInput) qtyInput.value = data.quantity;
+
+                    const totalCell = row.querySelector('.item-total');
+                    if (totalCell && data.item_total !== undefined) {
+                        totalCell.textContent = `$${parseFloat(data.item_total).toFixed(2)}`;
+                    }
+
+                    const totalPriceElem = document.querySelector('#cart-total, #cart-total-price');
+                    if (totalPriceElem && data.total_price !== undefined) {
+                        totalPriceElem.textContent = `$${parseFloat(data.total_price).toFixed(2)}`;
+                    }
+
+                    
+
+                }
+
+                if (typeof updateShippingProgress === "function") {
+                    updateShippingProgress();
+                }
+            } else {
+                alert('Failed to update quantity: ' + data.error);
+            }
+        })
+        .catch(error => console.error('Error updating quantity:', error));
+    }
+
+    // Bind increment buttons by product ID, but only those WITHOUT data-cart-key
+    document.querySelectorAll('.btnincrease:not([data-cart-key])').forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.dataset.id;
+            const row = document.querySelector(`[data-product-id="${productId}"]`);
+            if (!row) return;
+            const qtyInput = row.querySelector('.quantity-input');
+            if (!qtyInput) return;
+            let currentQty = parseInt(qtyInput.value);
+            updateQuantityByProductId(productId, currentQty + 1);
+        });
+    });
+
+    // Bind decrement buttons by product ID, but only those WITHOUT data-cart-key
+    document.querySelectorAll('.btndecrease:not([data-cart-key])').forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.dataset.id;
+            const row = document.querySelector(`[data-product-id="${productId}"]`);
+            if (!row) return;
+            const qtyInput = row.querySelector('.quantity-input');
+            if (!qtyInput) return;
+            let currentQty = parseInt(qtyInput.value);
+            if (currentQty > 1) {
+                updateQuantityByProductId(productId, currentQty - 1);
+            }
+        });
+    });
+});
+</script>
+
+<!--gift wrap js -->
+
+<script>
+document.getElementById('cart-gift-checkbox').addEventListener('change', function() {
+    const csrfTokenInput = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (!csrfTokenInput) {
+        console.error("CSRF token input not found");
+        return;
+    }
+    const csrfToken = csrfTokenInput.value;
+    const giftWrap = this.checked;
+
+    fetch('/cart/toggle-gift-wrap/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken,
+        },
+        body: JSON.stringify({ enable: giftWrap })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update checkbox state just in case
+            document.getElementById('cart-gift-checkbox').checked = data.gift_wrap;
+
+            // Update total price dynamically
+            const totalPriceElement = document.getElementById('cart-total');
+            if (totalPriceElement) {
+                totalPriceElement.textContent = `$${data.total_price}`;
+            }
+
+            // Optionally update gift wrap price display or any messages here
+
+        } else {
+            alert('Error updating gift wrap: ' + data.error);
+        }
+    })
+    .catch(error => console.error('Fetch error:', error));
+});
+
+
+</script>
+
+
+
+<!-- password change js in dashboard -->
+
+<script>
+// Global: Auto-hide alert messages after 4 seconds
+function autoHideMessages() {
+    setTimeout(function () {
+        $('.alert-success, .alert-info, .alert-warning, .alert-danger').fadeOut('slow');
+    }, 8000);
+}
+</script>
+
+
+<script>
+$(document).ready(function () {
+    $('.my-account-nav-item').click(function (e) {
+        // Skip if it's inside a form (like logout button)
+        if ($(this).closest('form').length > 0) {
+            return; // allow form to submit
+        }
+
+        e.preventDefault();
+
+        const section = $(this).data('section');
+        if (!section) return;
+
+        $('.my-account-nav-item').removeClass('active');
+        $(this).addClass('active');
+
+        loadSection(section);
+    });
+});
+</script>
+
+
+
+<script>
+// AJAX submit for password change form (initial bind, outside dynamic load)
+$(document).on("submit", "#form-password-change", function (e) {
+    e.preventDefault();
+    const form = $(this);
+    const url = form.attr("action");
+    const data = form.serialize();
+
+    $.ajax({
+        url: url,
+        method: "POST",
+        data: data,
+        headers: { "X-Requested-With": "XMLHttpRequest" },
+        success: function (response) {
+            $("#account-content").html('<div class="alert alert-success">Account updated successfully.</div>');
+            autoHideMessages();
+        },
+        error: function (xhr) {
+            if (xhr.responseJSON && xhr.responseJSON.errors) {
+                let errorHtml = '<div class="alert alert-danger">Please fix the errors:</div>';
+                $("#account-content").prepend(errorHtml);
+                autoHideMessages();
+            }
+        }
+    });
+});
+</script>
+
+<script>
+// Load account section via AJAX
+function loadSection(section) {
+    $.ajax({
+        url: "/account/section/" + section + "/",
+        method: "GET",
+        success: function (data) {
+            $('#account-content').html(data);
+            localStorage.setItem('lastSection', section);
+            $('.my-account-nav-item').removeClass('active');
+            $('.my-account-nav-item[data-section="' + section + '"]').addClass('active');
+
+            autoHideMessages();            // 👈 Show messages then hide
+            bindFormSubmission();         // 👈 Re-bind form after load
+        },
+        error: function () {
+            $('#account-content').html('<p class="text-danger">Failed to load section.</p>');
+        }
+    });
+}
+
+// Rebind AJAX form submit for dynamically loaded content
+function bindFormSubmission() {
+    $('#form-password-change').on('submit', function (e) {
+        e.preventDefault();
+
+        $.ajax({
+            url: $(this).attr('action'),
+            method: "POST",
+            data: $(this).serialize(),
+            headers: { "X-Requested-With": "XMLHttpRequest" },
+            success: function (response) {
+                loadSection('account_details');  // Refresh section on success
+            },
+            error: function (xhr) {
+                if (xhr.responseJSON && xhr.responseJSON.html) {
+                    $('#account-content').html(xhr.responseJSON.html);
+                    autoHideMessages();
+                    bindFormSubmission();  // Re-bind after replacing content
+                }
+            }
+        });
+    });
+}
+
+// Initial load of last section (or default)
+$(document).ready(function () {
+    let lastSection = localStorage.getItem('lastSection') || 'dashboard';
+    loadSection(lastSection);
+});
+</script>
+
+
+
+
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const loginDiv = document.getElementById('login');
+    const recoverDiv = document.getElementById('recover');
+    const showResetBtn = document.getElementById('show-reset');
+    const cancelResetBtn = document.getElementById('cancel-reset');
+
+    if(showResetBtn){
+      showResetBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          loginDiv.style.display = 'none';
+          recoverDiv.style.display = 'block';
+      });
+    }
+
+    if(cancelResetBtn){
+      cancelResetBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          loginDiv.style.display = 'block';
+          recoverDiv.style.display = 'none';
+      });
+    }
+});
+</script>
+
+
+
+
+</body>
+
+</html>

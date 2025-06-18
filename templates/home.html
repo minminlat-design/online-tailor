@@ -1,0 +1,523 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+
+
+        <!--         ************* end header navbar ************         -->
+
+
+        <!-- Slider -->
+        <div class="tf-slideshow slider-effect-fade position-relative">
+            <div dir="ltr" class="swiper tf-sw-slideshow" data-preview="1" data-tablet="1" data-mobile="1"
+                data-centered="false" data-space="0" data-loop="true" data-auto-play="false" data-delay="0"
+                data-speed="1000">
+                <div class="swiper-wrapper">
+                    <!-- home slider looping start -->
+                    {% for slide in sliders %}
+                    <div class="swiper-slide">
+                        <div class="wrap-slider">
+                            <img src="{{ slide.image.url }}" alt="{{ slide.alt_text }}">
+                            <div class="box-content">
+                                <div class="container">
+                                    <h3 class="fade-item fade-item-1" style="color: white;">{{ slide.name }}</h3>
+                                    <p class="fade-item fade-item-2" style="color: white;">{{ slide.short_description }}</p>
+                                    <a href="{{ slide.url }}"
+                                        class="fade-item fade-item-3 tf-btn btn-fill animate-hover-btn btn-xl radius-3"><span>{{ slide.button_text }}</span><i class="icon icon-arrow-right"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                </div>
+            </div>
+            <div class="wrap-pagination">
+                <div class="container">
+                    <div class="sw-dots sw-pagination-slider justify-content-center"></div>
+                </div>
+            </div>
+        </div>
+        <!-- /Slider -->
+        <!-- Marquee -->
+        <div class="tf-marquee bg_yellow-2" style="background-color:transparent; padding:0; margin:0;">
+            <div class="wrap-marquee">
+                <!--marquee-->
+            </div>
+
+        </div>
+        <!-- /Marquee -->
+
+        <!-- Shop By Categories -->
+        <section class="flat-spacing-4 flat-categorie">
+            <div class="container-full">
+                <div class="flat-title-v2">
+                    <div class="box-sw-navigation">
+                        <div class="nav-sw nav-next-slider nav-next-collection"><span
+                                class="icon icon-arrow-left"></span></div>
+                        <div class="nav-sw nav-prev-slider nav-prev-collection"><span
+                                class="icon icon-arrow-right"></span></div>
+                    </div>
+                    <span class="text-3 fw-7 text-uppercase title wow fadeInUp" data-wow-delay="0s">SHOP BY
+                        CATEGORIES</span>
+                </div>
+                <div class="row">
+                    <div class="col-xl-9 col-lg-8 col-md-8">
+                        <div dir="ltr" class="swiper tf-sw-collection" data-preview="3" data-tablet="2" data-mobile="2"
+                            data-space-lg="30" data-space-md="30" data-space="15" data-loop="false"
+                            data-auto-play="false">
+                            <div class="swiper-wrapper">
+
+                                {% for category in shop_categories %}
+                                <div class="swiper-slide" lazy="true">
+                                    <div class="collection-item style-left hover-img">
+                                        <div class="collection-inner">
+                                            <a href="{{ category.get_absolute_url }}" class="collection-image img-style">
+                                                {% if category.image %}
+                                                    <img class="lazyload" data-src="{{ category.image.url }}"
+                                                        src="{{ category.image.url }}" alt="{{ category.name }}">
+                                                {% else %}
+                                                    <img class="lazyload" data-src="{% static 'images/default-category.png' %}"
+                                                        src="{% static 'images/default-category.png' %}" alt="{{ category.name }}">
+                                                {% endif %}
+                                            </a>
+                                            <div class="collection-content">
+                                                <a href="{{ category.get_absolute_url }}"
+                                                    class="tf-btn collection-title hover-icon fs-15"><span>{{ category.name }}</span><i
+                                                        class="icon icon-arrow1-top-left"></i></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                                
+
+                                
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-lg-4 col-md-4">
+                        <div class="discovery-new-item">
+                            <h5>All</h5>
+                            <a href="{% url 'store:store' %}"><i class="icon-arrow1-top-left"></i></a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+        <!-- /Categories -->
+
+        <!-- Seller -->
+        <section class="flat-spacing-5 pt_0 flat-seller">
+            <div class="container">
+                <div class="flat-title">
+                    <span class="title wow fadeInUp" data-wow-delay="0s">Latest Arrivals</span>
+                    <p class="sub-title wow fadeInUp" data-wow-delay="0s">Shop the Latest Styles: Stay ahead of the
+                        curve with our newest arrivals</p>
+                </div>
+                <div class="grid-layout loadmore-item wow fadeInUp" data-wow-delay="0s" data-grid="grid-4">
+
+                    {% for product in latest_products %}
+                    <!-- card product 1 -->
+                    <div class="card-product fl-item">
+                        <div class="card-product-wrapper">
+                            <a href="{{ product.get_absolute_url }}" class="product-img">
+                                {% if product.first_image %}
+                                <img class="lazyload img-product" data-src="{{ product.first_image.image.url }}"
+                                    src="{{ product.first_image.image.url }}" alt="{{ product.name }}">
+                                {% else %}
+                                 <img class="lazyload img-hover" data-src="{% static 'images/placeholder.png' %}"
+                                    src="{% static 'images/placeholder.png' %}" alt="{{ product.name }}">
+                                {% endif %}
+
+                                {% if product.second_image %}
+                                 <img class="lazyload img-hover" data-src="{{ product.second_image.image.url }}"
+                                    src="{{ product.second_image.image.url }}" alt="{{ product.name }}">
+                                {% else %}
+                                 <img class="lazyload img-hover" data-src="{% static 'images/placeholder.png' %}"
+                                    src="{% static 'images/placeholder.png' %}" alt="{{ product.name }}">
+                                {% endif %}
+                            </a>
+                            
+                            
+                        </div>
+                        <div class="card-product-info">
+                            <a href="{{ product.get_absolute_url }}" class="title link">{{ product.name }}</a>
+                            <span class="price">
+                                {% if product.discounted_price %}
+                                   <del>${{ product.price }}</del> ${{ product.discounted_price }}
+                                {% else %}
+                                   ${{ product.price }}
+                                {% endif %}
+                            </span>
+                            
+                        </div>
+                    </div>
+
+                    {% endfor %}
+
+                    
+                <div class="tf-pagination-wrap view-more-button text-center">
+                    <button class="tf-btn-loading tf-loading-default style-2 btn-loadmore "><span class="text">Load
+                            more</span></button>
+                </div>
+            </div>
+        </section>
+        <!-- /Seller -->
+
+        <!-- Lookbook -->
+        <section class="flat-spacing-6">
+            <div class="flat-title wow fadeInUp" data-wow-delay="0s">
+                <span class="title">Shop the look</span>
+                <p class="sub-title">Handpicked styles tailored for the season — explore our newest additions curated for every occasion.</p>
+            </div>
+            <div dir="ltr" class="swiper tf-sw-lookbook" data-preview="2" data-tablet="2" data-mobile="1"
+                data-space-lg="0" data-space-md="0">
+                <div class="swiper-wrapper">
+
+                <!-- look book image section-->
+
+                  {% for item in lookbooks %}
+                    <div class="swiper-slide" lazy="true">
+
+                        <div class="wrap-lookbook lookbook-1">
+                            <div class="image">
+                                <img class="lazyload" data-src="{{ item.image.url }}"
+                                    src="{{ item.image.url }}" alt="{{ item.name }}">        
+                            </div>
+  
+                        </div>
+                    </div>
+                {% endfor %}
+
+
+                </div>
+                <div class="wrap-pagination">
+                    <div class="container-full">
+                        <div class="sw-dots sw-pagination-lookbook justify-content-center"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- /Lookbook -->
+        
+        <!-- Testimonial -->
+        <section class="flat-spacing-5 pt_0 flat-testimonial">
+            <div class="container">
+                <div class="flat-title wow fadeInUp" data-wow-delay="0s">
+                    <span class="title">Happy Clients</span>
+                    <p class="sub-title">Hear what they say about us</p>
+                </div>
+                <div class="wrap-carousel">
+                    <div dir="ltr" class="swiper tf-sw-testimonial" data-preview="3" data-tablet="2" data-mobile="1"
+                        data-space-lg="30" data-space-md="15">
+                        <div class="swiper-wrapper">
+                            <div class="swiper-slide">
+                                <div class="testimonial-item style-column wow fadeInUp" data-wow-delay="0s">
+                                    <div class="rating">
+                                        <i class="icon-star"></i>
+                                        <i class="icon-star"></i>
+                                        <i class="icon-star"></i>
+                                        <i class="icon-star"></i>
+                                        <i class="icon-star"></i>
+                                    </div>
+                                    <div class="heading">Best Online Fashion Site</div>
+                                    <div class="text">
+                                        “ I always find something stylish and affordable on this web fashion site ”
+                                    </div>
+                                    <div class="author">
+                                        <div class="name">Robert smith</div>
+                                        <div class="metas">Customer from USA</div>
+                                    </div>
+                                    <div class="product">
+                                        <div class="image">
+                                            <a href="product-detail.html">
+                                                <img class="lazyload" data-src="{% static 'images/shop/products/testimonial01.png' %}"
+                                                    src="{% static 'images/shop/products/testimonial01.png' %}" alt="">
+                                            </a>
+                                        </div>
+                                        <div class="content-wrap">
+                                            <div class="product-title">
+                                                <a href="product-detail.html">Three piece suit</a>
+                                            </div>
+                                            <div class="price">$105.95</div>
+                                        </div>
+                                        <a href="{% url 'store:store' %}" class=""><i class="icon-arrow1-top-left"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="swiper-slide">
+                                <div class="testimonial-item style-column wow fadeInUp" data-wow-delay=".1s">
+                                    <div class="rating">
+                                        <i class="icon-star"></i>
+                                        <i class="icon-star"></i>
+                                        <i class="icon-star"></i>
+                                        <i class="icon-star"></i>
+                                        <i class="icon-star"></i>
+                                    </div>
+                                    <div class="heading">Great Selection and Quality</div>
+                                    <div class="text">
+                                        "I love the variety of styles and the high-quality clothing on this web fashion
+                                        site."
+                                    </div>
+                                    <div class="author">
+                                        <div class="name">Allen Lyn</div>
+                                        <div class="metas">Customer from France</span></div>
+                                    </div>
+                                    <div class="product">
+                                        <div class="image">
+                                            <a href="product-detail.html">
+                                                <img class="lazyload" data-src="{% static 'images/shop/products/testimonial02.png' %}"
+                                                    src="{% static 'images/shop/products/testimonial02.png' %}" alt="">
+                                            </a>
+                                        </div>
+                                        <div class="content-wrap">
+                                            <div class="product-title">
+                                                <a href="product-detail.html">Double-breasted suit</a>
+                                            </div>
+                                            <div class="price">$150</div>
+                                        </div>
+                                        <a href="product-detail.html" class=""><i class="icon-arrow1-top-left"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="swiper-slide">
+                                <div class="testimonial-item style-column wow fadeInUp" data-wow-delay=".2s">
+                                    <div class="rating">
+                                        <i class="icon-star"></i>
+                                        <i class="icon-star"></i>
+                                        <i class="icon-star"></i>
+                                        <i class="icon-star"></i>
+                                        <i class="icon-star"></i>
+                                    </div>
+                                    <div class="heading">Best Customer Service</div>
+                                    <div class="text">
+                                        "I finally found a web fashion site with stylish and flattering options in my
+                                        size."
+                                    </div>
+                                    <div class="author">
+                                        <div class="name">Peter Rope</div>
+                                        <div class="metas">Customer from USA</div>
+                                    </div>
+                                    <div class="product">
+                                        <div class="image">
+                                            <a href="product-detail.html">
+                                                <img class="lazyload" data-src="{% static 'images/shop/products/testimonial03.png' %}"
+                                                    src="{% static 'images/shop/products/testimonial03.png' %}" alt="">
+                                            </a>
+                                        </div>
+                                        <div class="content-wrap">
+                                            <div class="product-title">
+                                                <a href="product-detail.html">Vest</a>
+                                            </div>
+                                            <div class="price">From $18.95</div>
+                                        </div>
+                                        <a href="{% url 'store:store' %}" class=""><i class="icon-arrow1-top-left"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="swiper-slide">
+                                <div class="testimonial-item style-column wow fadeInUp" data-wow-delay=".3s">
+                                    <div class="rating">
+                                        <i class="icon-star"></i>
+                                        <i class="icon-star"></i>
+                                        <i class="icon-star"></i>
+                                        <i class="icon-star"></i>
+                                        <i class="icon-star"></i>
+                                    </div>
+                                    <div class="heading">Great Selection and Quality</div>
+                                    <div class="text">
+                                        "I love the variety of styles and the high-quality clothing on this web fashion
+                                        site."
+                                    </div>
+                                    <div class="author">
+                                        <div class="name">Hellen Ase</div>
+                                        <div class="metas">Customer from Japan</span></div>
+                                    </div>
+                                    <div class="product">
+                                        <div class="image">
+                                            <a href="product-detail.html">
+                                                <img class="lazyload" data-src="{% static 'images/shop/products/testimonial04.png' %}"
+                                                    src="{% static 'images/shop/products/testimonial04.png' %}" alt="">
+                                            </a>
+                                        </div>
+                                        <div class="content-wrap">
+                                            <div class="product-title">
+                                                <a href="product-detail.html">Coat</a>
+                                            </div>
+                                            <div class="price">$16.95</div>
+                                        </div>
+                                        <a href="{% url 'store:store' %}" class=""><i class="icon-arrow1-top-left"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="nav-sw nav-next-slider nav-next-testimonial lg"><span
+                            class="icon icon-arrow-left"></span></div>
+                    <div class="nav-sw nav-prev-slider nav-prev-testimonial lg"><span
+                            class="icon icon-arrow-right"></span></div>
+                    <div class="sw-dots style-2 sw-pagination-testimonial justify-content-center"></div>
+                </div>
+            </div>
+        </section>
+        <!-- /Testimonial -->
+
+
+
+
+
+
+
+
+
+
+        <!-- Shop Gram -->
+<section class="flat-spacing-1">
+    <div class="container">
+        <div class="flat-title">
+            <span class="title">Shop Gram</span>
+            <p class="sub-title">Inspire and let yourself be inspired, from one unique fashion to another.</p>
+        </div>
+        <div class="wrap-shop-gram">
+            <div dir="ltr" class="swiper tf-sw-shop-gallery" data-preview="5" data-tablet="3" data-mobile="2"
+                 data-space-lg="7" data-space-md="7">
+                <div class="swiper-wrapper">
+                    {% for post in shop_gram_posts %}
+                        <div class="swiper-slide">
+                            <div class="gallery-item hover-img">
+                                <div class="img-style">
+                                    {% if post.source_url %}
+                                        <a href="{{ post.source_url }}" target="_blank" rel="noopener">
+                                            <img class="lazyload img-hover"
+                                                 data-src="{{ post.image.url }}"
+                                                 src="{{ post.image.url }}"
+                                                 alt="{{ post.caption }}">
+                                        </a>
+                                    {% else %}
+                                        <img class="lazyload img-hover"
+                                             data-src="{{ post.image.url }}"
+                                             src="{{ post.image.url }}"
+                                             alt="{{ post.caption }}">
+                                    {% endif %}
+                                </div>
+
+
+                               
+
+                                {% with post.products.all as products %}
+    {% if products %}
+        {% for product in products %}
+            <a href="{{ post.source_url }}" class="box-icon" target="_blank" rel="noopener noreferrer" 
+               title="View on Instagram - opens in a new tab">
+                <span class="icon icon-bag"></span>
+                <span class="tooltip">{{ product.name }} <br
+                                    class="d-xl-block d-none"> (View on Instagram)</span>
+            </a>
+        {% endfor %}
+    {% else %}
+        <a href="#" class="box-icon" title="No products tagged">
+            <span class="icon icon-bag"></span>
+            <span class="tooltip">No products tagged</span>
+        </a>
+    {% endif %}
+{% endwith %}
+
+
+
+
+
+                                
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="sw-dots sw-pagination-gallery justify-content-center"></div>
+        </div>
+    </div>
+</section>
+<!-- /Shop Gram -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+       
+        <!-- Icon box -->
+        <section class="flat-spacing-7 flat-iconbox wow fadeInUp" data-wow-delay="0s">
+            <div class="container">
+                <div class="wrap-carousel wrap-mobile">
+                    <div dir="ltr" class="swiper tf-sw-mobile" data-preview="1" data-space="15">
+                        <div class="swiper-wrapper wrap-iconbox">
+                            <div class="swiper-slide">
+                                <div class="tf-icon-box style-border-line text-center">
+                                    <div class="icon">
+                                        <i class="icon-shipping"></i>
+                                    </div>
+                                    <div class="content">
+                                        <div class="title">Free Shipping</div>
+                                        <p>Free shipping over order $120</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="swiper-slide">
+                                <div class="tf-icon-box style-border-line text-center">
+                                    <div class="icon">
+                                        <i class="icon-payment fs-22"></i>
+                                    </div>
+                                    <div class="content">
+                                        <div class="title">Flexible Payment</div>
+                                        <p>Pay with Multiple Credit Cards</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="swiper-slide">
+                                <div class="tf-icon-box style-border-line text-center">
+                                    <div class="icon">
+                                        <i class="icon-return fs-22"></i>
+                                    </div>
+                                    <div class="content">
+                                        <div class="title">14 Day Returns</div>
+                                        <p>Within 30 days for an exchange</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="swiper-slide">
+                                <div class="tf-icon-box style-border-line text-center">
+                                    <div class="icon">
+                                        <i class="icon-suport"></i>
+                                    </div>
+                                    <div class="content">
+                                        <div class="title">Premium Support</div>
+                                        <p>Outstanding premium support</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sw-dots style-2 sw-pagination-mb justify-content-center"></div>
+                </div>
+            </div>
+        </section>
+        <!-- /Icon box -->
+
+        
+
+        
+
+{% endblock content %}

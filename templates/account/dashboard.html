@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block title %}Dashboard{% endblock title %}
+
+{% block content %}
+
+ <!-- page-title -->
+        <div class="tf-page-title">
+            <div class="container-full">
+                <div class="heading text-center" style="color: white;">My Account</div>
+            </div>
+        </div>
+        <!-- /page-title -->
+
+        <!-- page-cart -->
+        <section class="flat-spacing-11">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <div class="wrap-sidebar-account">
+                           
+                            <ul class="my-account-nav">
+                                 {% if request.user.is_authenticated %}
+                                <li>
+                                    <a href="{% url 'dashboard' %}" class="my-account-nav-item {% if section == 'dashboard' %}active{% endif %}" data-section="dashboard">Dashboard</a></li>
+
+                                <li><a href="#" class="my-account-nav-item {% if section == 'orders' %}active{% endif %}" data-section="orders">My Orders</a></li>
+                               <!-- <li><a href="#" class="my-account-nav-item {% if section == 'address' %}active{% endif %}" data-section="address">Address</a></li>-->
+                                <li><a href="#" class="my-account-nav-item {% if section == 'account_details' %}active{% endif %}" data-section="account_details">Edit Profile</a></li>
+                                <li>
+                                    <a href="#" class="my-account-nav-item {% if section == 'measurements' %}active{% endif %}" data-section="measurements">
+                                        Measurements
+                                    </a>
+                                </li>
+
+                                <li>
+                                <form action="{% url 'logout' %}" method="post">
+                                    {% csrf_token %}
+                                   <button type="submit" class="my-account-nav-item">Logout</button>
+                                </form>
+                                </li>
+
+                                
+                                {% endif %}
+                                
+                            </ul>
+                            
+                        </div>
+                    </div>
+                    <div class="col-lg-9">
+                        <div class="my-account-content account-dashboard" id="account-content">
+                            <!-- ajax call content here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- page-cart -->
+
+        <div class="btn-sidebar-account">
+            <button data-bs-toggle="offcanvas" data-bs-target="#mbAccount" aria-controls="offcanvas"><i
+                    class="icon icon-sidebar-2"></i></button>
+        </div>
+
+
+
+        <!-- sidebar account-->
+    <div class="offcanvas offcanvas-start canvas-filter canvas-sidebar canvas-sidebar-account" id="mbAccount">
+        <div class="canvas-wrapper">
+            <header class="canvas-header">
+                <span class="title">SIDEBAR ACCOUNT</span>
+                <span class="icon-close icon-close-popup" data-bs-dismiss="offcanvas" aria-label="Close"></span>
+            </header>
+            <div class="canvas-body sidebar-mobile-append"> </div>
+        </div>
+    </div>
+    <!-- End sidebar account -->
+
+{% endblock content %}

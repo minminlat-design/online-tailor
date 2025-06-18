@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Register{% endblock title %}
+
+{% block content %}
+
+
+
+        <!-- page-title -->
+        <div class="tf-page-title style-2">
+            <div class="container-full">
+                <div class="heading text-center" style="color: white;">Register</div>
+            </div>
+        </div>
+        <!-- /page-title -->
+
+
+
+        <section class="flat-spacing-10">
+            <div class="container">
+                <div class="form-register-wrap">
+                    <div class="flat-title align-items-start gap-0 mb_30 px-0">
+                        <h5 class="mb_18">Register</h5>
+                        <p class="text_black-2">Sign up for early Sale access plus tailored new arrivals, trends and
+                            promotions. To opt out, click unsubscribe in our emails</p>
+                    </div>
+
+                    {% include "includes/alerts.html" %}
+
+
+                    <div>
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+
+                        <form class="" id="register-form" action="{% url 'register' %}" method="post" accept-charset="utf-8"
+                            data-mailchimp="true">
+                            {% csrf_token %}
+
+                            
+                            <br/>
+
+
+                            <div class="tf-field style-1 mb_15">
+                                <input class="tf-field-input tf-input" placeholder=" " type="text" id="property1"
+                                    name="{{ form.first_name.name }}" value="{{ form.first_name.value|default_if_none:'' }}" required>
+                                
+                                <label class="tf-field-label fw-4 text_black-2" for="property1">First name</label>
+                                 {{ form.first_name.errors }}
+                            </div>
+                            <div class="tf-field style-1 mb_15">
+                                <input class="tf-field-input tf-input" placeholder=" " type="text" id="property2"
+                                    name="{{ form.last_name.name }}" value="{{ form.last_name.value|default_if_none:'' }}" required>
+                                
+                                <label class="tf-field-label fw-4 text_black-2" for="property2">Last name</label>
+                                {{ form.last_name.errors }}
+                            </div>
+                            <div class="tf-field style-1 mb_15">
+                                <input class="tf-field-input tf-input" placeholder=" " type="email" id="property3"
+                                    name="{{ form.email.name }}" value="{{ form.email.value|default_if_none:'' }}" required>
+                                
+                                <label class="tf-field-label fw-4 text_black-2" for="property3">Email</label>
+                                {{ form.email.errors }}
+                            </div>
+                            <div class="tf-field style-1 mb_30">
+                                <input class="tf-field-input tf-input" placeholder=" " type="password" id="property4"
+                                    name="{{ form.password.name }}" required>
+                                
+                                <label class="tf-field-label fw-4 text_black-2" for="property4">Password</label>
+                                {{ form.password.errors }}
+                            </div>
+                            <div class="tf-field style-1 mb_30">
+                                <input class="tf-field-input tf-input" placeholder=" " type="password" id="property5"
+                                    name="{{ form.confirm_password.name }}" required>
+                                
+                                <label class="tf-field-label fw-4 text_black-2" for="property5">Confirm Password</label>
+                                {{ form.confirm_password.errors }}
+                            </div>
+                            
+
+
+                            <div class="mb_20">
+                                <input type="hidden" name="next" value="{{ request.GET.next }}">
+
+
+                                <button type="submit"
+                                    class="tf-btn w-100 radius-3 btn-fill animate-hover-btn justify-content-center">Register</button>
+                            </div>
+                            <div class="text-center">
+                                <a href="{% url 'login' %}" class="tf-btn btn-line">Already have an account? Log in here<i
+                                        class="icon icon-arrow1-top-left"></i></a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+
+{% endblock content %}
