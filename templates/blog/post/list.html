@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Blog{% endblock title %}
+
+{% block content %}
+
+
+ <!-- page-title -->
+        <div class="tf-page-title">
+            <div class="container-full">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="heading text-center">Blog Grid</div>
+                        <ul class="breadcrumbs d-flex align-items-center justify-content-center">
+                            <li>
+                                <a href="index.html">Home</a>
+                            </li>
+                            <li>
+                                <i class="icon-arrow-right"></i>
+                            </li>
+                            <li>
+                                Fashion
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /page-title -->
+
+        <!-- blog-grid-main -->
+        <div class="blog-grid-main">
+            <div class="container">
+                <div class="row">
+
+
+
+
+                    {% for post in posts %}
+<div class="col-xl-4 col-md-6 col-12">
+    <div class="blog-article-item">
+        <div class="article-thumb">
+            <a href="{{ post.get_absolute_url }}">
+                {% if post.images.first %}
+                    <img class="lazyload" data-src="{{ post.images.first.image.url }}" src="{{ post.images.first.image.url }}" alt="{{ post.title }}">
+                {% else %}
+                    <img class="lazyload" data-src="/static/images/default.jpg" src="/static/images/default.jpg" alt="No image">
+                {% endif %}
+            </a>
+            <div class="article-label">
+                <a href="{{ post.get_absolute_url }}"
+                   class="tf-btn btn-sm radius-3 btn-fill animate-hover-btn">
+                    {{ post.get_status_display }}
+                </a>
+            </div>
+        </div>
+        <div class="article-content">
+            <div class="article-title">
+                <a href="{{ post.get_absolute_url }}">{{ post.title }}</a>
+            </div>
+            <div class="article-btn">
+                <a href="{{ post.get_absolute_url }}" class="tf-btn btn-line fw-6">
+                    Read more <i class="icon icon-arrow1-top-left"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+
+                   
+
+
+
+
+
+                </div>
+            </div>
+        </div>
+        <!-- /blog-grid-main -->
+
+
+
+
+{% endblock content %}
