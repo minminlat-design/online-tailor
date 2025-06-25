@@ -1,0 +1,83 @@
+{# templates/store/partials/review_list.html #}
+<div class="reply-inside-comment-wrap">
+{% for review in reviews %}
+    <div class="reply-comment-item">
+        <div class="user">
+            <div class="image">
+                <img src="#" alt="User Image">
+            </div>
+
+            <div>
+                <h6>
+                    <a href="#" class="link">
+                        {{ review.user.get_full_name|default:review.user.username }}
+                    </a>
+                </h6>
+                <div class="day text_black-2">
+                    {{ review.created_at|timesince }} ago
+                </div>
+
+                {# ⭐ star rating ------------------------------------------------ #}
+                {% with rating=review.rating %}
+                    <div class="list-star" style="color:#f5c518;">
+                        {% for i in "12345" %}
+                            {% if rating >= forloop.counter %}
+                                <i class="fa-solid fa-star"></i>
+                            {% elif rating >= forloop.counter|add:"-0.5" %}
+                                <i class="fa-solid fa-star-half-stroke"></i>
+                            {% else %}
+                                <i class="fa-regular fa-star"></i>
+                            {% endif %}
+                        {% endfor %}
+                        <span style="margin-left:5px;">({{ rating|floatformat:1 }})</span>
+                    </div>
+                {% endwith %}
+            </div>
+        </div>
+
+        <p class="text_black-2">{{ review.review }}</p>
+
+        {# reply button & form ---------------------------------------- #}
+        <button type="button"
+        class="btn-reply-toggle"
+        style="background-color: black; color: white; padding: 8px 12px; border: none; border-radius: 4px;"
+        data-review-id="{{ review.id }}">
+    Reply Comment
+</button>
+
+
+        <form method="post"
+              action="{% url 'store:submit_reply' review.id %}"
+              class="reply-form"
+              id="reply-form-{{ review.id }}"
+              style="display:none;">
+            {% csrf_token %}
+            <textarea name="reply" rows="3" required></textarea>
+           <button type="submit"
+        style="background-color: black; color: white; padding: 8px 12px; border: none; border-radius: 4px;">
+    Submit Reply
+</button>
+
+        </form>
+
+        {# replies ----------------------------------------------------- #}
+        {% for reply in review.replies.all %}
+            <div class="reply-comment-item">
+                <p><strong>{{ reply.user.first_name }}</strong>: {{ reply.reply }}</p>
+                <small>{{ reply.created_at|timesince }} ago</small>
+            </div>
+        {% empty %}
+            <p>No replies yet.</p>
+        {% endfor %}
+    </div>
+
+    <hr/>
+
+{% empty %}
+    <p>No reviews yet.</p>
+{% endfor %}
+</div>
+
+
+
+

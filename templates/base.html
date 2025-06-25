@@ -12,6 +12,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
     <!-- font -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+
     <link rel="stylesheet" href="{% static 'fonts/fonts.css' %}">
     <link rel="stylesheet" href="{% static 'fonts/font-icons.css' %}">
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
@@ -21,6 +23,9 @@
     <link rel="stylesheet" href="{% static 'css/animate.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}" />
     <link rel="stylesheet" type="text/css" href="{% static 'css/mycss.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'css/custom.css' %}" />
+    
+    <link href="https://fonts.googleapis.com/css?family=Playfair+Display:700,900&display=swap" rel="stylesheet">
 
     <!-- Favicon and Touch Icons  -->
     <link rel="shortcut icon" href="{% static 'images/logo/favicon.png' %}">
@@ -96,9 +101,21 @@ input[type="radio"]:checked + label.color-option .option-img-wrapper {
 }
 
 
+.list-star i {
+    margin-right: 2px;
+    font-size: 16px;
+}
 
-  
 
+
+.btn-select.dropdown-toggle::after {
+    content: none !important;
+}
+
+
+.reply-section {
+    margin-left: 40px;
+}
 
 
   
@@ -904,6 +921,119 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+
+
+
+
+
+
+
+
+<!-- ajax review stars on product detail page-->
+
+<script>
+document.querySelectorAll('.btn-reply-toggle').forEach(button => {
+  button.addEventListener('click', () => {
+    const reviewId = button.getAttribute('data-review-id');
+    const form = document.getElementById(`reply-form-${reviewId}`);
+    if (form.style.display === 'none' || form.style.display === '') {
+      form.style.display = 'block';
+    } else {
+      form.style.display = 'none';
+    }
+  });
+});
+</script>
+
+
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const reviewsContainer = document.getElementById('reviews-container');
+  const dropdownMenu = document.querySelector('.tf-dropdown-sort .dropdown-menu');
+
+  if (!dropdownMenu || !reviewsContainer) {
+    console.warn('Dropdown or container not found.');
+    return;
+  }
+
+  dropdownMenu.addEventListener('click', event => {
+    const link = event.target.closest('.select-item');
+    if (!link) return;
+
+    event.preventDefault();
+    const url = link.getAttribute('href');
+
+    // Convert URL to AJAX endpoint (replace base with `/ajax/`)
+    const ajaxUrl = url.replace(/\/reviews\/?/, '/reviews/ajax/');
+
+    fetch(ajaxUrl, {
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+    })
+    .then(response => {
+      if (!response.ok) throw new Error('Network error');
+      return response.text();
+    })
+    .then(html => {
+      reviewsContainer.innerHTML = html;
+
+      // Update selected label in dropdown
+      const dropdownToggle = document.querySelector('.btn-select .text-sort-value');
+      if (dropdownToggle) {
+        const clickedText = link.querySelector('.text-value-item')?.textContent || '';
+        dropdownToggle.textContent = clickedText;
+      }
+
+      // Update active state
+      dropdownMenu.querySelectorAll('.select-item').forEach(item => item.classList.remove('active'));
+      link.classList.add('active');
+    })
+    .catch(err => console.error('AJAX sort failed:', err));
+  });
+});
+</script>
+
+
+
+
+<!-- ajax comment -->
+<script>
+document.addEventListener("click", function (e) {
+    const link = e.target.closest(".tf-dropdown-sort .select-item");
+    if (!link) return;
+
+    e.preventDefault();
+    const url = link.href;                // e.g. /product/slug/?sort=oldest
+
+    fetch(url, {headers: {"X-Requested-With": "XMLHttpRequest"}})
+        .then(r => r.json())
+        .then(data => {
+            // Swap the HTML
+            document.querySelector(".reply-inside-comment-wrap").outerHTML = data.html;
+
+            // Update dropdown label
+            document.querySelector(".text-sort-value").textContent =
+                  link.querySelector(".text-value-item").textContent.trim();
+
+            // Toggle active link
+            document.querySelectorAll(".tf-dropdown-sort .select-item")
+                    .forEach(a => a.classList.remove("active"));
+            link.classList.add("active");
+
+            // Replace URL in address bar (optional, nice for sharing/refresh)
+            history.replaceState(null, "", url);
+        })
+        .catch(console.error);
+});
+</script>
+
+
+
+
+
+
 
 
 

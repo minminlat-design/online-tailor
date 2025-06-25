@@ -35,6 +35,8 @@ urlpatterns = [
     path('admin-panel/', include('admin_dashboard.urls', namespace='admin_dashboard')),
     
     path('', include('content.urls', namespace='content')),
+    
+    path('newsletter/', include('newsletter.urls', namespace='newsletter')),
    
 
 

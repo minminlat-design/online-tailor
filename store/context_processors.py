@@ -1,5 +1,8 @@
 from .models import Product
 from category.models import Category
+from django.conf import settings
+
+
 
 def products_for_navbar(request):
     products = Product.objects.filter(is_available=True).prefetch_related('images')[:6] # limited to 6
@@ -19,3 +22,6 @@ def trunk_shows_navbar(request):
     return {
         'navbar_trunk_shows': trunk_shows,
     }
+    
+    
+

@@ -174,6 +174,8 @@
                             </div>
                         {% endif %}
 
+                       
+
                         <!-- Set Items Dropdown -->
                         {% if set_items %}
                             <label for="set-items">Select To Customize</label>
@@ -203,6 +205,8 @@
                             {% for target_item, option_groups in customizations.items %}
                         <div class="customization-group" data-target="{{ target_item }}" style="display: none;">
                             <h5 class="mt-3 text-capitalize">{{ target_item }} Customizations</h5>
+
+
 
                             {% for key, options in option_groups.items %}
                             
@@ -821,214 +825,324 @@
                                         </tbody>
                                     </table>
                                 </div>
-                                <div class="widget-content-inner">
-                                    <div class="tab-reviews write-cancel-review-wrap">
-                                        <div class="tab-reviews-heading">
-                                            <div class="top">
-                                                <div class="text-center">
-                                                    <h1 class="number fw-6">4.8</h1>
-                                                    <div class="list-star">
-                                                        <i class="icon icon-star"></i>
-                                                        <i class="icon icon-star"></i>
-                                                        <i class="icon icon-star"></i>
-                                                        <i class="icon icon-star"></i>
-                                                        <i class="icon icon-star"></i>
-                                                    </div>
-                                                    <p>(168 Ratings)</p>
-                                                </div>
-                                                <div class="rating-score">
-                                                    <div class="item">
-                                                        <div class="number-1 text-caption-1">5</div>
-                                                        <i class="icon icon-star"></i>
-                                                        <div class="line-bg">
-                                                            <div style="width: 94.67%;"></div>
-                                                        </div>
-                                                        <div class="number-2 text-caption-1">59</div>
-                                                    </div>
-                                                    <div class="item">
-                                                        <div class="number-1 text-caption-1">4</div>
-                                                        <i class="icon icon-star"></i>
-                                                        <div class="line-bg">
-                                                            <div style="width: 60%;"></div>
-                                                        </div>
-                                                        <div class="number-2 text-caption-1">46</div>
-                                                    </div>
-                                                    <div class="item">
-                                                        <div class="number-1 text-caption-1">3</div>
-                                                        <i class="icon icon-star"></i>
-                                                        <div class="line-bg">
-                                                            <div style="width: 0%;"></div>
-                                                        </div>
-                                                        <div class="number-2 text-caption-1">0</div>
-                                                    </div>
-                                                    <div class="item">
-                                                        <div class="number-1 text-caption-1">2</div>
-                                                        <i class="icon icon-star"></i>
-                                                        <div class="line-bg">
-                                                            <div style="width: 0%;"></div>
-                                                        </div>
-                                                        <div class="number-2 text-caption-1">0</div>
-                                                    </div>
-                                                    <div class="item">
-                                                        <div class="number-1 text-caption-1">1</div>
-                                                        <i class="icon icon-star"></i>
-                                                        <div class="line-bg">
-                                                            <div style="width: 0%;"></div>
-                                                        </div>
-                                                        <div class="number-2 text-caption-1">0</div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <div
-                                                    class="tf-btn btn-outline-dark fw-6 btn-comment-review btn-cancel-review">
-                                                    Cancel Review</div>
-                                                <div
-                                                    class="tf-btn btn-outline-dark fw-6 btn-comment-review btn-write-review">
-                                                    Write a review</div>
-                                            </div>
-                                        </div>
-                                        <div class="reply-comment cancel-review-wrap">
-                                            <div
-                                                class="d-flex mb_24 gap-20 align-items-center justify-content-between flex-wrap">
-                                                <h5 class="">03 Comments</h5>
-                                                <div class="d-flex align-items-center gap-12">
-                                                    <div class="text-caption-1">Sort by:</div>
-                                                    <div class="tf-dropdown-sort" data-bs-toggle="dropdown">
-                                                        <div class="btn-select">
-                                                            <span class="text-sort-value">Most Recent</span>
-                                                            <span class="icon icon-arrow-down"></span>
-                                                        </div>
-                                                        <div class="dropdown-menu">
-                                                            <div class="select-item active">
-                                                                <span class="text-value-item">Most Recent</span>
-                                                            </div>
-                                                            <div class="select-item">
-                                                                <span class="text-value-item">Oldest</span>
-                                                            </div>
-                                                            <div class="select-item">
-                                                                <span class="text-value-item">Most Popular</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="reply-comment-wrap">
-                                                <div class="reply-comment-item">
-                                                    <div class="user">
-                                                        <div class="image">
-                                                            <img src="{% static 'images/collections/collection-circle-9.jpg' %}"
-                                                                alt="">
-                                                        </div>
-                                                        <div>
-                                                            <h6>
-                                                                <a href="#" class="link">Superb quality apparel that
-                                                                    exceeds expectations</a>
-                                                            </h6>
-                                                            <div class="day text_black-2">1 days ago</div>
-                                                        </div>
-                                                    </div>
-                                                    <p class="text_black-2">Great theme - we were looking for a theme
-                                                        with lots of built in features and flexibility and this was
-                                                        perfect. We expected to need to employ a developer to add a few
-                                                        finishing touches. But we actually managed to do everything
-                                                        ourselves. We did have one small query and the support given was
-                                                        swift and helpful.</p>
-                                                </div>
-                                                <div class="reply-comment-item type-reply">
-                                                    <div class="user">
-                                                        <div class="image">
-                                                            <img src="{% static 'images/collections/collection-circle-10.jpg' %}"
-                                                                alt="">
-                                                        </div>
-                                                        <div>
-                                                            <h6>
-                                                                <a href="#" class="link">Reply from Modave</a>
-                                                            </h6>
-                                                            <div class="day text_black-2">1 days ago</div>
-                                                        </div>
-                                                    </div>
-                                                    <p class="text_black-2">We love to hear it! Part of what we love
-                                                        most about Modave is how much it empowers store owners like
-                                                        yourself to build a beautiful website without having to hire a
-                                                        developer :) Thank you for this fantastic review!</p>
-                                                </div>
-                                                <div class="reply-comment-item">
-                                                    <div class="user">
-                                                        <div class="image">
-                                                            <img src="{% static 'images/collections/collection-circle-9.jpg' %}"
-                                                                alt="">
-                                                        </div>
-                                                        <div>
-                                                            <h6>
-                                                                <a href="#" class="link">Superb quality apparel that
-                                                                    exceeds expectations</a>
-                                                            </h6>
-                                                            <div class="day text_black-2">1 days ago </div>
-                                                        </div>
-                                                    </div>
-                                                    <p class="text_black-2">Great theme - we were looking for a theme
-                                                        with lots of built in features and flexibility and this was
-                                                        perfect. We expected to need to employ a developer to add a few
-                                                        finishing touches. But we actually managed to do everything
-                                                        ourselves. We did have one small query and the support given was
-                                                        swift and helpful.</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <form class="form-write-review write-review-wrap">
-                                            <div class="heading">
-                                                <h5>Write a review:</h5>
-                                                <div class="list-rating-check">
-                                                    <input type="radio" id="star5" name="rate" value="5" />
-                                                    <label for="star5" title="text"></label>
-                                                    <input type="radio" id="star4" name="rate" value="4" />
-                                                    <label for="star4" title="text"></label>
-                                                    <input type="radio" id="star3" name="rate" value="3" />
-                                                    <label for="star3" title="text"></label>
-                                                    <input type="radio" id="star2" name="rate" value="2" />
-                                                    <label for="star2" title="text"></label>
-                                                    <input type="radio" id="star1" name="rate" value="1" />
-                                                    <label for="star1" title="text"></label>
-                                                </div>
-                                            </div>
-                                            <div class="form-content">
-                                                <fieldset class="box-field">
-                                                    <label class="label">Review Title</label>
-                                                    <input type="text" placeholder="Give your review a title"
-                                                        name="text" tabindex="2" value="" aria-required="true"
-                                                        required="">
-                                                </fieldset>
-                                                <fieldset class="box-field">
-                                                    <label class="label">Review</label>
-                                                    <textarea rows="4" placeholder="Write your comment here"
-                                                        tabindex="2" aria-required="true" required=""></textarea>
-                                                </fieldset>
-                                                <div class="box-field group-2">
-                                                    <fieldset>
-                                                        <input type="text" placeholder="You Name (Public)" name="text"
-                                                            tabindex="2" value="" aria-required="true" required="">
-                                                    </fieldset>
-                                                    <fieldset>
-                                                        <input type="email" placeholder="Your email (private)"
-                                                            name="email" tabindex="2" value="" aria-required="true"
-                                                            required="">
-                                                    </fieldset>
-                                                </div>
-                                                <div class="box-check">
-                                                    <input type="checkbox" name="availability" class="tf-check"
-                                                        id="check1">
-                                                    <label class="text_black-2" for="check1">Save my name, email, and
-                                                        website in this browser for the next time I comment.</label>
-                                                </div>
-                                            </div>
-                                            <div class="button-submit">
-                                                <button class="tf-btn btn-fill animate-hover-btn" type="submit">Submit
-                                                    Reviews</button>
-                                            </div>
-                                        </form>
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <!-- tab review -->
+
+<div class="widget-content-inner">
+    <div class="tab-reviews write-cancel-review-wrap">
+
+        <div class="tab-reviews-heading">
+            <div class="top">
+
+
+                {# Average rating & star bar --------------------------------------------- #}
+<div class="text-center">
+
+    {# numeric value ------------------------------------------------------ #}
+    <h1 class="number fw-6">
+        {{ average_rating|floatformat:1|default:"0.0" }}
+    </h1>
+
+    {# star icons --------------------------------------------------------- #}
+    <div class="list-star" style="color:#f5c518;">
+        {% with rating=average_rating %}
+            {% for i in "12345" %}
+                {% if rating >= forloop.counter %}
+                    <i class="fa-solid fa-star"></i>
+                {% elif rating >= forloop.counter|add:"-0.5" %}
+                    <i class="fa-solid fa-star-half-stroke"></i>
+                {% else %}
+                    <i class="fa-regular fa-star"></i>
+                {% endif %}
+            {% endfor %}
+        {% endwith %}
+    </div>
+
+    {# total-review count -------------------------------------------------- #}
+    <p>({{ total_reviews|default:"0" }} Ratings)</p>
+</div>
+
+
+
+                
+                <div class="rating-score">
+                    <!-- You can add dynamic rating breakdown here if available -->
+                </div>
+            </div>
+
+            <div>
+                <div class="tf-btn btn-outline-dark fw-6 btn-comment-review btn-cancel-review">
+                    Cancel Review
+                </div>
+                <div class="tf-btn btn-outline-dark fw-6 btn-comment-review btn-write-review">
+                    Write a review
+                </div>
+            </div>
+        </div>
+
+        <div class="reply-comment cancel-review-wrap">
+            <div class="d-flex mb_24 gap-20 align-items-center justify-content-between flex-wrap">
+                <h5 class="">{{ reviews.count }} Comments</h5>
+                <div class="d-flex align-items-center gap-12">
+                    <div class="text-caption-1">Sort by:</div>
+
+
+
+
+
+                    {# ---------- review-sort dropdown (final) ---------- #}
+<div class="dropdown tf-dropdown-sort">
+
+  {# trigger ----------------------------------------------------------- #}
+  <a href="#"
+     class="btn-select dropdown-toggle"
+     data-bs-toggle="dropdown"
+     aria-expanded="false">
+
+      <span class="text-sort-value">
+          {% if sort_option == 'oldest' %}Oldest
+          {% elif sort_option == 'most_popular' %}Most Popular
+          {% else %}Most Recent
+          {% endif %}
+      </span>
+      <span class="icon icon-arrow-down"></span>
+  </a>
+
+  {# menu -------------------------------------------------------------- #}
+  {% with base_url=request.path %}
+  <ul class="dropdown-menu">
+
+      <li>
+        <a class="select-item {% if sort_option == 'most_recent' %}active{% endif %}"
+           href="{{ base_url }}?sort=most_recent">
+          <span class="text-value-item">Most Recent</span>
+        </a>
+      </li>
+
+      <li>
+        <a class="select-item {% if sort_option == 'oldest' %}active{% endif %}"
+           href="{{ base_url }}?sort=oldest">
+          <span class="text-value-item">Oldest</span>
+        </a>
+      </li>
+
+      <li>
+        <a class="select-item {% if sort_option == 'most_popular' %}active{% endif %}"
+           href="{{ base_url }}?sort=most_popular">
+          <span class="text-value-item">Most Popular</span>
+        </a>
+      </li>
+
+  </ul>
+  {% endwith %}
+</div>
+
+
+
+
+
+
+                </div>
+            </div>
+
+
+
+
+
+
+
+
+<div class="reply-comment-wrap">
+
+           
+
+                {% comment "" %}
+                
+                
+
+
+                {% for review in reviews %}
+                    <!-- Review Comment -->
+                    <div class="reply-comment-item">
+                        <div class="user">
+                            <div class="image">
+                                <img src="#" alt="User Image">
+                            </div>
+
+
+                            <div>
+                                <h6>
+                                    <a href="#" class="link">{{ review.user.get_full_name|default:review.user.username }}</a>
+                                </h6>
+                                <div class="day text_black-2">{{ review.created_at|timesince }} ago</div>
+
+
+
+
+
+                                {% with rating=review.rating %}
+                                    <div class="list-star" style="color: #f5c518;">
+                                        {% for i in "12345" %}
+                                            {% if rating >= forloop.counter %}
+                                                <i class="fa-solid fa-star"></i>  {# Full star #}
+                                            {% elif rating >= forloop.counter|add:"-0.5" %}
+                                                <i class="fa-solid fa-star-half-stroke"></i>  {# Half star #}
+                                            {% else %}
+                                                <i class="fa-regular fa-star"></i>  {# Empty star #}
+                                            {% endif %}
+                                        {% endfor %}
+                                        <span style="margin-left: 5px; color: #333;">({{ rating|floatformat:1 }})</span>
                                     </div>
-                                </div>
+                                {% endwith %}
+
+                            </div>
+                        </div>
+
+                        <p class="text_black-2" style="margin-left: 60px;">{{ review.review }}</p>
+
+<!-- Indented Reply Section -->
+    <div style="margin-left: 60px;">
+    <!-- Reply button -->
+        <div style="text-align: left; margin-bottom: 8px;">
+            <button 
+                type="button"
+                class="btn-reply-toggle" 
+                data-review-id="{{ review.id }}" 
+                style="display: inline-block; padding: 6px 10px; background: black; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;">
+                Reply
+            </button>
+        </div>
+
+        <!-- Hidden reply form -->
+        <form method="post" action="{% url 'store:submit_reply' review.id %}" class="reply-form" id="reply-form-{{ review.id }}" style="display:none; margin-top:10px;">
+            {% csrf_token %}
+            <textarea name="reply" rows="3" placeholder="Write your reply here..." required></textarea>
+            <button type="submit" style="background-color: black; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer;">
+                Submit
+            </button>
+        </form>
+
+        <!-- Replies loop -->
+        {% for reply in review.replies.all %}
+            <div class="reply-comment-item" style="margin-top: 10px;">
+                <p><strong>{{ reply.user.first_name }}</strong><br/>{{ reply.reply }}</p>
+                <small>{{ reply.created_at|timesince }} ago</small>
+            </div>
+        {% empty %}
+            <p>No replies yet.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<hr/>
+                       
+                {% empty %}
+                    <p>No reviews yet.</p>
+                {% endfor %}
+
+                
+
+            </div>
+
+{% endcomment %}
+
+
+
+{% include "store/partials/review_list.html" %}
+
+
+
+</div>
+</div>
+      
+
+
+
+
+
+        <!-- review stars and comment -->
+        <form method="post" class="form-write-review write-review-wrap" action="{% url 'store:submit_review' product.id %}">
+            {% csrf_token %}
+            <div class="heading">
+                <h5>Write a review:</h5>
+                <div class="rate">
+                    <input type="radio" id="star10" name="rating" value="5" required/><label for="star10" title="5"></label>
+                    <input type="radio" id="star9" name="rating" value="4.5" required/><label for="star9" title="4.5" class="half"></label>
+                    <input type="radio" id="star8" name="rating" value="4" required/><label for="star8" title="4"></label>
+                    <input type="radio" id="star7" name="rating" value="3.5" required/><label for="star7" title="3.5" class="half"></label>
+                    <input type="radio" id="star6" name="rating" value="3" required/><label for="star6" title="3"></label>
+                    <input type="radio" id="star5" name="rating" value="2.5" required/><label for="star5" title="2.5" class="half"></label>
+                    <input type="radio" id="star4" name="rating" value="2" required/><label for="star4" title="2"></label>
+                    <input type="radio" id="star3" name="rating" value="1.5" required/><label for="star3" title="1.5" class="half"></label>
+                    <input type="radio" id="star2" name="rating" value="1" required/><label for="star2" title="1"></label>
+                    <input type="radio" id="star1" name="rating" value="0.5" required/><label for="star1" title="0.5" class="half"></label>
+                </div>
+            </div>
+
+            <div class="form-content">
+                <fieldset class="box-field">
+                    <label class="label">Review Title</label>
+                    <input type="text" name="subject" placeholder="Give your review a title" required />
+                </fieldset>
+
+                <fieldset class="box-field">
+                    <label class="label">Review</label>
+                    <textarea name="review" rows="4" placeholder="Write your comment here" required></textarea>
+                </fieldset>
+
+                {% if not request.user.is_authenticated %}
+                <div class="box-field group-2">
+                    <fieldset>
+                        <input type="text" placeholder="Your Name (Public)" name="name" required>
+                    </fieldset>
+                    <fieldset>
+                        <input type="email" placeholder="Your Email (Private)" name="email" required>
+                    </fieldset>
+                </div>
+                {% endif %}
+
+                <div class="box-check">
+                    <input type="checkbox" name="save_info" class="tf-check" id="check1">
+                    <label class="text_black-2" for="check1">
+                        Save my name, email, and website in this browser for the next time I comment.
+                    </label>
+                </div>
+            </div>
+
+            <div class="button-submit">
+                <button class="tf-btn btn-fill animate-hover-btn" type="submit">
+                    Submit Review
+                </button>
+            </div>
+
+            {% include 'includes/alerts.html' %}
+        </form>
+
+    </div>
+</div>
+
+<!-- End of tab review -->
+
+
+
+
+
+
+
+
+
                                 <div class="widget-content-inner">
                                     <div class="tf-page-privacy-policy">
                                         <div class="title">The Company Private Limited Policy</div>
@@ -1414,46 +1528,69 @@
 
     </div>
 
-   
 
-    <!-- modal ask_question -->
-    <div class="modal modalCentered fade modalDemo tf-product-modal modal-part-content" id="ask_question">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="header">
-                    <div class="demo-title">Ask a question</div>
-                    <span class="icon-close icon-close-popup" data-bs-dismiss="modal"></span>
-                </div>
-                <div class="overflow-y-auto">
-                    <form class="">
-                        <fieldset class="">
-                            <label for="">Name *</label>
-                            <input type="text" placeholder="" class="" name="text" tabindex="2" value=""
-                                aria-required="true" required="">
-                        </fieldset>
-                        <fieldset class="">
-                            <label for="">Email *</label>
-                            <input type="email" placeholder="" class="" name="text" tabindex="2" value=""
-                                aria-required="true" required="">
-                        </fieldset>
-                        <fieldset class="">
-                            <label for="">Phone number</label>
-                            <input type="number" placeholder="" class="" name="text" tabindex="2" value=""
-                                aria-required="true" required="">
-                        </fieldset>
-                        <fieldset class="">
-                            <label for="">Message</label>
-                            <textarea name="message" rows="4" placeholder="" class="" tabindex="2" aria-required="true"
-                                required=""></textarea>
-                        </fieldset>
-                        <button type="submit"
-                            class="tf-btn w-100 btn-fill justify-content-center fw-6 fs-16 flex-grow-1 animate-hover-btn"><span>Send</span></button>
-                    </form>
+
+
+<!-- modal ask_question -->
+<div 
+  class="modal fade modalCentered modalDemo tf-product-modal modal-part-content" 
+  id="ask_question" 
+  tabindex="-1" 
+  aria-labelledby="askQuestionTitle" 
+  aria-hidden="true"
+>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="header">
+                <div class="demo-title" id="askQuestionTitle">Ask a question</div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+
+            </div>
+            <div class="overflow-y-auto p-4">
+                <form id="ask-question-form" class="form-contact text-start" method="post" action="{% url 'newsletter:submit_question' %}">
+                    {% csrf_token %}
+                    
+                    <fieldset class="mb-3">
+                        <label for="ask-name">Name *</label>
+                        <input type="text" id="ask-name" name="name" class="form-control" required placeholder="Your name" autocomplete="name">
+                    </fieldset>
+                    
+                    <fieldset class="mb-3">
+                        <label for="ask-email">Email *</label>
+                        <input type="email" id="ask-email" name="email" class="form-control" required placeholder="Your email" autocomplete="email">
+                    </fieldset>
+
+                    <fieldset class="mb-3">
+                        <label for="ask-phone">Phone number</label>
+                        <input type="tel" id="ask-phone" name="phone" class="form-control" placeholder="Your phone number" autocomplete="tel">
+                    </fieldset>
+                    
+                    <fieldset class="mb-4">
+                        <label for="ask-message">Message *</label>
+                        <textarea id="ask-message" name="message" class="form-control" rows="4" required placeholder="Your message"></textarea>
+                    </fieldset>
+                    
+                    <div class="send-wrap">
+                        <button type="submit" class="tf-btn w-100 btn-fill justify-content-center fw-6 fs-16 flex-grow-1 animate-hover-btn">
+                            <span>Send</span>
+                        </button>
+                    </div>
+                </form>
+
+                <div id="ask-question-feedback" class="mt-3 text-success d-none fw-semibold" role="alert" aria-live="polite">
+                    Thank you! Your question has been sent.
                 </div>
             </div>
         </div>
     </div>
-    <!-- /modal ask_question -->
+</div>
+<!-- /modal ask_question -->
+
+
+
+
+
+
 
     <!-- modal delivery_return -->
     <div class="modal modalCentered fade modalDemo tf-product-modal modal-part-content" id="delivery_return">
@@ -1493,6 +1630,10 @@
         </div>
     </div>
     <!-- /modal delivery_return -->
+
+
+
+
     <!-- modal share social -->
     <div class="modal modalCentered fade modalDemo tf-product-modal modal-part-content" id="share_social">
         <div class="modal-dialog modal-dialog-centered">
@@ -1599,6 +1740,65 @@
     new bootstrap.Modal(document.getElementById('zoomModal')).show();
   }
 </script>
+
+
+
+
+<!-- modal ask_question -->
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("ask-question-form");
+    const feedback = document.getElementById("ask-question-feedback");
+
+    form.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(form);
+
+        fetch(form.action, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": formData.get('csrfmiddlewaretoken'),
+                "X-Requested-With": "XMLHttpRequest",  // good practice for AJAX detection
+            },
+            body: formData
+        })
+        .then(res => {
+            if (!res.ok) return res.json().then(err => Promise.reject(err));
+            return res.json();
+        })
+        .then(data => {
+            if (data.status === 'success') {
+                form.reset();
+                feedback.classList.remove("d-none");
+
+                setTimeout(() => {
+                    feedback.classList.add("d-none");
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('ask_question'));
+                    modal.hide();
+                }, 2500);
+            } else {
+                alert(data.message || "Something went wrong.");
+            }
+        })
+        .catch(err => {
+            alert(err.message || "Failed to send your question. Please try again.");
+            console.error(err);
+        });
+    });
+});
+
+
+
+
+
+
+
+
+</script>
+
+
 
 
 

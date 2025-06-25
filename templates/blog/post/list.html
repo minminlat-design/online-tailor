@@ -4,83 +4,207 @@
 
 {% block content %}
 
-
- <!-- page-title -->
-        <div class="tf-page-title">
-            <div class="container-full">
-                <div class="row">
-                    <div class="col-12">
-                        <div class="heading text-center">Blog Grid</div>
-                        <ul class="breadcrumbs d-flex align-items-center justify-content-center">
-                            <li>
-                                <a href="index.html">Home</a>
-                            </li>
-                            <li>
-                                <i class="icon-arrow-right"></i>
-                            </li>
-                            <li>
-                                Fashion
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- /page-title -->
-
-        <!-- blog-grid-main -->
-        <div class="blog-grid-main">
-            <div class="container">
-                <div class="row">
-
-
-
-
-                    {% for post in posts %}
-<div class="col-xl-4 col-md-6 col-12">
-    <div class="blog-article-item">
-        <div class="article-thumb">
-            <a href="{{ post.get_absolute_url }}">
-                {% if post.images.first %}
-                    <img class="lazyload" data-src="{{ post.images.first.image.url }}" src="{{ post.images.first.image.url }}" alt="{{ post.title }}">
-                {% else %}
-                    <img class="lazyload" data-src="/static/images/default.jpg" src="/static/images/default.jpg" alt="No image">
-                {% endif %}
-            </a>
-            <div class="article-label">
-                <a href="{{ post.get_absolute_url }}"
-                   class="tf-btn btn-sm radius-3 btn-fill animate-hover-btn">
-                    {{ post.get_status_display }}
-                </a>
-            </div>
-        </div>
-        <div class="article-content">
-            <div class="article-title">
-                <a href="{{ post.get_absolute_url }}">{{ post.title }}</a>
-            </div>
-            <div class="article-btn">
-                <a href="{{ post.get_absolute_url }}" class="tf-btn btn-line fw-6">
-                    Read more <i class="icon icon-arrow1-top-left"></i>
-                </a>
+<!-- Page Title -->
+<div class="tf-page-title">
+    <div class="container-full">
+        <div class="row">
+            <div class="col-12">
+                <div class="heading text-center" style="color:white;">Blog</div>
+                <ul class="breadcrumbs d-flex align-items-center justify-content-center">
+                    <li><a href="{% url 'store:store' %}" style="color:white;">Home</a></li>
+                    <li style="color:white;"><i class="icon-arrow-right"></i></li>
+                    <li style="color:white;">Blog</li>
+                </ul>
             </div>
         </div>
     </div>
 </div>
-{% endfor %}
+<!-- /Page Title -->
 
+<br/>
 
-                   
+<div class="container">
+    <div class="row">
+        <!-- Main Blog Content -->
+        <div class="col-md-8">
+            <div class="blog-list-main">
+                <div class="list-blog">
+                    {% for post in posts %}
+                    <div class="blog-article-item style-row mb-4">
+                        <div class="article-thumb">
+                            <a href="{{ post.get_absolute_url }}">
+                                {% if post.images.first %}
+                                <img class="lazyload" data-src="{{ post.images.first.image.url }}"
+                                     src="{{ post.images.first.image.url }}" alt="{{ post.title }}">
+                                {% else %}
+                                <img class="lazyload" data-src="{% static 'images/default.jpg' %}"
+                                     src="{% static 'images/default.jpg' %}" alt="No image available">
+                                {% endif %}
+                            </a>
+                        </div>
+                        <div class="article-content">
+                            <div class="article-label">
+                                <span class="tf-btn btn-sm radius-3 btn-fill">{{ post.get_status_display }}</span>
+                            </div>
+                            <div class="article-title">
+                                <a href="{{ post.get_absolute_url }}">{{ post.title }}</a>
+                            </div>
+                            <div class="desc">
+                                {{ post.summary|default:"No summary available." }}
+                            </div>
+                            <div class="article-btn">
+                                <a href="{{ post.get_absolute_url }}" class="tf-btn btn-line fw-6">
+                                    Read more <i class="icon icon-arrow1-top-left"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
 
+                    <ul class="wg-pagination">
+                                <li class="active">
+                                    <div class="pagination-item">1</div>
+                                </li>
+                                <li>
+                                    <a href="#" class="pagination-item animate-hover-btn">2</a>
+                                </li>
+                                <li>
+                                    <a href="#" class="pagination-item animate-hover-btn">3</a>
+                                </li>
+                                <li>
+                                    <a href="#" class="pagination-item animate-hover-btn"><i
+                                            class="icon-arrow-right"></i></a>
+                                </li>
+                            </ul>
 
-
-
-
+                    
                 </div>
             </div>
         </div>
-        <!-- /blog-grid-main -->
+
+        <!-- Sidebar -->
+        <div class="col-md-4">
+            <br/>
+            <aside class="tf-section-sidebar wrap-sidebar-mobile">
+
+                <div class="sidebar-item sidebar-categories">
+                                <div class="sidebar-title">Blog categories</div>
+                                <div class="sidebar-content">
+                                    <ul>
+                                        <li>
+                                            <a href="#">Accessories<span>(9)</span></a>
+                                        </li>
+                                        <li>
+                                            <a href="#">Bag<span>(9)</span></a>
+                                        </li>
+                                        <li>
+                                            <a href="#">Cookware & Kitchen<span>(9)</span></a>
+                                        </li>
+                                        <li>
+                                            <a href="#">Decor<span>(9)</span></a>
+                                        </li>
+                                        <li>
+                                            <a href="#">Decorate<span>(9)</span></a>
+                                        </li>
+                                        <li>
+                                            <a href="#">Denim<span>(9)</span></a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                
+                
+
+                <!-- Recent Posts -->
+                <div class="sidebar-item sidebar-post">
+                    <div class="sidebar-title">Recent Posts</div>
+                    <div class="sidebar-content">
+                        <ul>
+                            {% for post in posts|slice:":3" %}
+                            <li>
+                                <div class="blog-article-item style-sidebar">
+                                    <div class="article-thumb">
+                                        <a href="{{ post.get_absolute_url }}">
+                                            {% if post.images.first %}
+                                            <img src="{{ post.images.first.image.url }}" alt="{{ post.title }}">
+                                            {% else %}
+                                            <img src="{% static 'images/default.jpg' %}" alt="No image">
+                                            {% endif %}
+                                        </a>
+                                    </div>
+                                    <div class="article-content">
+                                        <div class="article-label">
+                                            <span class="tf-btn btn-sm radius-3 btn-fill">
+                                                {{ post.get_status_display }}
+                                            </span>
+                                        </div>
+                                        <div class="article-title">
+                                            <a href="{{ post.get_absolute_url }}">{{ post.title }}</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
 
 
 
+                 <div class="sidebar-item sidebar-tags">
+                                <div class="sidebar-title">Blog tags</div>
+                                <div class="sidebar-content">
+                                    <ul class="tags-lists">
+                                        <li>
+                                            <a href="#" class="tags-item">Bags</a>
+                                        </li>
+                                        <li>
+                                            <a href="#" class="tags-item">Fashion</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+
+                            <div class="sidebar-item sidebar-instagram">
+                                <div class="sidebar-title">Instagram</div>
+                                <div class="sidebar-content">
+                                    <ul>
+                                        <li>
+                                            <img src="{% static 'images/shop/file/img-1.jpg' %}" alt="">
+                                        </li>
+                                        <li>
+                                            <img src="{% static 'images/shop/file/img-2.jpg' %}" alt="">
+                                        </li>
+                                        <li>
+                                            <img src="{% static 'images/shop/file/img-3.jpg' %}" alt="">
+                                        </li>
+                                        <li>
+                                            <img src="{% static 'images/shop/file/img-4.jpg' %}" alt="">
+                                        </li>
+                                        <li>
+                                            <img src="{% static 'images/shop/file/img-5.jpg' %}" alt="">
+                                        </li>
+                                        <li>
+                                            <img src="{% static 'images/shop/file/img-6.png' %}" alt="">
+                                        </li>
+
+                                    </ul>
+                                </div>
+                            </div>
+
+                
+              
+
+            </aside>
+        </div>
+    </div>
+</div>
+
+<div class="btn-sidebar-mobile">
+    <button data-bs-toggle="offcanvas" data-bs-target="#sidebarmobile" aria-controls="offcanvasRight">
+        <i class="icon-open"></i>
+    </button>
+</div>
 
 {% endblock content %}

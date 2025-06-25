@@ -1,10 +1,11 @@
 from django.db import models
 from django.urls import reverse
+from accounts.models import Account
 from category.models import SubCategory
 from django.forms import ValidationError
 from ckeditor.fields import RichTextField
 from django.db.models import F
-
+from django.db.models import Avg
 from measurement.models import ProductType
 
 
@@ -85,6 +86,17 @@ class Product(models.Model):
     def second_image(self):
         images = self.images.order_by('order')
         return images[1] if images.count() > 1 else None
+    
+    
+    @property
+    def average_rating(self):
+        avg = self.reviews.filter(status=True).aggregate(avg_rating=Avg('rating'))['avg_rating']
+        return round(avg * 2) / 2 if avg else 0  # rounds to nearest 0.5
+    
+    @property
+    def total_reviews(self):
+        return self.reviews.filter(status=True).count()
+
     
     
 
@@ -182,3 +194,36 @@ class ProductPiece(models.Model):
         return self.name
     
     
+
+
+
+# Review rating
+class ReviewRating(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="reviews")
+    user = models.ForeignKey(Account, on_delete=models.CASCADE)
+    subject = models.CharField(max_length=100, blank=True)
+    review = models.TextField(max_length=500, blank=True)
+    rating = models.FloatField()
+    ip = models.GenericIPAddressField(blank=True, null=True)  # better for storing IPs
+    status = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+     # Add a self-referential ForeignKey for replies
+    parent = models.ForeignKey('self', null=True, blank=True, related_name='child_reviews', on_delete=models.CASCADE)
+
+
+    def __str__(self):
+        return self.subject or f"Review by {self.user} on {self.product}"
+    
+    
+    
+# Review reply
+class ReviewReply(models.Model):
+    review = models.ForeignKey(ReviewRating, on_delete=models.CASCADE, related_name='replies')
+    user = models.ForeignKey(Account, on_delete=models.CASCADE)
+    reply = models.TextField(max_length=500)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Reply by {self.user} on {self.review}"

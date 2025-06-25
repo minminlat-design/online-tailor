@@ -107,6 +107,11 @@
                             <div class="tf-collapse-content">
                                 <div class="footer-menu_item">Sign up to get first dibs on new arrivals, sales,
                                     exclusive content, events and more!</div>
+
+
+                                    {% comment "" %}
+                                    
+                                    
                                 <form class="form-newsletter subscribe-form" id="" action="#" method="post"
                                     accept-charset="utf-8" data-mailchimp="true">
                                     <div class="subscribe-content">
@@ -124,6 +129,42 @@
                                     </div>
                                     <div class="subscribe-msg"></div>
                                 </form>
+                                {% endcomment %}
+
+
+                                <form id="footer-subscribe-form" class="form-newsletter subscribe-form" action="#" method="post" accept-charset="utf-8"> 
+    <div class="subscribe-content">
+        <fieldset class="email">
+            <input
+                type="email"
+                name="email"
+                id="footer-subscribe-email"
+                class="subscribe-email"
+                placeholder="Enter your email..."
+                required
+                autocomplete="email"
+            >
+        </fieldset>
+        <div class="button-submit">
+            <button
+                id="footer-subscribe-button"
+                class="subscribe-button tf-btn btn-sm radius-3 btn-fill btn-icon animate-hover-btn"
+                type="button"
+            >
+                Subscribe <i class="icon icon-arrow1-top-left"></i>
+            </button>
+        </div>
+    </div>
+    <div id="footer-subscribe-msg" class="subscribe-msg" role="alert" aria-live="polite"></div>
+</form>
+
+
+
+
+                               
+
+
+
                                 <div class="tf-cur">
                                     <div class="tf-currencies">
                                         <select class="image-select center style-default type-currencies">
@@ -701,6 +742,8 @@
 
 
 
+{% comment "" %}
+
 
 <!-- auto popup  -->
 <div class="modal modalCentered fade auto-popup modal-newleter">
@@ -733,4 +776,348 @@
 </div>
 </div>
 <!-- /auto popup  -->
+{% endcomment %}
+
+
+<!-- auto popup  -->
+<div class="modal modalCentered fade auto-popup modal-newleter" tabindex="-1" aria-labelledby="newsletterModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-top position-relative">
+        <img class="lazyload w-100" data-src="{% static 'images/item/auto-popup-banner.png' %}" src="{% static 'images/item/auto-popup-banner.png' %}" alt="home-01">
+        <button type="button" class="btn-close position-absolute top-0 end-0 m-2" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-bottom p-4">
+        <h4 class="text-center mb-2">Don’t miss out</h4>
+        <h6 class="text-center mb-4">Be the first one to get the new product at early bird prices.</h6>
+        <form id="subscribe-form" method="post" novalidate>
+          {% csrf_token %}
+          <div id="subscribe-content" class="mb-3">
+            <input
+              type="email"
+              name="email"
+              id="subscribe-email"
+              placeholder="Email *"
+              required
+              class="form-control"
+              aria-label="Email address"
+            >
+          </div>
+          <button
+            type="button"
+            id="subscribe-button"
+            class="tf-btn btn-fill radius-3 animate-hover-btn w-100 justify-content-center"
+          >
+            Keep me updated
+          </button>
+          <div id="subscribe-msg" class="text-center mt-3 text-success"></div>
+        </form>
+        <div class="text-center mt-3">
+          <a href="#" data-bs-dismiss="modal" class="tf-btn btn-line fw-6 btn-hide-popup">Not interested</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- /auto popup  -->
+
+
+
+
+<!--blog post mobile side bar menu-->
+
+
+
+    <!-- sidebarmobile -->
+    <div class="offcanvas offcanvas-end canvas-sidebar canvas-sidebar-blog" id="sidebarmobile">
+        <div class="canvas-wrapper">
+            <div class="canvas-header">
+                <span class="title">SIDEBAR</span>
+                <span class="icon-close icon-close-popup" data-bs-dismiss="offcanvas" aria-label="Close"></span>
+            </div>
+            <div class="mb-canvas-content canvas-body">
+                <aside class="tf-section-sidebar">
+                    <div class="sidebar-item sidebar-categories">
+                        <div class="sidebar-title">Blog categories</div>
+                        <div class="sidebar-content">
+                            <ul>
+                                <li>
+                                    <a href="#">Accessories<span>(9)</span></a>
+                                </li>
+                                <li>
+                                    <a href="#">Bag<span>(9)</span></a>
+                                </li>
+                                <li>
+                                    <a href="#">Cookware & Kitchen<span>(9)</span></a>
+                                </li>
+                                <li>
+                                    <a href="#">Decor<span>(9)</span></a>
+                                </li>
+                                <li>
+                                    <a href="#">Decorate<span>(9)</span></a>
+                                </li>
+                                <li>
+                                    <a href="#">Denim<span>(9)</span></a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="sidebar-item sidebar-post">
+                        <div class="sidebar-title">Recent Post</div>
+                        <div class="sidebar-content">
+                            <ul>
+                                <li>
+                                    <div class="blog-article-item style-sidebar">
+                                        <div class="article-thumb">
+                                            <a href="blog-detail.html">
+                                                <img src="{% static 'images/shop/article/sidebar-1.jpg' %}" alt="">
+                                            </a>
+                                        </div>
+                                        <div class="article-content">
+                                            <div class="article-label">
+                                                <a href="blog-detail.html"
+                                                    class="tf-btn btn-sm radius-3 btn-fill animate-hover-btn">Accessories</a>
+                                            </div>
+                                            <div class="article-title">
+                                                <a href="blog-detail.html" class="">Effortlessly Blends The Carefree
+                                                    Style</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="blog-article-item style-sidebar">
+                                        <div class="article-thumb">
+                                            <a href="blog-detail.html">
+                                                <img src="{% static 'images/shop/article/sidebar-2.jpg' %}" alt="">
+                                            </a>
+                                        </div>
+                                        <div class="article-content">
+                                            <div class="article-label">
+                                                <a href="blog-detail.html"
+                                                    class="tf-btn btn-sm radius-3 btn-fill animate-hover-btn">Accessories</a>
+                                            </div>
+                                            <div class="article-title">
+                                                <a href="blog-detail.html" class="">The Limited Edition Club des Sports
+                                                    Courchevel</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="blog-article-item style-sidebar">
+                                        <div class="article-thumb">
+                                            <a href="blog-detail.html">
+                                                <img src="{% static 'images/shop/article/sidebar-3.jpg' %}" alt="">
+                                            </a>
+                                        </div>
+                                        <div class="article-content">
+                                            <div class="article-label">
+                                                <a href="blog-detail.html"
+                                                    class="tf-btn btn-sm radius-3 btn-fill animate-hover-btn">Fashion</a>
+                                            </div>
+                                            <div class="article-title">
+                                                <a href="blog-detail.html" class="">Christine Is A True Style Icon</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="sidebar-item sidebar-tags">
+                        <div class="sidebar-title">Blog tags</div>
+                        <div class="sidebar-content">
+                            <ul class="tags-lists">
+                                <li>
+                                    <a href="#" class="tags-item">Bags</a>
+                                </li>
+                                <li>
+                                    <a href="#" class="tags-item">Fashion</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="sidebar-item sidebar-instagram">
+                        <div class="sidebar-title">Instagram</div>
+                        <div class="sidebar-content">
+                            <ul>
+                                <li>
+                                    <img src="{% static 'images/shop/file/img-1.jpg' %}" alt="">
+                                </li>
+                                <li>
+                                    <img src="{% static 'images/shop/file/img-2.jpg' %}" alt="">
+                                </li>
+                                <li>
+                                    <img src="{% static 'images/shop/file/img-3.jpg' %}" alt="">
+                                </li>
+                                <li>
+                                    <img src="{% static 'images/shop/file/img-4.jpg' %}" alt="">
+                                </li>
+                                <li>
+                                    <img src="{% static 'images/shop/file/img-5.jpg' %}" alt="">
+                                </li>
+                                <li>
+                                    <img src="{% static 'images/shop/file/img-6.png' %}" alt="">
+                                </li>
+
+                            </ul>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+
+
+    </div>
+    <!-- /sidebarmobile -->
+
+
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const popupKey = 'newsletter_popup_closed_until';
+    const modalElement = document.querySelector('.modal-newleter');
+    const modal = new bootstrap.Modal(modalElement);
+    const messageDiv = document.getElementById("subscribe-msg");
+    const emailInput = document.getElementById("subscribe-email");
+    const subscribeButton = document.getElementById("subscribe-button");
+
+    // CSRF token from Django template context (make sure to pass it in your template!)
+    const csrftoken = "{{ csrf_token }}";
+
+    // Check if popup should be shown
+    const storedUntil = localStorage.getItem(popupKey);
+    const now = Date.now();
+
+    if (!storedUntil || now > parseInt(storedUntil)) {
+        modal.show();
+    }
+
+    // Function to set 2-week expiration
+    function setPopupExpiration() {
+        const twoWeeksMs = 14 * 24 * 60 * 60 * 1000; // 14 days in milliseconds
+        const expireAt = Date.now() + twoWeeksMs;
+        localStorage.setItem(popupKey, expireAt.toString());
+    }
+
+    // Basic email format validation
+    function validateEmail(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
+    }
+
+    subscribeButton.addEventListener("click", function () {
+        const email = emailInput.value.trim();
+        messageDiv.textContent = "";
+
+        if (email === "" || !validateEmail(email)) {
+            messageDiv.innerHTML = "<p class='text-danger'>Please enter a valid email.</p>";
+            emailInput.focus();
+            return;
+        }
+
+        // Disable button to prevent multiple clicks
+        subscribeButton.disabled = true;
+        subscribeButton.textContent = "Submitting...";
+
+        // Send AJAX POST request to Django backend
+        fetch("{% url 'newsletter:newsletter_subscribe' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "X-CSRFToken": csrftoken
+            },
+            body: new URLSearchParams({ email: email })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "success") {
+                messageDiv.innerHTML = `<p class="text-success">${data.message}</p>`;
+                setPopupExpiration();
+                setTimeout(() => modal.hide(), 2000);
+            } else if (data.status === "exists") {
+                messageDiv.innerHTML = `<p class="text-info">${data.message}</p>`;
+                setPopupExpiration();
+                setTimeout(() => modal.hide(), 2000);
+            } else {
+                messageDiv.innerHTML = `<p class="text-danger">${data.message || "An error occurred."}</p>`;
+            }
+        })
+        .catch(() => {
+            messageDiv.innerHTML = "<p class='text-danger'>Connection error. Please try again.</p>";
+        })
+        .finally(() => {
+            subscribeButton.disabled = false;
+            subscribeButton.textContent = "Keep me updated";
+        });
+    });
+
+    // Handle all dismiss buttons to set expiration too
+    document.querySelectorAll('.btn-hide-popup').forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            setPopupExpiration();
+        });
+    });
+});
+</script>
+
+
+
+
+
+<!-- footer subscribe email-->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const footerEmailInput = document.getElementById("footer-subscribe-email");
+    const footerSubscribeButton = document.getElementById("footer-subscribe-button");
+    const footerMessageDiv = document.getElementById("footer-subscribe-msg");
+    const footerForm = document.getElementById("footer-subscribe-form");
+
+    const csrftoken = "{{ csrf_token }}";
+
+    if (!footerSubscribeButton) return;
+
+    footerSubscribeButton.addEventListener("click", function () {
+        const email = footerEmailInput.value.trim();
+        footerMessageDiv.textContent = "";
+
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            footerMessageDiv.innerHTML = "<p class='text-danger'>Please enter a valid email.</p>";
+            return;
+        }
+
+        footerSubscribeButton.disabled = true;
+        footerSubscribeButton.textContent = "Submitting...";
+
+        fetch("{% url 'newsletter:newsletter_subscribe' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "X-CSRFToken": csrftoken,
+            },
+            body: new URLSearchParams({ email: email })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "success") {
+                footerMessageDiv.innerHTML = `<p class="text-success">${data.message}</p>`;
+                footerForm.reset();
+            } else if (data.status === "exists") {
+                footerMessageDiv.innerHTML = `<p class="text-info">${data.message}</p>`;
+            } else {
+                footerMessageDiv.innerHTML = `<p class="text-danger">${data.message || "An error occurred."}</p>`;
+            }
+        })
+        .catch(() => {
+            footerMessageDiv.innerHTML = "<p class='text-danger'>Connection error. Please try again.</p>";
+        })
+        .finally(() => {
+            footerSubscribeButton.disabled = false;
+            footerSubscribeButton.textContent = "Subscribe";
+        });
+    });
+});
+</script>
 

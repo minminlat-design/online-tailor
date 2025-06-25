@@ -5,8 +5,13 @@ from easy_thumbnails.files import get_thumbnailer
 from store.models import (
     Product, ProductPiece, ProductVariation, Style,
     FabricCategory, Color,
-    Season, Pattern, Material, ProductImage, ProductGroup
+    Season, Pattern, Material, ProductImage, ProductGroup,
+    ReviewRating, ReviewReply
 )
+
+
+
+
 
 class ProductImageInline(SortableInlineAdminMixin, admin.TabularInline):
     model = ProductImage
@@ -99,3 +104,22 @@ class ProductPieceAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('name',)}
 
 
+
+
+class ReviewReplyInline(admin.TabularInline):
+    model = ReviewReply
+    extra = 1  # show one empty form for adding new reply
+    readonly_fields = ('created_at',)  # optional: prevent editing created_at
+
+@admin.register(ReviewRating)
+class ReviewRatingAdmin(admin.ModelAdmin):
+    list_display = ('product', 'user', 'subject', 'rating', 'status', 'created_at')
+    search_fields = ('product__name', 'user__username', 'subject', 'review')
+    list_filter = ('status', 'created_at')
+    inlines = [ReviewReplyInline]
+
+@admin.register(ReviewReply)
+class ReviewReplyAdmin(admin.ModelAdmin):
+    list_display = ('review', 'user', 'reply', 'created_at')
+    search_fields = ('review__subject', 'user__username', 'reply')
+    list_filter = ('created_at',)
