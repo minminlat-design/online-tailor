@@ -22,6 +22,11 @@ def static_page_detail(request, slug):
         'contact': 'content/contact.html',
         'make-an-appointment': 'content/appointment.html',
         'about-us': 'content/about.html',
+        'shipping-delivery': 'content/shipping_delivery.html',  
+        'delivery-return': 'content/delivery_return.html',  
+        'privacy-policy': 'content/privacy_policy.html',
+        'terms-and-conditions': 'content/terms_conditions.html',
+        'faq': 'content/faq.html',         
     }
 
     template_name = template_map.get(slug)
@@ -106,6 +111,9 @@ def static_page_detail(request, slug):
     return render(request, template_name, context)
 
 
+
+
+
 @csrf_protect
 def contact_form_view(request):
     if request.method == 'POST':
@@ -125,3 +133,4 @@ def contact_form_view(request):
 
 def make_appointment_success(request):
     return render(request, 'content/appointment_success.html')
+

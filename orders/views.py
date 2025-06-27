@@ -24,7 +24,14 @@ from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 import logging
 
+
+
+
 logger = logging.getLogger(__name__)
+
+
+
+
 
 
 

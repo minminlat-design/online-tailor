@@ -323,6 +323,8 @@ def cart_to_checkout(request):
     # ✅ Step 1: Clear old CartItems for this user
     CartItem.objects.filter(user=request.user).delete()
     print("[DEBUG] Cleared existing CartItems for user")
+    
+    # Copy items from session
 
     count = 0
     for key, item in session_cart.items():
@@ -349,13 +351,27 @@ def cart_to_checkout(request):
             gift_wrap=cart.gift_wrap,
         )
         count += 1
+        
+    # Check if any custom items still lack measurement
+    missing_measurement = CartItem.objects.filter(
+        user=request.user,
+        product__is_customizable=True,
+        user_measurement__isnull=True,
+    )
+    print("[DEBUG] still missing:", missing_measurement.count())
+    
+    if missing_measurement.exists():
+        # Need to collect body measurements
+        return redirect('cart:measurement_form_view')
+    
+    # All good - proceed to shipping / payment
 
     # (Optional) Clear session cart to avoid resync confusion
     # cart.clear()
 
     print(f"[DEBUG] Finished copying. Total items created: {count}")
     messages.success(request, f"{count} item(s) moved to your checkout.")
-    return redirect('cart:measurement_form_view')
+    return redirect('orders:shipping_info')
 
 
 
@@ -397,7 +413,7 @@ def measurement_form_view(request):
     all_cart_items = CartItem.objects.filter(user=request.user)
     
     # Get ONLY items that need measurement (used for forms)
-    cart_items_needing_measurement = all_cart_items.filter(user_measurement__isnull=True)
+    cart_items_needing_measurement = all_cart_items.filter(user_measurement__isnull=True, product__is_customizable=True)
 
     # If no measurement needed, redirect to checkout
     if not cart_items_needing_measurement.exists():

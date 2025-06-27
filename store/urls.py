@@ -4,6 +4,9 @@ from . import views
 app_name = 'store'
 
 urlpatterns = [
+    # Product image ranking
+    path('image-ranking/', views.image_ranking, name='image_ranking'),
+    
     # Action-based routes — these must go FIRST
     path('submit_review/<int:product_id>/', views.submit_review, name='submit_review'),
     path('submit-reply/<int:review_id>/', views.submit_reply, name='submit_reply'),
@@ -22,4 +25,6 @@ urlpatterns = [
 
     # Default store page
     path('', views.store, name='store'),
+    
+    
 ]

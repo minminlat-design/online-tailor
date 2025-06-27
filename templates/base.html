@@ -118,6 +118,11 @@ input[type="radio"]:checked + label.color-option .option-img-wrapper {
 }
 
 
+#toast-message {
+  transition: opacity 0.3s ease;
+}
+
+
   
 </style>
 
@@ -375,51 +380,6 @@ if (form) {
 
 </script>
 
-
-{% comment "mini side bar mini cart" %}
-
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-  const form = document.getElementById("product-form");
-  
-  if (form) {
-    form.addEventListener("submit", function (e) {
-      e.preventDefault();  // Prevent traditional form submission
-
-      const url = form.action;
-      const formData = new FormData(form);
-
-      fetch(url, {
-        method: "POST",
-        headers: {
-          "X-Requested-With": "XMLHttpRequest"
-        },
-        body: formData,
-      })
-      .then(response => {
-        if (response.ok) {
-          return response.json(); // You may want your Django view to return JSON
-        }
-        throw new Error("Network response was not ok.");
-      })
-      .then(data => {
-        // Optionally: update cart items / quantity here via data
-        // Then show the Bootstrap modal
-        const modalElement = document.getElementById("shoppingCart");
-        const cartModal = bootstrap.Modal.getOrCreateInstance(modalElement);
-        cartModal.show();
-
-      })
-      .catch(error => {
-        console.error("There was a problem with the fetch operation:", error);
-      });
-    });
-  }
-});
-</script>
-
-{% endcomment %}
 
 
 
@@ -928,106 +888,249 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
+<!-- startr of product stars reviews and comment -->
 
-<!-- ajax review stars on product detail page-->
+{# ---------- single toast placeholder ---------- #}
+<div id="toast"
+     style="position:fixed;top:20px;right:20px;display:none;padding:12px 20px;
+            background:#4BB543;color:#fff;border-radius:8px;z-index:9999;
+            box-shadow:0 0 10px rgba(0,0,0,.15);transition:opacity .3s;">
+  Saved!
+</div>
 
-<script>
-document.querySelectorAll('.btn-reply-toggle').forEach(button => {
-  button.addEventListener('click', () => {
-    const reviewId = button.getAttribute('data-review-id');
-    const form = document.getElementById(`reply-form-${reviewId}`);
-    if (form.style.display === 'none' || form.style.display === '') {
-      form.style.display = 'block';
-    } else {
-      form.style.display = 'none';
+
+
+{% comment "" %}
+
+
+<!-- SINGLE script that handles everything -->
+<script defer>
+/* === utilities ==================================================== */
+const $  = (sel, root=document) => root.querySelector(sel);
+const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+
+function toast(msg='Done!') {
+  const t = $('#toast');
+  t.textContent  = msg;
+  t.style.display = 'block';
+  t.style.opacity = '0';
+  setTimeout(()=>t.style.opacity='1',15);
+  setTimeout(()=>{
+    t.style.opacity='0';
+    setTimeout(()=>t.style.display='none',300);
+  },3000);
+}
+
+/* === 1. swap list & jump to it ==================================== */
+function replaceReviewList(html) {
+  const wrap = $('#reviews');                       // << USE #reviews
+  wrap.innerHTML = html;
+  wrap.scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+/* === 2. Ajax helper (CSRF header added) ========================== */
+async function postForm(form) {
+  const fd   = new FormData(form);
+  const csrf = fd.get('csrfmiddlewaretoken');
+  const resp = await fetch(form.action + location.search, {
+    method: 'POST',
+    body: fd,
+    headers: {
+      'X-Requested-With': 'XMLHttpRequest',
+      'X-CSRFToken': csrf,
+    },
+    credentials: 'same-origin',
+  });
+  if (!resp.ok) throw resp;
+  return resp.json();
+}
+
+/* === 3. clicks: sort links & reply toggles ======================= */
+function delegateClicks() {
+  document.addEventListener('click', async (e) => {
+
+    /* 3-a  sort dropdown ----------------------------------------- */
+    const sortLink = e.target.closest('.tf-dropdown-sort .select-item');
+    if (sortLink) {
+      e.preventDefault();
+      try {
+        const data = await fetch(sortLink.href, {
+          headers:{'X-Requested-With':'XMLHttpRequest'}
+        }).then(r=>r.json());
+
+        replaceReviewList(data.html);
+
+        $('.tf-dropdown-sort .text-sort-value').textContent =
+          sortLink.querySelector('.text-value-item').textContent.trim();
+        $$('.tf-dropdown-sort .select-item')
+          .forEach(a=>a.classList.toggle('active', a===sortLink));
+        history.replaceState(null,'',sortLink.href);
+      } catch (err) { console.error(err); toast('Could not sort'); }
+      return;
+    }
+
+    /* 3-b  reply toggle ------------------------------------------ */
+    const replyBtn = e.target.closest('.btn-reply-toggle');
+    if (replyBtn) {
+      const id   = replyBtn.dataset.reviewId;
+      const frm  = $('#reply-form-'+id);
+      if (frm) frm.style.display = frm.style.display==='block'?'none':'block';
+      return;
     }
   });
-});
-</script>
+}
 
-
-
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  const reviewsContainer = document.getElementById('reviews-container');
-  const dropdownMenu = document.querySelector('.tf-dropdown-sort .dropdown-menu');
-
-  if (!dropdownMenu || !reviewsContainer) {
-    console.warn('Dropdown or container not found.');
-    return;
-  }
-
-  dropdownMenu.addEventListener('click', event => {
-    const link = event.target.closest('.select-item');
-    if (!link) return;
-
-    event.preventDefault();
-    const url = link.getAttribute('href');
-
-    // Convert URL to AJAX endpoint (replace base with `/ajax/`)
-    const ajaxUrl = url.replace(/\/reviews\/?/, '/reviews/ajax/');
-
-    fetch(ajaxUrl, {
-      headers: {
-        'X-Requested-With': 'XMLHttpRequest',
-      },
-    })
-    .then(response => {
-      if (!response.ok) throw new Error('Network error');
-      return response.text();
-    })
-    .then(html => {
-      reviewsContainer.innerHTML = html;
-
-      // Update selected label in dropdown
-      const dropdownToggle = document.querySelector('.btn-select .text-sort-value');
-      if (dropdownToggle) {
-        const clickedText = link.querySelector('.text-value-item')?.textContent || '';
-        dropdownToggle.textContent = clickedText;
-      }
-
-      // Update active state
-      dropdownMenu.querySelectorAll('.select-item').forEach(item => item.classList.remove('active'));
-      link.classList.add('active');
-    })
-    .catch(err => console.error('AJAX sort failed:', err));
-  });
-});
-</script>
-
-
-
-
-<!-- ajax comment -->
-<script>
-document.addEventListener("click", function (e) {
-    const link = e.target.closest(".tf-dropdown-sort .select-item");
-    if (!link) return;
+/* === 4. submits: write review & reply ============================ */
+function delegateSubmits() {
+  document.addEventListener('submit', async (e) => {
+    const form = e.target;
+    if (!form.matches('#review-form, .reply-form')) return;
 
     e.preventDefault();
-    const url = link.href;                // e.g. /product/slug/?sort=oldest
+    const btn = form.querySelector('[type="submit"]');
+    btn && (btn.disabled = true);
 
-    fetch(url, {headers: {"X-Requested-With": "XMLHttpRequest"}})
-        .then(r => r.json())
-        .then(data => {
-            // Swap the HTML
-            document.querySelector(".reply-inside-comment-wrap").outerHTML = data.html;
+    try {
+      const data = await postForm(form);
+      toast(data.message || 'Saved!');
 
-            // Update dropdown label
-            document.querySelector(".text-sort-value").textContent =
-                  link.querySelector(".text-value-item").textContent.trim();
+      if (data.reviews_html) replaceReviewList(data.reviews_html);
 
-            // Toggle active link
-            document.querySelectorAll(".tf-dropdown-sort .select-item")
-                    .forEach(a => a.classList.remove("active"));
-            link.classList.add("active");
+      form.reset();
 
-            // Replace URL in address bar (optional, nice for sharing/refresh)
-            history.replaceState(null, "", url);
-        })
-        .catch(console.error);
+      if (form.id === 'review-form') $('.btn-cancel-review')?.click();
+      if (form.classList.contains('reply-form')) form.style.display='none';
+
+    } catch (resp) {
+      if (resp.json) {
+        const err = await resp.json();
+        toast(err.errors ? Object.values(err.errors).join(', ') : 'Error');
+      } else {
+        console.error(resp); toast('Server error');
+      }
+    } finally { btn && (btn.disabled=false); }
+  });
+}
+
+/* === 5. boot ===================================================== */
+document.addEventListener('DOMContentLoaded', () => {
+  delegateClicks();
+  delegateSubmits();
 });
 </script>
+
+<!-- end of product stars reviews and comment -->
+{% endcomment %}
+
+
+
+<script defer>
+(() => {
+  const $  = (sel, root=document) => root.querySelector(sel);
+  const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+
+  function toast(msg='Done!') {
+    const t = $('#toast');
+    t.textContent  = msg;
+    t.style.display = 'block';
+    t.style.opacity = '0';
+    setTimeout(()=>t.style.opacity='1',15);
+    setTimeout(()=> {
+      t.style.opacity='0';
+      setTimeout(()=>t.style.display='none',300);
+    }, 3000);
+  }
+
+  function replaceReviewList(html) {
+    const wrap = $('#reviews');
+    wrap.innerHTML = html;
+    wrap.scrollIntoView({ behavior:'smooth', block:'start' });
+  }
+
+  async function postForm(form) {
+    const fd   = new FormData(form);
+    const csrf = fd.get('csrfmiddlewaretoken');
+    const resp = await fetch(form.action + location.search, {
+      method: 'POST',
+      body: fd,
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRFToken': csrf,
+      },
+      credentials: 'same-origin',
+    });
+    if (!resp.ok) throw resp;
+    return resp.json();
+  }
+
+  function delegateClicks() {
+    document.addEventListener('click', async (e) => {
+      const sortLink = e.target.closest('.tf-dropdown-sort .select-item');
+      if (sortLink) {
+        e.preventDefault();
+        try {
+          const data = await fetch(sortLink.href, {
+            headers:{'X-Requested-With':'XMLHttpRequest'}
+          }).then(r=>r.json());
+
+          replaceReviewList(data.html);
+          $('.tf-dropdown-sort .text-sort-value').textContent =
+            sortLink.querySelector('.text-value-item').textContent.trim();
+          $$('.tf-dropdown-sort .select-item')
+            .forEach(a=>a.classList.toggle('active', a===sortLink));
+          history.replaceState(null,'',sortLink.href);
+        } catch (err) {
+          console.error(err); toast('Could not sort');
+        }
+        return;
+      }
+
+      const replyBtn = e.target.closest('.btn-reply-toggle');
+      if (replyBtn) {
+        const id  = replyBtn.dataset.reviewId;
+        const frm = $('#reply-form-' + id);
+        if (frm) frm.style.display = frm.style.display === 'block' ? 'none' : 'block';
+        return;
+      }
+    });
+  }
+
+  function delegateSubmits() {
+    document.addEventListener('submit', async (e) => {
+      const form = e.target;
+      if (!form.matches('#review-form, .reply-form')) return;
+
+      e.preventDefault();
+      const btn = form.querySelector('[type="submit"]');
+      btn && (btn.disabled = true);
+
+      try {
+        const data = await postForm(form);
+        toast(data.message || 'Saved!');
+        if (data.reviews_html) replaceReviewList(data.reviews_html);
+        form.reset();
+        if (form.id === 'review-form') $('.btn-cancel-review')?.click();
+        if (form.classList.contains('reply-form')) form.style.display = 'none';
+      } catch (resp) {
+        if (resp.json) {
+          const err = await resp.json();
+          toast(err.errors ? Object.values(err.errors).join(', ') : 'Error');
+        } else {
+          console.error(resp); toast('Server error');
+        }
+      } finally {
+        btn && (btn.disabled = false);
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    delegateClicks();
+    delegateSubmits();
+  });
+})();
+</script>
+
 
 
 

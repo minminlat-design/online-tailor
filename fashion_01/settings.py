@@ -92,6 +92,8 @@ TEMPLATES = [
                 "store.context_processors.products_for_navbar",
                 "store.context_processors.categories_for_navbar",
                 "store.context_processors.trunk_shows_navbar",
+                'content.context_processors.navbar_static_pages',
+                'content.context_processors.social_links',
             ],
         },
     },
@@ -238,3 +240,18 @@ TWILIO_PHONE_NUMBER = config('TWILIO_PHONE_NUMBER')
 
 #Rabbitmq online
 CELERY_BROKER_URL = config('CELERY_BROKER_URL')
+
+
+
+#Redis for views engine
+REDIS_HOST = 'localhost'
+REDIS_PORT = 6379
+REDIS_DB = 0
+
+
+
+LOGGING = {
+    "version": 1,
+    "handlers": {"console": {"class": "logging.StreamHandler"}},
+    "root": {"handlers": ["console"], "level": "DEBUG"},
+}

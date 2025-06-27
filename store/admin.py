@@ -6,8 +6,27 @@ from store.models import (
     Product, ProductPiece, ProductVariation, Style,
     FabricCategory, Color,
     Season, Pattern, Material, ProductImage, ProductGroup,
-    ReviewRating, ReviewReply
+    ReviewRating, ReviewReply, ProductFeature, MaterialCareItem, PieceSpec
 )
+
+
+
+
+
+class ProductFeatureInline(admin.TabularInline):
+    model = ProductFeature
+    extra = 1
+
+class MaterialCareItemInline(admin.TabularInline):
+    model = MaterialCareItem
+    extra = 1
+
+
+class PieceSpecInline(admin.TabularInline):
+    model = PieceSpec
+    extra = 1
+
+
 
 
 
@@ -37,12 +56,12 @@ class ProductVariationInline(admin.TabularInline):
 
 @admin.register(Product)
 class ProductAdmin(SortableAdminBase, admin.ModelAdmin):
-    list_display = ['name', 'group', 'sub_category', 'price', 'is_available', 'first_image_preview']
+    list_display = ['name', 'is_customizable', 'group', 'sub_category', 'price', 'is_available', 'first_image_preview']
     list_filter = ['is_available', 'group', 'sub_category', 'style']
     search_fields = ['name', 'description', 'group__name']
-    list_editable = ['price', 'is_available']
+    list_editable = ['price', 'is_available',]
     prepopulated_fields = {'slug': ('name',)}
-    inlines = [ProductImageInline, ProductVariationInline]
+    inlines = [ProductImageInline, ProductVariationInline, ProductFeatureInline, MaterialCareItemInline, PieceSpecInline]
     filter_horizontal = ['pieces']  # 👈 Add this line to manage item pieces
     show_facets = admin.ShowFacets.ALWAYS
     

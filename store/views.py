@@ -16,6 +16,25 @@ from decimal import Decimal, ROUND_HALF_UP
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.template.loader import render_to_string
+from django.views.decorators.http import require_POST
+from content.models import StaticPage
+import redis
+from django.conf import settings
+
+
+import logging
+logger = logging.getLogger(__name__)
+
+
+
+# Re-use a single Redis connection for the whole module
+r = redis.Redis(
+    host=settings.REDIS_HOST,
+    port=settings.REDIS_PORT,
+    db=settings.REDIS_DB,
+    decode_responses=True,     # return Python str instead of bytes
+    socket_timeout=5,          # fail fast if Redis is down
+)
 
 
 
@@ -122,10 +141,15 @@ def store(request, main_slug=None, category_slug=None, subcategory_slug=None):
 
 
 
+    
 
 
 
 def product_detail(request, main_slug, category_slug, subcategory_slug, product_slug):
+
+    
+    
+    
     product = get_object_or_404(
         Product,
         slug=product_slug,
@@ -133,6 +157,30 @@ def product_detail(request, main_slug, category_slug, subcategory_slug, product_
         sub_category__category__slug=category_slug,
         sub_category__category__main_category__slug=main_slug
     )
+    
+    # Atomically increment and get the view count
+    should_count = (
+        request.method == "GET"
+        and request.headers.get("X-Requested-With") != "XMLHttpRequest"
+        and not request.GET.get("partial")
+        and not request.headers.get("Purpose") == "prefetch"  # Chrome prefetch
+        and not request.headers.get("Sec-Fetch-Mode") == "navigate"
+        and not request.headers.get("Sec-Fetch-Site") == "none"
+    )
+
+    if should_count and not request.session.get(f"viewed_product_{product.id}"):
+        total_views = r.incr(f"product:{product.id}:views")
+        request.session[f"viewed_product_{product.id}"] = True
+
+        if product.images.exists():
+            main_image_id = product.images.first().id
+            r.zincrby('product_view_ranking', 1, str(main_image_id))
+    else:
+        total_views = r.get(f"product:{product.id}:views") or 0
+
+
+        
+   
     
     product_pieces = [piece.name.lower() for piece in product.pieces.all()]
 
@@ -228,6 +276,24 @@ def product_detail(request, main_slug, category_slug, subcategory_slug, product_
     }
 
     reply_forms = {review.id: ReviewReplyForm(prefix=str(review.id)) for review in reviews}
+    
+    
+    # Fetch privacy policy page
+    try:
+        shipping_policy = StaticPage.objects.get(slug='shipping-delivery', published=True)
+    except StaticPage.DoesNotExist:
+        shipping_policy = None
+        
+        
+    try:
+        return_policy = StaticPage.objects.get(slug='delivery-return', published=True)
+    except StaticPage.DoesNotExist:
+        return_policy = None
+        
+        
+    share_url = request.build_absolute_uri(product.get_absolute_url())
+
+
 
     context = {
         'product': product,
@@ -251,6 +317,11 @@ def product_detail(request, main_slug, category_slug, subcategory_slug, product_
         'star_steps': star_steps,
         'reply_forms': reply_forms,
         'sort_option': sort_option,  # To highlight active sort option in template
+        'shipping_policy': shipping_policy,  # pass privacy policy as 'shipping policy'
+        'return_policy': return_policy,  # pass return policy as 'return policy'
+        'is_customizable': product.is_customizable, 
+        'share_url': share_url,
+        'total_views': total_views,
     }
     
     included_pieces = {
@@ -291,98 +362,210 @@ def product_detail(request, main_slug, category_slug, subcategory_slug, product_
 
 
 
-
-
-
+# ───────────────────── helper: client IP ────────────────────────────
 def get_client_ip(request):
-    """Returns the client IP address from the request."""
-    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-    if x_forwarded_for:
-        ip = x_forwarded_for.split(',')[0]
-    else:
-        ip = request.META.get('REMOTE_ADDR')
-    return ip
+    """Return the client’s IP address."""
+    xff = request.META.get("HTTP_X_FORWARDED_FOR")
+    return xff.split(",")[0] if xff else request.META.get("REMOTE_ADDR")
 
 
+# ───────────────────── helper: sorting  ─────────────────────────────
+ORDER_MAP = {
+    "most_recent":   ("-created_at",),
+    "oldest":        ("created_at",),
+    "most_popular":  ("-rating", "-created_at"),
+}
+DEFAULT_SORT = "most_recent"
 
 
+def get_sorted_reviews(product, sort_key):
+    """Return top-level reviews (no parents) in requested order."""
+    ordering = ORDER_MAP.get(sort_key, ORDER_MAP[DEFAULT_SORT])
+    return (
+        ReviewRating.objects
+        .filter(product=product, status=True, parent=None)
+        .order_by(*ordering)
+        .select_related("user")
+        .prefetch_related("replies")  # assumes related_name="replies"
+    )
 
-@login_required
+
+# ───────────────────── view: submit_review  ─────────────────────────
+@login_required                    # remove if you allow guest reviews
+@require_POST
 def submit_review(request, product_id):
     product = get_object_or_404(Product, id=product_id)
+    form    = ReviewRatingForm(request.POST)
 
-    def redirect_to_product():
+    def _redirect():
         return redirect(
-            'store:product_detail',
-            main_slug=product.sub_category.category.main_category.slug,
-            category_slug=product.sub_category.category.slug,
-            subcategory_slug=product.sub_category.slug,
-            product_slug=product.slug
+            "store:product_detail",
+            main_slug        = product.sub_category.category.main_category.slug,
+            category_slug    = product.sub_category.category.slug,
+            subcategory_slug = product.sub_category.slug,
+            product_slug     = product.slug,
         )
 
-    if request.method == 'POST':
-        form = ReviewRatingForm(request.POST)
-        if form.is_valid():
-            rating = form.cleaned_data['rating']
-            subject = form.cleaned_data['subject']
-            review_text = form.cleaned_data['review']
+    # ---------- validation error ------------------------------------
+    if not form.is_valid():
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            return JsonResponse({"errors": form.errors}, status=400)
+        messages.error(request, "There was an error with your review.")
+        return _redirect()
 
-            review, created = ReviewRating.objects.get_or_create(
-                product=product,
-                user=request.user,
-                defaults={
-                    'subject': subject,
-                    'review': review_text,
-                    'rating': rating,
-                    'ip': get_client_ip(request)
-                }
-            )
+    # ---------- create / update ------------------------------------
+    cd = form.cleaned_data
+    review, created = ReviewRating.objects.get_or_create(
+        product  = product,
+        user     = request.user,
+        defaults = {
+            "subject": cd["subject"],
+            "review" : cd["review"],
+            "rating" : cd["rating"],
+            "ip"     : get_client_ip(request),
+        },
+    )
+    if not created:                        # user edited existing review
+        review.subject = cd["subject"]
+        review.review  = cd["review"]
+        review.rating  = cd["rating"]
+        review.ip      = get_client_ip(request)
+        review.save()
 
-            if not created:
-                review.subject = subject
-                review.review = review_text
-                review.rating = rating
-                review.ip = get_client_ip(request)
-                review.save()
-                messages.success(request, "Your review has been updated.")
-            else:
-                messages.success(request, "Thank you! Your review has been submitted.")
-        else:
-            messages.error(request, "There was an error with your review. Please try again.")
-    return redirect_to_product()
+    msg = "Thank you! Your review has been submitted." if created \
+          else "Your review has been updated."
+
+    # ---------- AJAX branch ----------------------------------------
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        sort_opt   = request.GET.get("sort", DEFAULT_SORT)
+        reviews_qs = get_sorted_reviews(product, sort_opt)
+
+        reviews_html = render_to_string(
+            "store/partials/review_list.html",
+            {
+                "product":     product,
+                "reviews":     reviews_qs,
+                "sort_option": sort_opt,
+            },
+            request=request,
+        )
+        return JsonResponse(
+            {"message": msg, "reviews_html": reviews_html},
+            status=201 if created else 200,
+        )
+
+    # ---------- non-AJAX fallback ----------------------------------
+    messages.success(request, msg)
+    return _redirect()
 
 
-
-
+# ───────────────────── view: submit_reply  ─────────────────────────
 @login_required
+@require_POST
 def submit_reply(request, review_id):
     parent_review = get_object_or_404(ReviewRating, id=review_id)
-    product = parent_review.product
+    product       = parent_review.product
 
-    def redirect_to_product():
+    def _redirect():
         return redirect(
-            'store:product_detail',
-            main_slug=product.sub_category.category.main_category.slug,
-            category_slug=product.sub_category.category.slug,
-            subcategory_slug=product.sub_category.slug,
-            product_slug=product.slug
+            "store:product_detail",
+            main_slug        = product.sub_category.category.main_category.slug,
+            category_slug    = product.sub_category.category.slug,
+            subcategory_slug = product.sub_category.slug,
+            product_slug     = product.slug,
         )
 
-    if request.method == 'POST':
-        form = ReviewReplyForm(request.POST)
-        if form.is_valid():
-            reply = form.save(commit=False)
-            reply.user = request.user
-            reply.review = parent_review
-            reply.save()
-            messages.success(request, "Your reply has been submitted.")
-            return redirect_to_product()
-        else:
-            messages.error(request, "There was an error submitting your reply.")
-            print(form.errors)  # For debugging
+    form = ReviewReplyForm(request.POST)
+    if not form.is_valid():
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            return JsonResponse({"errors": form.errors}, status=400)
+        messages.error(request, "There was an error submitting your reply.")
+        return _redirect()
 
-    return redirect_to_product()
+    # ---------- save reply -----------------------------------------
+    reply = form.save(commit=False)
+    reply.user   = request.user
+    reply.review = parent_review
+    reply.ip     = get_client_ip(request)
+    reply.save()
+
+    msg = "Your reply has been submitted."
+
+    # ---------- AJAX branch ----------------------------------------
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        sort_opt   = request.GET.get("sort", DEFAULT_SORT)
+        reviews_qs = get_sorted_reviews(product, sort_opt)
+
+        reviews_html = render_to_string(
+            "store/partials/review_list.html",
+            {
+                "product":     product,
+                "reviews":     reviews_qs,
+                "sort_option": sort_opt,
+            },
+            request=request,
+        )
+        return JsonResponse(
+            {"message": msg, "reviews_html": reviews_html},
+            status=201,
+        )
+
+    # ---------- non-AJAX fallback ----------------------------------
+    messages.success(request, msg)
+    return _redirect()
 
 
 
 
+
+
+
+
+import logging
+logger = logging.getLogger(__name__)
+
+@login_required
+def image_ranking(request):
+    """
+    Show the 10 images with the highest view scores,
+    in the exact order Redis returns, plus debug info.
+    """
+
+    # ── 1. Pull the top 10 IDs from Redis ──────────────────────────────
+    image_ids = r.zrevrange("product_view_ranking", 0, 9)  # strings
+    logger.debug("Redis zrevrange returned: %s", image_ids)
+
+    if not image_ids:
+        logger.warning("Redis sorted-set 'product_view_ranking' is empty.")
+        return render(
+            request,
+            "images/image/ranking.html",
+            {"section": "images", "most_viewed": [], "debug_ids": image_ids},
+        )
+
+    # ── 2. Convert to ints for the ORM and fetch rows ──────────────────
+    id_ints = [int(pk) for pk in image_ids]
+    images_qs = (
+        ProductImage.objects.filter(id__in=id_ints)
+        .select_related("product", "color")
+    )
+    images = list(images_qs)
+    logger.debug("DB returned IDs: %s", [img.id for img in images])
+
+    # ── 3. Preserve Redis order (highest score first) ──────────────────
+    images.sort(key=lambda img: id_ints.index(img.id))
+
+    # ── 4. Optional: surface debug data in the template when
+    #        ?debug=1 is present in the URL ─────────────────────────────
+    context = {
+        "section": "images",
+        "most_viewed": images,
+    }
+    if request.GET.get("debug") == "1":
+        context.update(
+            redis_ids=image_ids,
+            db_ids=[img.id for img in images],
+            redis_dump=r.zrevrange("product_view_ranking", 0, 9, withscores=True),
+        )
+
+    return render(request, "images/image/ranking.html", context)

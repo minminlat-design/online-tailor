@@ -9,7 +9,7 @@ urlpatterns = [
     # later add your stripe checkout URL here, e.g.
     # path('payment/', views.stripe_checkout, name='payment'),
   
-    path('shipping/', views.shipping_info_view, name='shipping_info'),
+    #path('shipping/', views.shipping_info_view, name='shipping_info'),
     path('review/', views.review_order_view, name='review_order'), 
     path('success/', views.payment_success_view, name='payment_success'),
     path('cancel/', views.payment_cancel_view, name='payment_cancel'),

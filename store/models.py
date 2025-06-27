@@ -227,3 +227,52 @@ class ReviewReply(models.Model):
 
     def __str__(self):
         return f"Reply by {self.user} on {self.review}"
+
+
+
+
+
+
+# product description
+
+class ProductFeature(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='features')
+    text = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f"{self.product.name} - Feature: {self.text[:30]}"
+
+
+class MaterialCareItem(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='material_care_items')
+    icon_class = models.CharField(max_length=50)  # e.g. 'icon-machine'
+    description = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f"{self.product.name} - Care: {self.description[:30]}"
+
+
+
+# product item details 
+class PieceSpec(models.Model):
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name='piece_specs'
+    )
+    piece = models.ForeignKey(
+        ProductPiece,
+        on_delete=models.CASCADE,
+        related_name='specs'
+    )
+    label  = models.CharField(max_length=80)   # e.g. “Style”
+    value  = models.CharField(max_length=120)  # e.g. “Dress Trouser”
+    order  = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        verbose_name = "Piece Specification"
+        verbose_name_plural = "Piece Specifications"
+        ordering = ['piece__name', 'order']
+
+    def __str__(self):
+        return f"{self.product.name} – {self.piece.name}: {self.label}"

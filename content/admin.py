@@ -4,7 +4,18 @@ from django.contrib import admin
 from .models import StaticPage,  GalleryImage, AboutPage, ContactPage
 from django.utils.html import format_html
 from easy_thumbnails.files import get_thumbnailer
-from .models import Appointment, Location
+from .models import Appointment, Location, SocialMediaLink
+
+
+
+
+
+
+@admin.register(SocialMediaLink)
+class SocialMediaLinkAdmin(admin.ModelAdmin):
+    list_display = ['name', 'url', 'visible', 'order']
+    list_editable = ['visible', 'order']
+
 
 
 

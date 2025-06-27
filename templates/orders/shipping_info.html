@@ -1,56 +1,6 @@
 {% extends "base.html" %}
 {% load form_tags %}
-{% comment "" %}
 
-
-
-{% extends "base.html" %}
-{% block title %}Shipping Info{% endblock %}
-
-{% block content %}
-<div class="container mx-auto px-4 py-8 grid grid-cols-1 md:grid-cols-3 gap-8">
-
-  <!-- Left: Shipping Form -->
-  <div class="col-span-2 bg-white p-6 rounded shadow">
-    <h2 class="text-2xl font-bold mb-4">Enter Your Shipping Details</h2>
-    <form method="post">
-      {% csrf_token %}
-      {% for field in form %}
-        <div class="mb-4">
-          <label class="font-semibold block">{{ field.label }}</label>
-          {{ field }}
-        </div>
-      {% endfor %}
-      <button type="submit" class="btn btn-success mt-4">Save and Continue to Checkout</button>
-    </form>
-  </div>
-
-  <!-- Right: Cart Summary (same as your existing layout) -->
-  <div class="col-span-1 bg-gray-50 p-4 rounded shadow-sm">
-    <h2 class="text-lg font-semibold mb-4">Cart Summary</h2>
-    {% for item in cart_items %}
-      <div class="border-b pb-4 mb-4">
-        <strong>{{ item.product.name }}</strong><br>
-        Unit Price: ${{ item.unit_price|floatformat:2 }}<br>
-        Quantity: {{ item.quantity }}<br>
-        Total: ${{ item.total_price|floatformat:2 }}<br>
-        {% if item.gift_wrap %}
-          <small>Includes $5.00 gift wrap</small><br>
-        {% endif %}
-      </div>
-    {% endfor %}
-    <div class="mt-4">
-      <p class="font-semibold text-lg">Subtotal: ${{ subtotal|floatformat:2 }}</p>
-    </div>
-    <a href="{% url 'cart:cart_detail' %}" class="btn btn-outline w-full mt-2">Edit Cart</a>
-  </div>
-
-</div>
-
-
-{% endblock %}
-
-{% endcomment %}
 
 
 
@@ -145,7 +95,8 @@
     <!-- Order Total -->
     <div class="d-flex justify-content-between align-items-center mt-4 border-top pt-3">
       <h6 class="fw-semibold mb-0">Total</h6>
-      <h6 class="total fw-bold text-success mb-0">${{ subtotal|floatformat:2 }}</h6>
+      <h6 class="total fw-bold text-black mb-0">${{ subtotal|floatformat:2 }}</h6>
+
     </div>
 
     <!-- Terms -->
@@ -165,9 +116,10 @@
 
     <!-- Submit Button -->
     <div class="text-center mt-4">
-      <button type="submit" class="tf-btn radius-3 btn-fill btn-icon animate-hover-btn w-100">
-        Save & Continue to Checkout
-      </button>
+     <button type="submit" class="tf-btn radius-3 btn-fill btn-icon animate-hover-btn w-100 text-center d-flex justify-content-center align-items-center">
+  Save & Continue to Checkout
+</button>
+
     </div>
 
   </div>

@@ -1,13 +1,15 @@
 from datetime import datetime
 from django.db import models
 from django.utils.text import slugify
+from ckeditor.fields import RichTextField
 
 class StaticPage(models.Model):
     title = models.CharField(max_length=200)
     slug = models.SlugField(unique=True, blank=True)
-    content = models.TextField()
+    content = RichTextField('Content', config_name='default')
     published = models.BooleanField(default=True)
     order = models.PositiveIntegerField(default=0, help_text="Lower numbers appear first in menus")
+    show_in_navbar = models.BooleanField(default=True, help_text="If checked, show in navbar")
 
     class Meta:
         ordering = ['order', 'title']  # Default ordering by order then title
@@ -135,3 +137,35 @@ class Appointment(models.Model):
         if self.preferred_date and self.preferred_time:
             return datetime.combine(self.preferred_date, self.preferred_time)
         return None
+
+
+
+
+
+
+
+
+class SocialMediaLink(models.Model):
+    PLATFORM_CHOICES = [
+        ('facebook', 'Facebook'),
+        ('twitter', 'Twitter'),
+        ('instagram', 'Instagram'),
+        ('linkedin', 'LinkedIn'),
+        ('youtube', 'YouTube'),
+        ('tiktok', 'TikTok'),
+        ('pinterest', 'Pinterest'),
+        ('custom', 'Custom'),
+    ]
+
+    name = models.CharField(max_length=50, choices=PLATFORM_CHOICES)
+    url = models.URLField()
+    icon_class = models.CharField(max_length=100, help_text="Font Awesome class, e.g. 'fa fa-facebook' or custom SVG class.")
+    order = models.PositiveIntegerField(default=0)
+    visible = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['order']
+
+    def __str__(self):
+        return f"{self.get_name_display()}"
+
