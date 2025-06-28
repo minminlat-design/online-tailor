@@ -8,6 +8,23 @@ python manage.py runserver
 #celery run second option (run inside env)
 celery -A fashion_01 worker --loglevel=info --pool=solo
 
-# Run ouside env (no need to run inside env for stripe)
+# Run outside env (no need to run inside env for stripe)
 stripe listen --forward-to localhost:8000/orders/webhook/
 
+# Run Redis outside env (for views count)
+docker run -it --rm --name redis -p 6379:6379 redis:7.2.4
+
+# Run this to update the views count on docker
+docker exec -it <redis> redis-cli # update it with your docker conatiner
+127.0.0.1:6379> CONFIG GET appendonly
+1) "appendonly"
+2) "no"
+127.0.0.1:6379> CONFIG SET appendonly yes
+OK
+127.0.0.1:6379> CONFIG GET appendonly
+1) "appendonly"
+2) "yes"
+
+
+
+---------------------------------------------

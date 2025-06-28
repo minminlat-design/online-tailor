@@ -77,6 +77,8 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "fashion_01.urls"
 
+
+
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -89,15 +91,17 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "category.context_processors.menu_links",
                 "cart.context_processors.cart",
-                "store.context_processors.products_for_navbar",
-                "store.context_processors.categories_for_navbar",
-                "store.context_processors.trunk_shows_navbar",
-                'content.context_processors.navbar_static_pages',
-                'content.context_processors.social_links',
+                "store.context_processors.navbar_data",  # ✅ COMBINED ONE
+                "content.context_processors.navbar_static_pages",
+                "content.context_processors.social_links",
             ],
         },
     },
 ]
+
+
+
+
 
 WSGI_APPLICATION = "fashion_01.wsgi.application"
 

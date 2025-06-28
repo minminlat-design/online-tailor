@@ -41,18 +41,7 @@
                                 class="text">Filter</span></a>
                     </div>
                     <ul class="tf-control-layout d-flex justify-content-center">
-                        <li class="tf-view-layout-switch sw-layout-list list-layout" data-value-layout="list">
-                            <div class="item"><span class="icon icon-list"></span></div>
-                        </li>
-                        <li class="tf-view-layout-switch sw-layout-2" data-value-layout="tf-col-2">
-                            <div class="item"><span class="icon icon-grid-2"></span></div>
-                        </li>
-                        <li class="tf-view-layout-switch sw-layout-3 active" data-value-layout="tf-col-3">
-                            <div class="item"><span class="icon icon-grid-3"></span></div>
-                        </li>
-                        <li class="tf-view-layout-switch sw-layout-4" data-value-layout="tf-col-4">
-                            <div class="item"><span class="icon icon-grid-4"></span></div>
-                        </li>
+                       
                     </ul>
                     <div class="tf-control-sorting d-flex justify-content-end">
                         <div class="tf-dropdown-sort" data-bs-toggle="dropdown">
@@ -93,108 +82,112 @@
                 <!-- side menu bar -->
                 <div class="tf-row-flex">
                     <aside class="tf-shop-sidebar wrap-sidebar-mobile">
-                        
-                       
+
+
+
+
                         {% for main in links %}
-                            {% if main.id == active_main_category_id %}
-                                {# Open the selected main category #}
-                                {% for category in categories %}
-                                    {% if category.main_category_id == main.id %}
-                                    <div class="widget-facet wd-categories">
-                                        <div class="facet-title"
-                                            data-bs-target="#categories-{{ category.id }}"
-                                            data-bs-toggle="collapse"
-                                            aria-expanded="{% if category.id == active_category_id %}true{% else %}false{% endif %}"
-                                            aria-controls="categories-{{ category.id }}">
+    {% if main.id == active_main_category_id %}
+        {# Open the selected main category #}
+        {% for category in main.categories.all %}
+            <div class="widget-facet wd-categories">
+                <div class="facet-title"
+                    data-bs-target="#categories-{{ category.id }}"
+                    data-bs-toggle="collapse"
+                    aria-expanded="{% if category.id == active_category_id %}true{% else %}false{% endif %}"
+                    aria-controls="categories-{{ category.id }}">
 
-                                            <span>{{ category.name }}</span>
-                                            <span class="icon icon-arrow-up"></span>
-                                        </div>
+                    <span>{{ category.name }}</span>
+                    <span class="icon icon-arrow-up"></span>
+                </div>
 
-                                        <div id="categories-{{ category.id }}"
-                                            class="collapse {% if category.id == active_category_id %}show{% endif %}">
-                                            <ul class="list-categoris current-scrollbar mb_36">
+                <div id="categories-{{ category.id }}"
+                    class="collapse {% if category.id == active_category_id %}show{% endif %}">
+                    <ul class="list-categoris current-scrollbar mb_36">
 
-                                                {# 'All' link for the category #}
-                                                <li class="cate-item {% if not sub_category or sub_category.category.id == category.id and not sub_category.slug %}current{% endif %}">
-                                                    <a href="{% url 'store:store_category' main_slug=main.slug category_slug=category.slug %}">
-                                                        <span>All</span>&nbsp;<span>({{ category.product_count }})</span>
-                                                    </a>
-                                                </li>
+                        {# 'All' link for the category #}
+                        <li class="cate-item {% if not sub_category or sub_category.category.id == category.id and not sub_category.slug %}current{% endif %}">
 
-                                                {# Subcategories with product counts #}
-                                                {% for sub in category.subcategories.all %}
-                                                <li class="cate-item {% if sub_category and sub_category.slug == sub.slug %}current{% endif %}">
-                                                    <a href="{% url 'store:store_subcategory' main_slug=main.slug category_slug=category.slug subcategory_slug=sub.slug %}">
-                                                        <span>{{ sub.name }}</span>&nbsp;<span>({{ sub.product_count }})</span>
-                                                    </a>
-                                                </li>
-                                                {% endfor %}
+                            <a href="{% url 'store:store_category' main_slug=main.slug category_slug=category.slug %}">
+                                <span>All</span>&nbsp;<span>({{ category.product_count }})</span>
+                            </a>
+                        </li>
 
-                                            </ul>
-                                        </div>
-                                    </div>
-                                    {% endif %}
-                                {% endfor %}
-
-                            {% elif not active_main_category_id and forloop.first %}
-                                {# Default open first main category if none selected #}
-                                {% for category in categories %}
-                                    {% if category.main_category_id == main.id %}
-                                    <div class="widget-facet wd-categories">
-                                        <div class="facet-title"
-                                            data-bs-target="#categories-{{ category.id }}"
-                                            data-bs-toggle="collapse"
-                                            aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}"
-                                            aria-controls="categories-{{ category.id }}">
-                                            <span>{{ category.name }}</span>
-                                            <span class="icon icon-arrow-up"></span>
-                                        </div>
-                                        <div id="categories-{{ category.id }}"
-                                            class="collapse {% if forloop.first %}show{% endif %}">
-                                            <ul class="list-categoris current-scrollbar mb_36">
-                                                {% for sub in category.subcategories.all %}
-                                                <li class="cate-item {% if sub_category and sub_category.slug == sub.slug %}current{% endif %}">
-                                                    <a href="{{ sub.get_absolute_url }}">
-                                                        <span>{{ sub.name }}</span>&nbsp;<span>({{ sub.product_count }})</span>
-                                                    </a>
-                                                </li>
-                                                {% endfor %}
-                                            </ul>
-                                        </div>
-                                    </div>
-                                    {% endif %}
-                                {% endfor %}
-
-                            {% else %}
-                                {# All other main categories collapsed #}
-                                {% for category in categories %}
-                                    {% if category.main_category_id == main.id %}
-                                    <div class="widget-facet wd-categories">
-                                        <div class="facet-title"
-                                            data-bs-target="#categories-{{ category.id }}"
-                                            data-bs-toggle="collapse"
-                                            aria-expanded="false"
-                                            aria-controls="categories-{{ category.id }}">
-                                            <span>{{ category.name }}</span>
-                                            <span class="icon icon-arrow-up"></span>
-                                        </div>
-                                        <div id="categories-{{ category.id }}" class="collapse">
-                                            <ul class="list-categoris current-scrollbar mb_36">
-                                                {% for sub in category.subcategories.all %}
-                                                <li class="cate-item {% if sub_category and sub_category.slug == sub.slug %}current{% endif %}">
-                                                    <a href="{{ sub.get_absolute_url }}">
-                                                        <span>{{ sub.name }}</span>&nbsp;<span>({{ sub.product_count }})</span>
-                                                    </a>
-                                                </li>
-                                                {% endfor %}
-                                            </ul>
-                                        </div>
-                                    </div>
-                                    {% endif %}
-                                {% endfor %}
-                            {% endif %}
+                        {# Subcategories with product counts #}
+                        {% for sub in category.subcategories.all %}
+                            <li class="cate-item {% if sub_category and sub_category.slug == sub.slug %}current{% endif %}">
+                                <a href="{% url 'store:store_subcategory' main_slug=main.slug category_slug=category.slug subcategory_slug=sub.slug %}">
+                                    <span>{{ sub.name }}</span>&nbsp;<span>({{ sub.product_count }})</span>
+                                </a>
+                            </li>
                         {% endfor %}
+
+                    </ul>
+                </div>
+            </div>
+        {% endfor %}
+
+    {% elif not active_main_category_id and forloop.first %}
+        {# Default open first main category if none selected #}
+        {% for category in main.categories.all %}
+            <div class="widget-facet wd-categories">
+                <div class="facet-title"
+                    data-bs-target="#categories-{{ category.id }}"
+                    data-bs-toggle="collapse"
+                    aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}"
+                    aria-controls="categories-{{ category.id }}">
+                    <span>{{ category.name }}</span>
+                    <span class="icon icon-arrow-up"></span>
+                </div>
+                <div id="categories-{{ category.id }}"
+                    class="collapse {% if forloop.first %}show{% endif %}">
+                    <ul class="list-categoris current-scrollbar mb_36">
+                        {% for sub in category.subcategories.all %}
+                            <li class="cate-item {% if sub_category and sub_category.slug == sub.slug %}current{% endif %}">
+                                <a href="{{ sub.get_absolute_url }}">
+                                    <span>{{ sub.name }}</span>&nbsp;<span>({{ sub.product_count }})</span>
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        {% endfor %}
+
+    {% else %}
+        {# All other main categories collapsed #}
+        {% for category in main.categories.all %}
+            <div class="widget-facet wd-categories">
+                <div class="facet-title"
+                    data-bs-target="#categories-{{ category.id }}"
+                    data-bs-toggle="collapse"
+                    aria-expanded="false"
+                    aria-controls="categories-{{ category.id }}">
+                    <span>{{ category.name }}</span>
+                    <span class="icon icon-arrow-up"></span>
+                </div>
+                <div id="categories-{{ category.id }}" class="collapse">
+                    <ul class="list-categoris current-scrollbar mb_36">
+                        {% for sub in category.subcategories.all %}
+                            <li class="cate-item {% if sub_category and sub_category.slug == sub.slug %}current{% endif %}">
+                                <a href="{{ sub.get_absolute_url }}">
+                                    <span>{{ sub.name }}</span>&nbsp;<span>({{ sub.product_count }})</span>
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endfor %}
+
+                    
+
+
+
+
+
 
 
 
@@ -220,7 +213,7 @@
                                             {% endif %}
                                         </a>
                                         <div class="card-product-info">
-                                            <a href="#" class="title link">{{ sale.name }}</a>
+                                            <a href="{{ sale.get_absolute_url }}" class="title link">{{ sale.name }}</a>
                                             <span class="price"><del>${{ sale.price}} </del> ${{ sale.discounted_price }}</span>
                                         </div>
                                     </div>
@@ -316,85 +309,30 @@
                                 <span class="icon icon-arrow-up"></span>
                             </div>
                             <div id="follow" class="collapse show">
+
                                 <ul class="tf-social-icon d-flex gap-10">
-                                    <li><a href="#" class="box-icon w_34 round bg_line social-facebook"><i
-                                                class="icon fs-14 icon-fb"></i></a></li>
-                                    <li><a href="#" class="box-icon w_34 round bg_line social-twiter"><i
-                                                class="icon fs-12 icon-Icon-x"></i></a></li>
-                                    <li><a href="#" class="box-icon w_34 round bg_line social-instagram"><i
-                                                class="icon fs-14 icon-instagram"></i></a></li>
-                                    <li><a href="#" class="box-icon w_34 round bg_line social-tiktok"><i
-                                                class="icon fs-14 icon-tiktok"></i></a></li>
-                                    <li><a href="#" class="box-icon w_34 round bg_line social-pinterest"><i
-                                                class="icon fs-14 icon-pinterest-1"></i></a></li>
+                                    {% for link in social_links %}
+                                        <li>
+                                            <a href="{{ link.url }}" class="box-icon w_34 round bg_line social-{{ link.name|lower }}" target="_blank" rel="noopener noreferrer">
+                                                <i class="icon fs-14 {{ link.icon_class }}"></i>
+                                            </a>
+                                        </li>
+                                    {% endfor %}
                                 </ul>
+
+
+
+                                
                             </div>
                         </div>
                     </aside>
+
+
+
                     <div class="wrapper-control-shop tf-shop-content">
-                        <div class="meta-filter-shop">
-                            <div id="product-count-grid" class="count-text"></div>
-                            <div id="product-count-list" class="count-text"></div>
-                            <div id="applied-filters"></div>
-                            <button id="remove-all" class="remove-all-filters" style="display: none;">Remove All <i
-                                    class="icon icon-close"></i></button>
-                        </div>
+                        
 
-                        <!-- product list disply on shop page -->
-                        <div class="tf-list-layout wrapper-shop" id="listLayout">
-
-                            {% for product in products %}
-
-                            <!-- card product 1 -->
-                            <div class="card-product list-layout" data-availability="In stock" data-brand="Ecomus">
-                                <div class="card-product-wrapper">
-                                    <a href="{{ product.get_absolute_url }}" class="product-img">
-
-                                        {% if product.first_image %}
-                                        <img class="lazyload img-product" data-src="{{ product.first_image.image.url }}"
-                                            src="{{ product.first_image.image.url }}" alt="{{ product.name}}">
-                                        {% endif %}
-
-                                        {% if product.second_image %}
-                                        <img class="lazyload img-hover" data-src="{{ product.second_image.image.url }}"
-                                            src="{{ product.second_image.image.url }}" alt="{{ product.name }}">
-                                        {% endif %}
-                                    </a>
-                                </div>
-
-                                <div class="card-product-info">
-                                    <a href="{{ product.get_absolute_url }}" class="title link">{{ product.name }}</a>
-                                    <span class="price current-price">
-                                        {% if product.discounted_price %}
-                                        <del>${{ product.price }}</del> ${{ product.discounted_price }}
-                                        {% else %}
-                                        ${{ product.price }}
-                                        {% endif %}
-                                    </span>   
-                                </div>
-                            </div>
-
-                            {% endfor %}
-
-                            <!-- pagination -->
-                            <ul class="wg-pagination tf-pagination-list justify-content-start">
-                                <li class="active">
-                                    <a href="#" class="pagination-link">1</a>
-                                </li>
-                                <li>
-                                    <a href="#" class="pagination-link animate-hover-btn">2</a>
-                                </li>
-                                <li>
-                                    <a href="#" class="pagination-link animate-hover-btn">3</a>
-                                </li>
-                                <li>
-                                    <a href="#" class="pagination-link animate-hover-btn">
-                                        <span class="icon icon-arrow-right"></span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-
+                        
                         <!-- product display second layout -->
                         <div class="tf-grid-layout wrapper-shop tf-col-3" id="gridLayout">
 
@@ -543,222 +481,171 @@
                         
                     </div>
                 </div>
-                <form action="#" id="facet-filter-form" class="facet-filter-form">
-                    <div class="widget-facet">
-                        <div class="facet-title" data-bs-target="#availability" data-bs-toggle="collapse"
-                            aria-expanded="true" aria-controls="availability">
-                            <span>Availability</span>
-                            <span class="icon icon-arrow-up"></span>
-                        </div>
-                        <div id="availability" class="collapse show">
-                            <ul class="tf-filter-group current-scrollbar mb_36">
-                                <li class="list-item d-flex gap-12 align-items-center">
-                                    <input type="radio" name="availability" class="tf-check" id="inStock">
-                                    <label for="inStock" class="label"><span>In
-                                            stock</span>&nbsp;<span>(14)</span></label>
-                                </li>
-                                <li class="list-item d-flex gap-12 align-items-center">
-                                    <input type="radio" name="availability" class="tf-check" id="outStock">
-                                    <label for="outStock" class="label"><span>Out of
-                                            stock</span>&nbsp;<span>(2)</span></label>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="widget-facet">
-                        <div class="facet-title" data-bs-target="#price" data-bs-toggle="collapse" aria-expanded="true"
-                            aria-controls="price">
-                            <span>Price</span>
-                            <span class="icon icon-arrow-up"></span>
-                        </div>
-                        <div id="price" class="collapse show">
-                            <div class="widget-price filter-price">
-                                <div class="price-val-range" id="price-value-range" data-min="0" data-max="500"></div>
-                                <div class="box-title-price">
-                                    <span class="title-price">Price :</span>
-                                    <div class="caption-price">
-                                        <div class="price-val" id="price-min-value" data-currency="$"></div>
-                                        <span>-</span>
-                                        <div class="price-val" id="price-max-value" data-currency="$"></div>
-                                    </div>
-                                </div>
-                            </div>
 
-                        </div>
-                    </div>
-                    <div class="widget-facet">
-                        <div class="facet-title" data-bs-target="#brand" data-bs-toggle="collapse" aria-expanded="true"
-                            aria-controls="brand">
-                            <span>Brand</span>
-                            <span class="icon icon-arrow-up"></span>
-                        </div>
-                        <div id="brand" class="collapse show">
-                            <ul class="tf-filter-group current-scrollbar mb_36">
-                                <li class="list-item d-flex gap-12 align-items-center">
-                                    <input type="radio" name="brand" class="tf-check" id="Ecomus">
-                                    <label for="Ecomus" class="label"><span>Ecomus</span>&nbsp;<span>(8)</span></label>
-                                </li>
-                                <li class="list-item d-flex gap-12 align-items-center">
-                                    <input type="radio" name="brand" class="tf-check" id="M&H">
-                                    <label for="M&H" class="label"><span>M&H</span>&nbsp;<span>(8)</span></label>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="widget-facet">
-                        <div class="facet-title" data-bs-target="#color" data-bs-toggle="collapse" aria-expanded="true"
-                            aria-controls="color">
-                            <span>Color</span>
-                            <span class="icon icon-arrow-up"></span>
-                        </div>
-                        <div id="color" class="collapse show">
-                            <ul class="tf-filter-group filter-color current-scrollbar mb_36">
-                                <li class="list-item d-flex gap-12 align-items-center">
-                                    <input type="radio" name="color" class="tf-check-color bg_beige" id="Beige"
-                                        value="Beige">
-                                    <label for="Beige" class="label"><span>Beige</span>&nbsp;<span>(3)</span></label>
-                                </li>
-                                <li class="list-item d-flex gap-12 align-items-center">
-                                    <input type="radio" name="color" class="tf-check-color bg_dark" id="Black"
-                                        value="Black">
-                                    <label for="Black" class="label"><span>Black</span>&nbsp;<span>(18)</span></label>
-                                </li>
-                                <li class="list-item d-flex gap-12 align-items-center">
-                                    <input type="radio" name="color" class="tf-check-color bg_blue-2" id="Blue"
-                                        value="Blue">
-                                    <label for="Blue" class="label"><span>Blue</span>&nbsp;<span>(3)</span></label>
-                                </li>
-                                <li class="list-item d-flex gap-12 align-items-center">
-                                    <input type="radio" name="color" class="tf-check-color bg_brown" id="Brown"
-                                        value="Brown">
-                                    <label for="Brown" class="label"><span>Brown</span>&nbsp;<span>(3)</span></label>
-                                </li>
-                                <li class="list-item d-flex gap-12 align-items-center">
-                                    <input type="radio" name="color" class="tf-check-color bg_cream" id="Cream"
-                                        value="Cream">
-                                    <label for="Cream" class="label"><span>Cream</span>&nbsp;<span>(1)</span></label>
-                                </li>
-                                <li class="list-item d-flex gap-12 align-items-center">
-                                    <input type="radio" name="color" class="tf-check-color bg_dark-beige"
-                                        id="Dark Beige" value="Dark Beige">
-                                    <label for="Dark Beige" class="label"><span>Dark
-                                            Beige</span>&nbsp;<span>(1)</span></label>
-                                </li>
-                                <li class="list-item d-flex gap-12 align-items-center">
-                                    <input type="radio" name="color" class="tf-check-color bg_dark-blue" id="Dark Blue"
-                                        value="Dark Blue">
-                                    <label for="Dark Blue" class="label"><span>Dark
-                                            Blue</span>&nbsp;<span>(3)</span></label>
-                                </li>
-                                <li class="list-item d-flex gap-12 align-items-center">
-                                    <input type="radio" name="color" class="tf-check-color bg_dark-green"
-                                        id="Dark Green" value="Dark Green">
-                                    <label for="Dark Green" class="label"><span>Dark
-                                            Green</span>&nbsp;<span>(1)</span></label>
-                                </li>
-                                <li class="list-item d-flex gap-12 align-items-center">
-                                    <input type="radio" name="color" class="tf-check-color bg_dark-grey" id="Dark Grey"
-                                        value="Dark Grey">
-                                    <label for="Dark Grey" class="label"><span>Dark
-                                            Grey</span>&nbsp;<span>(1)</span></label>
-                                </li>
-                                <li class="list-item d-flex gap-12 align-items-center">
-                                    <input type="radio" name="color" class="tf-check-color bg_grey" id="Grey"
-                                        value="Grey">
-                                    <label for="Grey" class="label"><span>Grey</span>&nbsp;<span>(2)</span></label>
-                                </li>
-                                <li class="list-item d-flex gap-12 align-items-center">
-                                    <input type="radio" name="color" class="tf-check-color bg_light-blue"
-                                        id="Light Blue" value="Light Blue">
-                                    <label for="Light Blue" class="label"><span>Light
-                                            Blue</span>&nbsp;<span>(5)</span></label>
-                                </li>
-                                <li class="list-item d-flex gap-12 align-items-center">
-                                    <input type="radio" name="color" class="tf-check-color bg_light-green"
-                                        id="Light Green" value="Light Green">
-                                    <label for="Light Green" class="label"><span>Light
-                                            Green</span>&nbsp;<span>(3)</span></label>
-                                </li>
-                                <li class="list-item d-flex gap-12 align-items-center">
-                                    <input type="radio" name="color" class="tf-check-color bg_light-grey"
-                                        id="Light Grey" value="Light Grey">
-                                    <label for="Light Grey" class="label"><span>Light
-                                            Grey</span>&nbsp;<span>(1)</span></label>
-                                </li>
-                                <li class="list-item d-flex gap-12 align-items-center">
-                                    <input type="radio" name="color" class="tf-check-color bg_light-pink"
-                                        id="Light Pink" value="Light Pink">
-                                    <label for="Light Pink" class="label"><span>Light
-                                            Pink</span>&nbsp;<span>(2)</span></label>
-                                </li>
-                                <li class="list-item d-flex gap-12 align-items-center">
-                                    <input type="radio" name="color" class="tf-check-color bg_purple" id="Light Purple"
-                                        value="Light Purple">
-                                    <label for="Light Purple" class="label"><span>Light
-                                            Purple</span>&nbsp;<span>(2)</span></label>
-                                </li>
-                                <li class="list-item d-flex gap-12 align-items-center">
-                                    <input type="radio" name="color" class="tf-check-color bg_light-yellow"
-                                        id="Light Yellow" value="Light Yellow">
-                                    <label for="Light Yellow" class="label"><span>Light
-                                            Yellow</span>&nbsp;<span>(1)</span></label>
-                                </li>
-                                <li class="list-item d-flex gap-12 align-items-center">
-                                    <input type="radio" name="color" class="tf-check-color bg_orange" id="Orange"
-                                        value="Orange">
-                                    <label for="Orange" class="label"><span>Orange</span>&nbsp;<span>(1)</span></label>
-                                </li>
-                                <li class="list-item d-flex gap-12 align-items-center">
-                                    <input type="radio" name="color" class="tf-check-color bg_pink" id="Pink"
-                                        value="Pink">
-                                    <label for="Pink" class="label"><span>Pink</span>&nbsp;<span>(2)</span></label>
-                                </li>
-                                <li class="list-item d-flex gap-12 align-items-center">
-                                    <input type="radio" name="color" class="tf-check-color bg_taupe" id="Taupe"
-                                        value="Taupe">
-                                    <label for="Taupe" class="label"><span>Taupe</span>&nbsp;<span>(1)</span></label>
-                                </li>
-                                <li class="list-item d-flex gap-12 align-items-center">
-                                    <input type="radio" name="color" class="tf-check-color bg_white" id="White"
-                                        value="White">
-                                    <label for="White" class="label"><span>White</span>&nbsp;<span>(14)</span></label>
-                                </li>
-                                <li class="list-item d-flex gap-12 align-items-center">
-                                    <input type="radio" name="color" class="tf-check-color bg_yellow" id="Yellow"
-                                        value="Yellow">
-                                    <label for="Yellow" class="label"><span>Yellow</span>&nbsp;<span>(1)</span></label>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="widget-facet">
-                        <div class="facet-title" data-bs-target="#size" data-bs-toggle="collapse" aria-expanded="true"
-                            aria-controls="size">
-                            <span>Size</span>
-                            <span class="icon icon-arrow-up"></span>
-                        </div>
-                        <div id="size" class="collapse show">
-                            <ul class="tf-filter-group current-scrollbar">
-                                <li class="list-item d-flex gap-12 align-items-center">
-                                    <input type="radio" name="size" class="tf-check tf-check-size" value="S" id="S">
-                                    <label for="S" class="label"><span>S</span>&nbsp;<span>(7)</span></label>
-                                </li>
-                                <li class="list-item d-flex gap-12 align-items-center">
-                                    <input type="radio" name="size" class="tf-check tf-check-size" value="M" id="M">
-                                    <label for="M" class="label"><span>M</span>&nbsp;<span>(8)</span></label>
-                                </li>
-                                <li class="list-item d-flex gap-12 align-items-center">
-                                    <input type="radio" name="size" class="tf-check tf-check-size" value="L" id="L">
-                                    <label for="L" class="label"><span>L</span>&nbsp;<span>(8)</span></label>
-                                </li>
-                                <li class="list-item d-flex gap-12 align-items-center">
-                                    <input type="radio" name="size" class="tf-check tf-check-size" value="XL" id="XL">
-                                    <label for="XL" class="label"><span>XL</span>&nbsp;<span>(6)</span></label>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </form>
+
+
+
+<form action="{{ request.path }}" method="get" id="facet-filter-form" class="facet-filter-form">
+
+  {% if selected_brand %}
+    <input type="hidden" name="brand" value="{{ selected_brand.slug }}">
+  {% endif %}
+  {% if selected_color %}
+    <input type="hidden" name="color" value="{{ selected_color.slug }}">
+  {% endif %}
+
+  <div class="widget-facet">
+    <div class="facet-title"
+         data-bs-target="#price"
+         data-bs-toggle="collapse"
+         aria-expanded="true"
+         aria-controls="price">
+      <span>Price</span>
+      <span class="icon icon-arrow-up"></span>
+    </div>
+
+    <div id="price" class="collapse show">
+      <div class="widget-price filter-price">
+        <div id="price-value-range"></div>
+
+        <div class="box-title-price">
+          <span class="title-price">Price :</span>
+          <div class="caption-price">
+            <div class="price-val" id="price-min-value" data-currency="$">0</div>
+            <span> - </span>
+            <div class="price-val" id="price-max-value" data-currency="$">500</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hidden inputs -->
+      <input type="hidden" name="price_min" id="price-min-input" value="{{ price_min|default:0 }}">
+      <input type="hidden" name="price_max" id="price-max-input" value="{{ price_max|default:500 }}">
+
+      <!-- ✅ Button now inside the collapse container -->
+     <div class="mt-3">
+  <button type="submit" class="w-100 bg-black text-white py-2 px-3 rounded">Filter</button>
+</div>
+
+    </div>
+  </div>
+</form>
+<hr/>
+
+
+
+
+
+
+
+
+                    {# ──────────────── BRAND FILTER ──────────────── #}
+<div class="widget-facet">
+  <div class="facet-title"
+       data-bs-target="#brand"
+       data-bs-toggle="collapse"
+       aria-expanded="true"
+       aria-controls="brand">
+    <span>Brand</span>
+    <span class="icon icon-arrow-up"></span>
+  </div>
+
+  <div id="brand" class="collapse show">
+    <ul class="tf-filter-group current-scrollbar mb_36">
+
+      {# individual brands #}
+      {% for brand in brands %}
+        <li class="list-item d-flex gap-12 align-items-center">
+          {% if selected_color %}
+            {# keep current color filter #}
+            <a href="{% url 'store:store_brand_color' brand_slug=brand.slug color_slug=selected_color.slug %}"
+               class="d-flex gap-2 {% if selected_brand and selected_brand.id == brand.id %}active-filter{% endif %}">
+          {% else %}
+            <a href="{% url 'store:store_brand' brand_slug=brand.slug %}"
+               class="d-flex gap-2 {% if selected_brand and selected_brand.id == brand.id %}active-filter{% endif %}">
+          {% endif %}
+              <span>{{ brand.name }}</span>
+              <span>({{ brand.product_count }})</span>
+            </a>
+        </li>
+      {% endfor %}
+
+      {# “All brands” link resets the brand filter but keeps color if present #}
+      <li class="list-item d-flex gap-12 align-items-center">
+        {% if selected_color %}
+          <a href="{% url 'store:store_color' color_slug=selected_color.slug %}"
+             class="d-flex gap-2 {% if not selected_brand %}active-filter{% endif %}">
+        {% else %}
+          <a href="{% url 'store:store_all' %}"
+             class="d-flex gap-2 {% if not selected_brand %}active-filter{% endif %}">
+        {% endif %}
+            <span>All Brands</span>
+          </a>
+      </li>
+
+    </ul>
+  </div>
+</div>
+
+
+
+{# ──────────────── COLOR FILTER ──────────────── #}
+<div class="widget-facet">
+  <div class="facet-title"
+       data-bs-target="#color"
+       data-bs-toggle="collapse"
+       aria-expanded="true"
+       aria-controls="color">
+    <span>Color</span>
+    <span class="icon icon-arrow-up"></span>
+  </div>
+
+  <div id="color" class="collapse show">
+    <ul class="tf-filter-group filter-color current-scrollbar mb_36">
+
+      {# individual colors #}
+      {% for color in colors %}
+        <li class="list-item d-flex gap-12 align-items-center">
+          {% if selected_brand %}
+            {# keep current brand filter #}
+            <a href="{% url 'store:store_brand_color' brand_slug=selected_brand.slug color_slug=color.slug %}"
+               class="d-flex gap-2 {% if selected_color and selected_color.id == color.id %}active-filter{% endif %}">
+          {% else %}
+            <a href="{% url 'store:store_color' color_slug=color.slug %}"
+               class="d-flex gap-2 {% if selected_color and selected_color.id == color.id %}active-filter{% endif %}">
+          {% endif %}
+              <span>{{ color.name }}</span>
+              <span>({{ color.product_count }})</span>
+            </a>
+        </li>
+      {% endfor %}
+
+      {# “All colors” link resets the color filter but keeps brand if present #}
+      <li class="list-item d-flex gap-12 align-items-center">
+        {% if selected_brand %}
+          <a href="{% url 'store:store_brand' brand_slug=selected_brand.slug %}"
+             class="d-flex gap-2 {% if not selected_color %}active-filter{% endif %}">
+        {% else %}
+          <a href="{% url 'store:store_all' %}"
+             class="d-flex gap-2 {% if not selected_color %}active-filter{% endif %}">
+        {% endif %}
+            <span>All Colors</span>
+          </a>
+      </li>
+
+    </ul>
+  </div>
+</div>
+
+
+
+                    
+                   
+
+
+
+
+               
             </div>
         </div>
     </div>
@@ -782,6 +669,48 @@
         </div>
     </div>
     <!-- End Filter sidebar -->
+
+
+
+
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var priceSlider = document.getElementById('price-value-range');
+
+    noUiSlider.create(priceSlider, {
+      start: [0, 500],
+      connect: true,
+      range: {
+        'min': 0,
+        'max': 500
+      },
+      step: 1,
+      format: {
+        to: function (value) {
+          return Math.round(value);
+        },
+        from: function (value) {
+          return Number(value);
+        }
+      }
+    });
+
+    var priceMinValue = document.getElementById('price-min-value');
+    var priceMaxValue = document.getElementById('price-max-value');
+    var priceMinInput = document.getElementById('price-min-input');
+    var priceMaxInput = document.getElementById('price-max-input');
+
+    priceSlider.noUiSlider.on('update', function (values, handle) {
+      priceMinValue.textContent = values[0];
+      priceMaxValue.textContent = values[1];
+      priceMinInput.value = values[0];
+      priceMaxInput.value = values[1];
+    });
+  });
+</script>
+
 
 
     

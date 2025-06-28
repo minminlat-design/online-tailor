@@ -6,7 +6,8 @@ from store.models import (
     Product, ProductPiece, ProductVariation, Style,
     FabricCategory, Color,
     Season, Pattern, Material, ProductImage, ProductGroup,
-    ReviewRating, ReviewReply, ProductFeature, MaterialCareItem, PieceSpec
+    ReviewRating, ReviewReply, ProductFeature, MaterialCareItem, PieceSpec,
+    Brand
 )
 
 
@@ -53,12 +54,14 @@ class ProductVariationInline(admin.TabularInline):
     model = ProductVariation
     extra = 1
     autocomplete_fields = ['option']    
+    
+    
 
 @admin.register(Product)
 class ProductAdmin(SortableAdminBase, admin.ModelAdmin):
-    list_display = ['name', 'is_customizable', 'group', 'sub_category', 'price', 'is_available', 'first_image_preview']
-    list_filter = ['is_available', 'group', 'sub_category', 'style']
-    search_fields = ['name', 'description', 'group__name']
+    list_display = ['name', 'brand', 'is_customizable', 'group', 'sub_category', 'price', 'is_available', 'first_image_preview']
+    list_filter = ['is_available', 'brand', 'group', 'sub_category', 'style']
+    search_fields = ['name', 'description', 'brand__name', 'group__name']
     list_editable = ['price', 'is_available',]
     prepopulated_fields = {'slug': ('name',)}
     inlines = [ProductImageInline, ProductVariationInline, ProductFeatureInline, MaterialCareItemInline, PieceSpecInline]
@@ -74,7 +77,16 @@ class ProductAdmin(SortableAdminBase, admin.ModelAdmin):
     
     first_image_preview.short_description = "Preview"
     
-    
+
+
+@admin.register(Brand)
+class BrandAdmin(admin.ModelAdmin):
+    list_display = ['name']
+    search_fields = ['name']
+    prepopulated_fields = {'slug': ('name',)}
+
+
+ 
     
 
 @admin.register(Style)
@@ -102,6 +114,7 @@ class MaterialAdmin(admin.ModelAdmin):
 @admin.register(Color)
 class ColorAdmin(admin.ModelAdmin):
     list_display = ['name', 'hex_code']
+    prepopulated_fields = {'slug': ('name',)}
 
 
 @admin.register(ProductGroup)

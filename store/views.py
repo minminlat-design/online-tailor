@@ -2,7 +2,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from cart.forms import CartAddProductForm
 from category.models import MainCategory, Category, SubCategory
 from store.forms import ReviewRatingForm, ReviewReplyForm
-from store.models import Product, ProductImage, ReviewRating
+from store.models import Product, ProductImage, ReviewRating, Brand, Color
 from django.db.models import Count, Q, Prefetch
 from django.utils import timezone
 from collections import defaultdict
@@ -20,6 +20,8 @@ from django.views.decorators.http import require_POST
 from content.models import StaticPage
 import redis
 from django.conf import settings
+from django.db.models import F
+
 
 
 import logging
@@ -42,106 +44,204 @@ r = redis.Redis(
 
 
 
-def store(request, main_slug=None, category_slug=None, subcategory_slug=None):
-    main_category = None
-    category = None
-    sub_category = None
-    subcategories = None
-    categories = None
+def store(
+    request,
+    main_slug: str | None = None,
+    category_slug: str | None = None,
+    subcategory_slug: str | None = None,
+    brand_slug: str | None = None,      # ← comes from /shop/brand/<slug>/
+    color_slug: str | None = None,      # ← comes from /shop/color/<slug>/
+):
+    """
+    Product catalogue with optional filters:
+      • main category / category / sub-category (via path)
+      • brand  (via /shop/brand/<slug>/   or legacy ?brand=<id>)
+      • color  (via /shop/color/<slug>/   or legacy ?color=<id>)
+    """
+
+    # ------------------------------------------------------------------
+    # Base queryset
+    # ------------------------------------------------------------------
     products = Product.objects.filter(is_available=True)
+
+    # ------------------------------------------------------------------
+    # Brand filter (slug first, fall back to ?brand=id for backward compat)
+    # ------------------------------------------------------------------
+    selected_brand = None
+    if brand_slug:
+        selected_brand = get_object_or_404(Brand, slug=brand_slug)
+        products = products.filter(brand=selected_brand)
+    else:  # legacy query-string
+        brand_id = request.GET.get("brand")
+        if brand_id and brand_id.isdigit():
+            selected_brand = get_object_or_404(Brand, id=int(brand_id))
+            products = products.filter(brand_id=selected_brand.id)
+
+    # ------------------------------------------------------------------
+    # Color filter (slug first, fall back to ?color=id)
+    # ------------------------------------------------------------------
+    selected_color = None
+    if color_slug:
+        selected_color = get_object_or_404(Color, slug=color_slug)
+        products = products.filter(color=selected_color)
+    else:  # legacy query-string
+        color_id = request.GET.get("color")
+        if color_id and color_id.isdigit():
+            selected_color = get_object_or_404(Color, id=int(color_id))
+            products = products.filter(color_id=selected_color.id)
+            
+            
+    # ------------------------------------------------------------------
+    # Price filter (?price_min=&price_max=)  ← ADD THIS BLOCK
+    # ------------------------------------------------------------------
+    price_min = request.GET.get("price_min")
+    price_max = request.GET.get("price_max")
+
+    if price_min and price_min.isnumeric():
+        products = products.filter(price__gte=price_min)
+
+    if price_max and price_max.isnumeric():
+        products = products.filter(price__lte=price_max)
+
+
+    # ------------------------------------------------------------------
+    # Category / sub-category filters (unchanged from your original logic)
+    # ------------------------------------------------------------------
+    main_category = category = sub_category = None
+    subcategories = categories = None
     active_main_category_id = None
 
     if main_slug and category_slug and subcategory_slug:
-        # Filter by subcategory
-        sub_category = get_object_or_404(SubCategory, 
-            slug=subcategory_slug, 
-            category__slug=category_slug, 
-            category__main_category__slug=main_slug
+        sub_category = get_object_or_404(
+            SubCategory,
+            slug=subcategory_slug,
+            category__slug=category_slug,
+            category__main_category__slug=main_slug,
         )
         category = sub_category.category
         main_category = category.main_category
-        products = products.filter(sub_category=sub_category)
         active_main_category_id = main_category.id
-
-        # annotate all categories for sidebar
-        categories = main_category.categories.prefetch_related(
-            Prefetch(
-                'subcategories',
-                queryset=SubCategory.objects.annotate(
-                    product_count=Count('products', filter=Q(products__is_available=True))
-                )
-            )
-        ).annotate(
-            product_count=Count('subcategories__products', filter=Q(subcategories__products__is_available=True), distinct=True)
-        )
+        products = products.filter(sub_category=sub_category)
+        categories = _annotate_sidebar_categories(main_category)
 
     elif main_slug and category_slug:
-        # Filter by category
         category = get_object_or_404(Category, slug=category_slug, main_category__slug=main_slug)
         main_category = category.main_category
         active_main_category_id = main_category.id
 
-        # annotate subcategories of current category
+        # Annotate subcategories with product counts
         subcategories = category.subcategories.annotate(
             product_count=Count('products', filter=Q(products__is_available=True))
         )
-        products = products.filter(sub_category__in=subcategories)
 
-        # annotate all categories for sidebar
-        categories = main_category.categories.prefetch_related(
-            Prefetch(
-                'subcategories',
-                queryset=SubCategory.objects.annotate(
-                    product_count=Count('products', filter=Q(products__is_available=True))
-                )
-            )
-        ).annotate(
-            product_count=Count('subcategories__products', filter=Q(subcategories__products__is_available=True), distinct=True)
+        # Include both products from subcategories and (optionally) directly assigned to the category
+        products = products.filter(
+            Q(sub_category__in=subcategories) | Q(category=category)
         )
+
+        categories = _annotate_sidebar_categories(main_category)
 
     elif main_slug:
-        # Filter by MainCategory
         main_category = get_object_or_404(MainCategory, slug=main_slug)
         active_main_category_id = main_category.id
+        categories = _annotate_sidebar_categories(main_category)
+        all_subs = SubCategory.objects.filter(category__main_category=main_category)
+        products = products.filter(sub_category__in=all_subs)
 
-        categories = main_category.categories.prefetch_related(
-            Prefetch(
-                'subcategories',
-                queryset=SubCategory.objects.annotate(
-                    product_count=Count('products', filter=Q(products__is_available=True))
-                )
-            )
-        ).annotate(
-            product_count=Count('subcategories__products', filter=Q(subcategories__products__is_available=True), distinct=True)
-        )
+    # ------------------------------------------------------------------
+    # Sidebar collections (brands & colors with counts)
+    # ------------------------------------------------------------------
+    brands = (
+        Brand.objects
+             .filter(products__is_available=True)
+             .annotate(product_count=Count('products', filter=Q(products__is_available=True)))
+             .distinct()
+    )
+    colors = (
+        Color.objects
+             .filter(products__is_available=True)
+             .annotate(product_count=Count('products', filter=Q(products__is_available=True)))
+             .distinct()
+    )
 
-        all_subcategories = SubCategory.objects.filter(category__main_category=main_category)
-        products = products.filter(sub_category__in=all_subcategories)
-        
-        
-    sale_products = Product.is_sale.all()[:3]  # fetch sale products
-    gallery = Product.objects.filter(is_available=True)[:6]  # Shop sidebar gallery
+    # ------------------------------------------------------------------
+    # Extras
+    # ------------------------------------------------------------------
+    sale_products = Product.is_sale.all()[:3]
+    gallery = Product.objects.filter(is_available=True)[:6]
 
-
+    # ------------------------------------------------------------------
+    # Context
+    # ------------------------------------------------------------------
     context = {
-        'main_category': main_category,
-        'category': category,
-        'sub_category': sub_category,
-        'subcategories': subcategories,
-        'products': products,
-        'active_category_id': category.id if category else None,
-        'active_main_category_id': active_main_category_id,
-        'categories': categories,  # includes prefetched subcategories with product_count
-        'sale_products': sale_products,
-        'gallery': gallery,
+        "products": products,
+        "main_category": main_category,
+        "category": category,
+        "sub_category": sub_category,
+        "subcategories": subcategories,
+        "categories": categories,
+        "active_category_id": category.id if category else None,
+        "active_main_category_id": active_main_category_id,
+
+        # filter widgets
+        "brands": brands,
+        "colors": colors,
+        "selected_brand": selected_brand,
+        "selected_color": selected_color,
+
+        # extras
+        "sale_products": sale_products,
+        "gallery": gallery,
+        
+        "price_min": price_min,
+        "price_max": price_max,
+
     }
-
-    return render(request, 'store/store.html', context)
-
+    return render(request, "store/store.html", context)
 
 
 
-    
+
+
+
+
+
+
+# -------------------------------------------------------------------
+# Helper to annotate every category under a main category
+# -------------------------------------------------------------------
+
+
+def _annotate_sidebar_categories(main_category):
+    """
+    Returns the categories under `main_category`
+    each with:
+        - product_count (all products in all sub-categories)
+        - subcategories prefetched & annotated with their own product counts
+    """
+    return (
+        main_category.categories.prefetch_related(
+            Prefetch(
+                "subcategories",
+                queryset=SubCategory.objects.annotate(
+                    product_count=Count(
+                        "products",
+                        filter=Q(products__is_available=True)
+                    )
+                ),
+            )
+        )
+        .annotate(
+            product_count=Count(
+                "subcategories__products",
+                filter=Q(subcategories__products__is_available=True),
+                distinct=True,
+            )
+        )
+    )
+
+
+
 
 
 
@@ -457,6 +557,8 @@ def submit_review(request, product_id):
     # ---------- non-AJAX fallback ----------------------------------
     messages.success(request, msg)
     return _redirect()
+
+
 
 
 # ───────────────────── view: submit_reply  ─────────────────────────

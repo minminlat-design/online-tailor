@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from .models import HomeSlider, LookBook, ShopGram
 from category.models import Category
-from store.models import Product
+from store.models import Product, ReviewRating
+
 
 def home(request):
     # home sliders
@@ -25,6 +26,12 @@ def home(request):
     # Shop Gram section
     shop_gram_posts = ShopGram.objects.filter(is_active=True).prefetch_related('products').order_by('order', '-created_at')[:6]
     
+    # In your existing home() view
+    top_reviews = ReviewRating.objects.filter(
+        status=True, parent__isnull=True  # only main reviews, not replies
+    ).select_related('user', 'product') \
+    .order_by('-created_at')[:5]  # Or order_by('-rating')[:5]
+        
     
     context = {
         'sliders': sliders,
@@ -32,6 +39,7 @@ def home(request):
         'latest_products': latest_products,
         'lookbooks': lookbooks,
         'shop_gram_posts': shop_gram_posts,
+        'top_reviews': top_reviews,
     }
     
     

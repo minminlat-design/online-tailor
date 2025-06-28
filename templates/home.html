@@ -1,5 +1,34 @@
 {% extends "base.html" %}
 {% load static %}
+{% load home_filters %}
+
+{% block header %}
+
+<style>
+
+
+.swiper-slide {
+  display: flex !important;
+  align-items: stretch !important;
+}
+
+.testimonial-item {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  height: 100% !important;
+  padding: 20px !important;
+  border: 1px solid #eee !important;
+  background: #fff !important;
+  min-height: 400px !important;
+}
+
+
+</style>
+
+{% endblock %}
+
+
 
 {% block content %}
 
@@ -202,6 +231,8 @@
             </div>
         </section>
         <!-- /Lookbook -->
+
+
         
         <!-- Testimonial -->
         <section class="flat-spacing-5 pt_0 flat-testimonial">
@@ -214,145 +245,85 @@
                     <div dir="ltr" class="swiper tf-sw-testimonial" data-preview="3" data-tablet="2" data-mobile="1"
                         data-space-lg="30" data-space-md="15">
                         <div class="swiper-wrapper">
-                            <div class="swiper-slide">
-                                <div class="testimonial-item style-column wow fadeInUp" data-wow-delay="0s">
-                                    <div class="rating">
-                                        <i class="icon-star"></i>
-                                        <i class="icon-star"></i>
-                                        <i class="icon-star"></i>
-                                        <i class="icon-star"></i>
-                                        <i class="icon-star"></i>
-                                    </div>
-                                    <div class="heading">Best Online Fashion Site</div>
-                                    <div class="text">
-                                        “ I always find something stylish and affordable on this web fashion site ”
-                                    </div>
-                                    <div class="author">
-                                        <div class="name">Robert smith</div>
-                                        <div class="metas">Customer from USA</div>
-                                    </div>
-                                    <div class="product">
-                                        <div class="image">
-                                            <a href="product-detail.html">
-                                                <img class="lazyload" data-src="{% static 'images/shop/products/testimonial01.png' %}"
-                                                    src="{% static 'images/shop/products/testimonial01.png' %}" alt="">
-                                            </a>
-                                        </div>
-                                        <div class="content-wrap">
-                                            <div class="product-title">
-                                                <a href="product-detail.html">Three piece suit</a>
-                                            </div>
-                                            <div class="price">$105.95</div>
-                                        </div>
-                                        <a href="{% url 'store:store' %}" class=""><i class="icon-arrow1-top-left"></i></a>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="swiper-slide">
-                                <div class="testimonial-item style-column wow fadeInUp" data-wow-delay=".1s">
-                                    <div class="rating">
-                                        <i class="icon-star"></i>
-                                        <i class="icon-star"></i>
-                                        <i class="icon-star"></i>
-                                        <i class="icon-star"></i>
-                                        <i class="icon-star"></i>
-                                    </div>
-                                    <div class="heading">Great Selection and Quality</div>
-                                    <div class="text">
-                                        "I love the variety of styles and the high-quality clothing on this web fashion
-                                        site."
-                                    </div>
-                                    <div class="author">
-                                        <div class="name">Allen Lyn</div>
-                                        <div class="metas">Customer from France</span></div>
-                                    </div>
-                                    <div class="product">
-                                        <div class="image">
-                                            <a href="product-detail.html">
-                                                <img class="lazyload" data-src="{% static 'images/shop/products/testimonial02.png' %}"
-                                                    src="{% static 'images/shop/products/testimonial02.png' %}" alt="">
-                                            </a>
-                                        </div>
-                                        <div class="content-wrap">
-                                            <div class="product-title">
-                                                <a href="product-detail.html">Double-breasted suit</a>
-                                            </div>
-                                            <div class="price">$150</div>
-                                        </div>
-                                        <a href="product-detail.html" class=""><i class="icon-arrow1-top-left"></i></a>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="swiper-slide">
-                                <div class="testimonial-item style-column wow fadeInUp" data-wow-delay=".2s">
-                                    <div class="rating">
-                                        <i class="icon-star"></i>
-                                        <i class="icon-star"></i>
-                                        <i class="icon-star"></i>
-                                        <i class="icon-star"></i>
-                                        <i class="icon-star"></i>
-                                    </div>
-                                    <div class="heading">Best Customer Service</div>
-                                    <div class="text">
-                                        "I finally found a web fashion site with stylish and flattering options in my
-                                        size."
-                                    </div>
-                                    <div class="author">
-                                        <div class="name">Peter Rope</div>
-                                        <div class="metas">Customer from USA</div>
-                                    </div>
-                                    <div class="product">
-                                        <div class="image">
-                                            <a href="product-detail.html">
-                                                <img class="lazyload" data-src="{% static 'images/shop/products/testimonial03.png' %}"
-                                                    src="{% static 'images/shop/products/testimonial03.png' %}" alt="">
-                                            </a>
-                                        </div>
-                                        <div class="content-wrap">
-                                            <div class="product-title">
-                                                <a href="product-detail.html">Vest</a>
-                                            </div>
-                                            <div class="price">From $18.95</div>
-                                        </div>
-                                        <a href="{% url 'store:store' %}" class=""><i class="icon-arrow1-top-left"></i></a>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="swiper-slide">
-                                <div class="testimonial-item style-column wow fadeInUp" data-wow-delay=".3s">
-                                    <div class="rating">
-                                        <i class="icon-star"></i>
-                                        <i class="icon-star"></i>
-                                        <i class="icon-star"></i>
-                                        <i class="icon-star"></i>
-                                        <i class="icon-star"></i>
-                                    </div>
-                                    <div class="heading">Great Selection and Quality</div>
-                                    <div class="text">
-                                        "I love the variety of styles and the high-quality clothing on this web fashion
-                                        site."
-                                    </div>
-                                    <div class="author">
-                                        <div class="name">Hellen Ase</div>
-                                        <div class="metas">Customer from Japan</span></div>
-                                    </div>
-                                    <div class="product">
-                                        <div class="image">
-                                            <a href="product-detail.html">
-                                                <img class="lazyload" data-src="{% static 'images/shop/products/testimonial04.png' %}"
-                                                    src="{% static 'images/shop/products/testimonial04.png' %}" alt="">
-                                            </a>
-                                        </div>
-                                        <div class="content-wrap">
-                                            <div class="product-title">
-                                                <a href="product-detail.html">Coat</a>
-                                            </div>
-                                            <div class="price">$16.95</div>
-                                        </div>
-                                        <a href="{% url 'store:store' %}" class=""><i class="icon-arrow1-top-left"></i></a>
-                                    </div>
-                                </div>
-                            </div>
+
+
+
+
+{% for review in top_reviews %}
+  <div class="swiper-slide">
+    <div class="testimonial-item style-column wow fadeInUp"
+         data-wow-delay="{{ forloop.counter0|add:"0.1" }}s">
+
+      {# ─────────── Rating stars (½-star support) ─────────── #}
+      <div class="rating">
+        {% for star in "12345" %}
+          {% if star|to_int|lte:review.rating %}
+            <i class="icon-star"></i>
+          {% elif star|to_int == review.rating|add:"0.5" %}
+            <i class="icon-star half"></i>
+          {% else %}
+            <i class="icon-star empty"></i>
+          {% endif %}
+        {% endfor %}
+      </div>
+
+      <div class="heading">{{ review.subject }}</div>
+      <div class="text">“ {{ review.review|truncatewords:25 }} ”</div>
+
+      <div class="author">
+        <div class="name">{{ review.user.get_full_name|default:review.user.username }}</div>
+        <div class="metas">
+          <!--Customer from {{ review.user.profile.country|default:"unknown" }}-->
+        </div>
+      </div>
+
+      {% if review.product %}
+      <div class="product">
+        <div class="image">
+          <a href="{{ review.product.get_absolute_url }}">
+            {% with review.product.first_image as img %}
+              {% if img %}
+                <img class="lazyload"
+                     data-src="{{ img.image.url }}"
+                     src="{{ img.image.url }}"
+                     alt="{{ img.alt_text|default:review.product.name }}">
+              {% else %}
+                <img class="lazyload"
+                     data-src="{% static 'img/placeholder.png' %}"
+                     src="{% static 'img/placeholder.png' %}"
+                     alt="No image">
+              {% endif %}
+            {% endwith %}
+          </a>
+        </div>
+
+        <div class="content-wrap">
+          <div class="product-title">
+            <a href="{{ review.product.get_absolute_url }}">{{ review.product.name }}</a>
+          </div>
+          <div class="price">
+            {% if review.product.discounted_price %}
+              <del>${{ review.product.price }}</del>
+              ${{ review.product.discounted_price }}
+            {% else %}
+              ${{ review.product.price }}
+            {% endif %}
+          </div>
+        </div>
+
+        <a href="{% url 'store:store' %}">
+          <i class="icon-arrow1-top-left"></i>
+        </a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+
+                            
+                           
+                           
+
                         </div>
                     </div>
                     <div class="nav-sw nav-next-slider nav-next-testimonial lg"><span

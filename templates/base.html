@@ -30,6 +30,9 @@
     <!-- Favicon and Touch Icons  -->
     <link rel="shortcut icon" href="{% static 'images/logo/favicon.png' %}">
     <link rel="apple-touch-icon-precomposed" href="{% static 'images/logo/favicon.png' %}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.css" rel="stylesheet" />
+
+
 
     <!-- Optional CSS -->
 
@@ -126,7 +129,7 @@ input[type="radio"]:checked + label.color-option .option-img-wrapper {
   
 </style>
 
-
+{% block header %}{% endblock %}
 
 </head>
 
@@ -169,6 +172,7 @@ input[type="radio"]:checked + label.color-option .option-img-wrapper {
     <script type="module" src="{% static 'js/model-viewer.min.js' %}"></script>
     <script type="module" src="{% static 'js/zoom.js' %}"></script>
     <script src="https://cdn.jsdelivr.net/npm/@panzoom/panzoom@9.4.0/dist/panzoom.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.js"></script>
 
 
 

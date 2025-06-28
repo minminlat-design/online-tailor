@@ -1,12 +1,13 @@
 from django.db import models
 from django.urls import reverse
 from accounts.models import Account
-from category.models import SubCategory
+from category.models import Category, SubCategory
 from django.forms import ValidationError
 from ckeditor.fields import RichTextField
 from django.db.models import F
 from django.db.models import Avg
 from measurement.models import ProductType
+from django.utils.text import slugify
 
 
 class IsSaleManager(models.Manager):
@@ -18,11 +19,31 @@ class IsSaleManager(models.Manager):
 
 
 
+
+class Brand(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    slug = models.SlugField(unique=True)
+    description = models.TextField(blank=True, null=True)  # optional
+    # add logo or other fields if you want
+    
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+
+
+    def __str__(self):
+        return self.name
+    
+    
+
+
 class Product(models.Model):
     name = models.CharField(max_length=255, unique=True)
     slug = models.SlugField(unique=True)
     
     group = models.ForeignKey('ProductGroup', on_delete=models.SET_NULL, null=True, blank=True, related_name='products')
+    
     sub_category = models.ForeignKey(SubCategory, on_delete=models.CASCADE, related_name='products') # must not use '' cos it is imported from another app
     
     description = RichTextField('Description', config_name='default')
@@ -32,7 +53,7 @@ class Product(models.Model):
     delivery_days = models.PositiveIntegerField(default=7)
     
     style = models.ForeignKey('Style', on_delete=models.SET_NULL, null=True, blank=True)  # For suit, jacket, pants styles
-    color = models.ForeignKey('Color', on_delete=models.SET_NULL, null=True, blank=True)  # Default/primary color
+    color = models.ForeignKey('Color', on_delete=models.SET_NULL, null=True, blank=True, related_name='products')  # Default/primary color
     material = models.ForeignKey('Material', on_delete=models.SET_NULL, null=True, blank=True)
     pattern = models.ForeignKey('Pattern', on_delete=models.SET_NULL, null=True, blank=True)
     season = models.ForeignKey('Season', on_delete=models.SET_NULL, null=True, blank=True)
@@ -50,6 +71,8 @@ class Product(models.Model):
     is_sale = IsSaleManager() # Custom manager for sale products
     # measuring type field
     product_type = models.ForeignKey(ProductType, on_delete=models.SET_NULL, null=True, blank=True, related_name='products')
+    
+    brand = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True, related_name="products")
    
     
     class Meta:
@@ -139,8 +162,15 @@ class FabricCategory(models.Model):
 
 class Color(models.Model):
     name = models.CharField(max_length=100, unique=True)  # e.g., Navy Blue
+    slug = models.SlugField(unique=True)
     hex_code = models.CharField(max_length=7, blank=True, null=True)  # e.g., #000080 for frontend use
     image = models.ImageField(upload_to='colors/', blank=True, null=True)  # optional swatch
+    
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+        
 
     def __str__(self):
         return self.name
@@ -276,3 +306,6 @@ class PieceSpec(models.Model):
 
     def __str__(self):
         return f"{self.product.name} – {self.piece.name}: {self.label}"
+
+
+
