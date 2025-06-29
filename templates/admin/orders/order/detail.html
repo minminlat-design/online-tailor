@@ -58,41 +58,53 @@ Order #{{ order.id }} | {{ block.super }}
 </div>
   
 
+<table class="admin-table" style="width: 100%;">
+  <tbody>
+    <tr><th scope="row">Created</th><td>{{ order.created|date:"SHORT_DATETIME_FORMAT" }}</td></tr>
+    <tr><th scope="row">Customer</th><td>{{ order.first_name }} {{ order.last_name }}</td></tr>
+    <tr><th scope="row">Email</th><td><a href="mailto:{{ order.email }}">{{ order.email }}</a></td></tr>
+    <tr><th scope="row">Phone</th><td>{{ order.phone|default:"—" }}</td></tr>
+    <tr><th scope="row">Address</th>
+      <td>
+        {{ order.address }}<br>
+        {{ order.postal_code }} {{ order.city }}<br>
+        {{ order.country }}
+      </td>
+    </tr>
+    <tr><th scope="row">Items Total</th><td><strong>${{ order.get_total_cost }}</strong></td></tr>
+
+    {% if order.shipping_fee and order.shipping_fee > 0 %}
+      <tr><th scope="row">Shipping Fee</th><td><strong>${{ order.shipping_fee }}</strong></td></tr>
+    {% endif %}
+
+    {% if order.gift_wrap_fee and order.gift_wrap_fee > 0 %}
+      <tr><th scope="row">Gift Wrap Fee</th><td><strong>${{ order.gift_wrap_fee }}</strong></td></tr>
+    {% endif %}
+
+    <tr><th scope="row">Total Amount</th><td><strong>${{ order.total_price }}</strong></td></tr>
+
+    <tr><th scope="row">Status</th><td>{{ order.get_status_display }}</td></tr>
+    <tr><th scope="row">Payment</th>
+      <td>
+        {% if order.paid %}<span style="color: green;">✔ Paid</span>
+        {% else %}<span style="color: red;">✘ Pending</span>{% endif %}
+      </td>
+    </tr>
+    <tr><th scope="row">Stripe Payment</th>
+      <td>
+        {% if order.stripe_id %}
+          <a href="{{ order.get_stripe_url }}" target="_blank">{{ order.stripe_id }}</a>
+        {% else %}
+          —
+        {% endif %}
+      </td>
+    </tr>
+  </tbody>
+</table>
 
 
   
-  <table class="admin-table" style="width: 100%;">
-    <tbody>
-      <tr><th scope="row">Created</th><td>{{ order.created|date:"SHORT_DATETIME_FORMAT" }}</td></tr>
-      <tr><th scope="row">Customer</th><td>{{ order.first_name }} {{ order.last_name }}</td></tr>
-      <tr><th scope="row">Email</th><td><a href="mailto:{{ order.email }}">{{ order.email }}</a></td></tr>
-      <tr><th scope="row">Phone</th><td>{{ order.phone|default:"—" }}</td></tr>
-      <tr><th scope="row">Address</th>
-        <td>
-          {{ order.address }}<br>
-          {{ order.postal_code }} {{ order.city }}<br>
-          {{ order.country }}
-        </td>
-      </tr>
-      <tr><th scope="row">Total Amount</th><td><strong>${{ order.get_total_cost }}</strong></td></tr>
-      <tr><th scope="row">Status</th><td>{{ order.get_status_display }}</td></tr>
-      <tr><th scope="row">Payment</th>
-        <td>
-          {% if order.paid %}<span style="color: green;">✔ Paid</span>
-          {% else %}<span style="color: red;">✘ Pending</span>{% endif %}
-        </td>
-      </tr>
-      <tr><th scope="row">Stripe Payment</th>
-        <td>
-          {% if order.stripe_id %}
-            <a href="{{ order.get_stripe_url }}" target="_blank">{{ order.stripe_id }}</a>
-          {% else %}
-            —
-          {% endif %}
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  
 </div>
 
 <div class="module aligned">

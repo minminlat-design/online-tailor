@@ -31,6 +31,9 @@ class Order(models.Model):
     status = models.CharField(max_length=20, choices=ORDER_STATUS_CHOICES, default='pending')
     total_price = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     
+    shipping_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    gift_wrap_fee  = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    
 
 
     
@@ -44,8 +47,13 @@ class Order(models.Model):
         return f'Order {self.id}'
     
     
-    def get_total_cost(self):
+    def items_subtotal(self):
         return sum(item.get_cost() for item in self.items.all())
+
+    def get_total_cost(self):
+        return self.items_subtotal() + self.shipping_fee + self.gift_wrap_fee
+
+
     
     def get_stripe_url(self):
         if not self.stripe_id:

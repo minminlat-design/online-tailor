@@ -7,7 +7,7 @@ from store.models import (
     FabricCategory, Color,
     Season, Pattern, Material, ProductImage, ProductGroup,
     ReviewRating, ReviewReply, ProductFeature, MaterialCareItem, PieceSpec,
-    Brand
+    Brand, ShippingFee
 )
 
 
@@ -55,19 +55,25 @@ class ProductVariationInline(admin.TabularInline):
     extra = 1
     autocomplete_fields = ['option']    
     
-    
-
+ 
+ 
 @admin.register(Product)
 class ProductAdmin(SortableAdminBase, admin.ModelAdmin):
-    list_display = ['name', 'brand', 'is_customizable', 'group', 'sub_category', 'price', 'is_available', 'first_image_preview']
+    list_display = [
+        'name', 'is_customizable', 'group', 'sub_category',
+        'price', 'weight', 'is_available', 'first_image_preview'
+    ]
     list_filter = ['is_available', 'brand', 'group', 'sub_category', 'style']
     search_fields = ['name', 'description', 'brand__name', 'group__name']
-    list_editable = ['price', 'is_available',]
+    list_editable = ['price', 'weight', 'is_available']  # add weight here for inline editing
     prepopulated_fields = {'slug': ('name',)}
-    inlines = [ProductImageInline, ProductVariationInline, ProductFeatureInline, MaterialCareItemInline, PieceSpecInline]
-    filter_horizontal = ['pieces']  # 👈 Add this line to manage item pieces
+    inlines = [
+        ProductImageInline, ProductVariationInline, ProductFeatureInline,
+        MaterialCareItemInline, PieceSpecInline
+    ]
+    filter_horizontal = ['pieces']
     show_facets = admin.ShowFacets.ALWAYS
-    
+
     def first_image_preview(self, obj):
         first_image = obj.images.order_by('order').first()
         if first_image and first_image.image:
@@ -76,7 +82,10 @@ class ProductAdmin(SortableAdminBase, admin.ModelAdmin):
         return "-"
     
     first_image_preview.short_description = "Preview"
-    
+
+ 
+ 
+ 
 
 
 @admin.register(Brand)
@@ -155,3 +164,37 @@ class ReviewReplyAdmin(admin.ModelAdmin):
     list_display = ('review', 'user', 'reply', 'created_at')
     search_fields = ('review__subject', 'user__username', 'reply')
     list_filter = ('created_at',)
+
+
+
+
+
+
+
+@admin.register(ShippingFee)
+class ShippingFeeAdmin(admin.ModelAdmin):
+    list_display = [
+        'min_weight', 'max_weight', 'min_fee', 'fee_per_kg', 'flat_fee'
+    ]
+    list_editable = [
+        'min_fee', 'fee_per_kg', 'flat_fee'
+    ]
+    list_filter = ['min_weight', 'max_weight']
+    search_fields = ['min_weight', 'max_weight']
+
+    fieldsets = (
+        (None, {
+            'fields': ('min_weight', 'max_weight')
+        }),
+        ('Fee Details', {
+            'fields': ('min_fee', 'fee_per_kg', 'flat_fee'),
+            'description': 'Define the fees associated with this weight range.'
+        }),
+    )
+
+    def has_add_permission(self, request):
+        # Optionally, limit how many ShippingFee entries can be created
+        return True  # or add logic if you want to restrict
+
+    def has_delete_permission(self, request, obj=None):
+        return True  # or add logic to restrict deleting if needed

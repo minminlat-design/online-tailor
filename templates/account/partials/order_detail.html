@@ -9,7 +9,6 @@
                         <img src="/static/images/default-product.jpg" alt="No image">
                     {% endif %}
                 {% endwith %}
-
             {% endwith %}
         </figure>
         <div class="content">
@@ -53,7 +52,6 @@
                                 <img src="/static/images/default-product.jpg" alt="No image">
                             {% endif %}
                         {% endwith %}
-
                     </figure>
                     <div class="content">
                         <div class="text-2 fw-6">{{ item.product_name }}</div>
@@ -73,6 +71,20 @@
             </div>
             {% endfor %}
             <ul class="mt-4">
+                {% if order.shipping_fee and order.shipping_fee > 0 %}
+                <li class="d-flex justify-content-between text-2">
+                    <span>Shipping</span>
+                    <span class="fw-6">${{ order.shipping_fee }}</span>
+                </li>
+                {% endif %}
+
+                {% if order.gift_wrap_fee and order.gift_wrap_fee > 0 %}
+                <li class="d-flex justify-content-between text-2">
+                    <span>Gift Wrap</span>
+                    <span class="fw-6">${{ order.gift_wrap_fee }}</span>
+                </li>
+                {% endif %}
+
                 <li class="d-flex justify-content-between text-2 mt_8">
                     <span>Order Total</span>
                     <span class="fw-6">${{ order.total_price }}</span>
@@ -82,10 +94,10 @@
     </div>
     <br/>
     <div style="text-align: center;">
-    <a href="javascript:void(0);" 
-   onclick="loadSection('orders')"
-   class="tf-btn btn-border animate-hover-btn rounded-0 justify-content-center">
-    <span>Back to Orders</span>
-</a>
-</div>
+        <a href="javascript:void(0);" 
+           onclick="loadSection('orders')"
+           class="tf-btn btn-border animate-hover-btn rounded-0 justify-content-center">
+            <span>Back to Orders</span>
+        </a>
+    </div>
 </div>

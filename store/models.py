@@ -48,6 +48,10 @@ class Product(models.Model):
     
     description = RichTextField('Description', config_name='default')
     price = models.DecimalField(max_digits=10, decimal_places=2)
+    weight = models.DecimalField(
+        max_digits=6, decimal_places=2, default=0,
+        help_text="Weight of the product in kg"
+    )
     discounted_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     
     delivery_days = models.PositiveIntegerField(default=7)
@@ -309,3 +313,41 @@ class PieceSpec(models.Model):
 
 
 
+
+
+
+class ShippingFee(models.Model):
+    min_weight = models.DecimalField(
+        max_digits=6, decimal_places=2,
+        help_text="Minimum total weight (kg) for this fee to apply"
+    )
+    max_weight = models.DecimalField(
+        max_digits=6, decimal_places=2,
+        help_text="Maximum total weight (kg) for this fee to apply"
+    )
+    min_fee = models.DecimalField(
+        max_digits=6, decimal_places=2,
+        help_text="Minimum shipping fee charged"
+    )
+    fee_per_kg = models.DecimalField(
+        max_digits=6, decimal_places=2,
+        default=0,
+        help_text="Additional fee charged per kg within the weight range"
+    )
+    flat_fee = models.DecimalField(
+        max_digits=6, decimal_places=2,
+        default=0,
+        help_text="Flat fee charged regardless of weight"
+    )
+    
+    def __str__(self):
+        return f"Shipping fee for {self.min_weight}kg - {self.max_weight}kg"
+    
+    
+    
+    
+    def calculate_fee(self, total_weight):
+        if not (self.min_weight <= total_weight <= self.max_weight):
+            return None
+        fee = max(self.min_fee, self.flat_fee + self.fee_per_kg * total_weight)
+        return fee

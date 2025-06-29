@@ -1,77 +1,112 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8" />
+    <title>Order #{{ order.id }}</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <style>
-        body { font-family: sans-serif; }
-        img { max-width: 120px; height: auto; margin-right: 10px; }
-        .photos { display: flex; margin-top: 10px; }
-        .item { margin-bottom: 30px; }
-        ul { margin: 0; padding-left: 20px; }
-        li { margin-bottom: 4px; }
+        body      { font-family: sans-serif; margin: 20px; }
+        h1, h2, h4{ margin-bottom: .6rem; }
+        ul        { margin: 0 0 1rem 1.25rem; }
+        li        { margin-bottom: .25rem; }
+
+         /* force aspect‑ratio friendly scaling on screen AND print */
+    .photos img {
+        width: 150px;          /* fixed width */
+        height: auto !important; /* let PDF engine calculate height */
+        border: 1px solid #ccc;
+        padding: 4px;
+    }
+
+    @media print {
+        .photos img {
+            width: 150px;      /* same width in PDF */
+            height: auto !important;
+        }
+    }
     </style>
 </head>
 <body>
-    <h1>Order #{{ order.id }}</h1>
-    <p><strong>Date:</strong> {{ order.created|date:"Y-m-d" }}</p>
-    <p><strong>Customer:</strong> {{ order.first_name }} {{ order.last_name }} | <strong>Email:</strong> {{ order.email }}</p>
+    <h1>Order #{{ order.id }}</h1>
+    <p>
+        <strong>Date:</strong> {{ order.created|date:"Y‑m‑d H:i" }}<br>
+        <strong>Customer:</strong> {{ order.first_name }} {{ order.last_name }}<br>
+        <strong>Email:</strong> <a href="mailto:{{ order.email }}">{{ order.email }}</a>
+    </p>
     <hr/>
 
     {% for item in order.items.all %}
         <div class="item">
             <h2>{{ item.product_name }}</h2>
-            <h4>Selected Options:</h4>
-            <ul>
-                {% for section, options_dict in item.selected_options.items %}
-                    {% if section == 'set' %}
-                        {% with single_item=options_dict.items %}
-                            <li><strong>{{ section|capfirst }}:</strong> 
-                                {{ single_item.name }}
-                                {% if single_item.price_difference and single_item.price_difference != '0.00' %}
-                                    (+{{ single_item.price_difference }})
-                                {% endif %}
-                            </li>
-                        {% endwith %}
-                    {% else %}
-                        {% for label, option in options_dict.items %}
-                            <li><strong>{{ label|capfirst }}:</strong> 
-                                {{ option.name }}
-                                {% if option.price_difference and option.price_difference != '0.00' %}
-                                    (+{{ option.price_difference }})
-                                {% endif %}
-                            </li>
-                        {% endfor %}
-                    {% endif %}
-                {% endfor %}
-            </ul>
 
+            {# ---------- Selected options ---------- #}
+            {% if item.selected_options %}
+                <h4>Selected Options:</h4>
+                <ul>
+                    {% for section, options_dict in item.selected_options.items %}
+                        {% if section == 'set' %}
+                            {% with opt=options_dict.values|first %}
+                                <li>
+                                    <strong>{{ section|capfirst }}:</strong>
+                                    {{ opt.name }}
+                                    {% if opt.price_difference and opt.price_difference != '0.00' %}
+                                        (+${{ opt.price_difference }})
+                                    {% endif %}
+                                </li>
+                            {% endwith %}
+                        {% else %}
+                            {% for label, opt in options_dict.items %}
+                                <li>
+                                    <strong>{{ label|capfirst }}:</strong>
+                                    {{ opt.name }}
+                                    {% if opt.price_difference and opt.price_difference != '0.00' %}
+                                        (+${{ opt.price_difference }})
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            {# ---------- Photos & measurements ---------- #}
             {% if item.user_measurement %}
                 <p><strong>Fit Type:</strong> {{ item.user_measurement.get_fit_type_display }}</p>
-                <div class="photos">
+
+                <div class="photos d-flex gap-3 flex-wrap">
                     {% if item.photo_front_url %}
-                        <img src="{{ item.photo_front_url }}" alt="Front" />
+                        <!-- NOTE: width attribute only, NO height -->
+                        <img src="{{ item.photo_front_url }}" alt="Front" width="150" class="img-thumbnail">
                     {% endif %}
                     {% if item.photo_side_url %}
-                        <img src="{{ item.photo_side_url }}" alt="Side" />
+                        <img src="{{ item.photo_side_url }}"  alt="Side"  width="150" class="img-thumbnail">
                     {% endif %}
                     {% if item.photo_back_url %}
-                        <img src="{{ item.photo_back_url }}" alt="Back" />
+                        <img src="{{ item.photo_back_url }}"  alt="Back"  width="150" class="img-thumbnail">
                     {% endif %}
                 </div>
+
+
                 <h4>Measurements:</h4>
                 <ul>
-                    {% for key, value in item.user_measurement.measurement_data.items %}
-                        <li><strong>{{ key|capfirst }}:</strong> {{ value }} cm</li>
+                    {% for key, val in item.user_measurement.measurement_data.items %}
+                        <li><strong>{{ key|capfirst }}:</strong> {{ val }} cm</li>
                     {% endfor %}
                 </ul>
             {% elif item.frozen_measurement_data %}
-                <h4>Measurements (Frozen):</h4>
+                <h4>Measurements (Frozen):</h4>
                 <ul>
-                    {% for key, value in item.frozen_measurement_data.items %}
-                        <li><strong>{{ key|capfirst }}:</strong> {{ value }} cm</li>
+                    {% for key, val in item.frozen_measurement_data.items %}
+                        <li><strong>{{ key|capfirst }}:</strong> {{ val }} cm</li>
                     {% endfor %}
                 </ul>
             {% endif %}
         </div>
+    {% empty %}
+        <p>No items in this order.</p>
     {% endfor %}
 </body>
 </html>

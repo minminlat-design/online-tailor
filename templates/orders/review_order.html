@@ -52,9 +52,11 @@
 <!-- Page Title -->
 <div class="tf-page-title">
     <div class="container-full">
-        <div class="heading text-center">Review & Confirm Your Order</div>
+        <div class="heading text-center" style="color:white;">Review & Confirm Your Order</div>
     </div>
 </div>
+
+
 
 <!-- Page Cart -->
 <section class="flat-spacing-11">
@@ -69,33 +71,30 @@
                 <div class="tf-page-cart-checkout">
 
                     <div class="d-flex align-items-center justify-content-between mb_15">
-    <div class="fs-18">Name</div>
-    <p>{{ shipping_info.first_name }} {{ shipping_info.last_name }}</p>
-</div>
-<div class="d-flex align-items-center justify-content-between mb_15">
-    <div class="fs-18">Email</div>
-    <p>{{ shipping_info.email }}</p>
-</div>
-
-
-<div class="d-flex align-items-center justify-content-between mb_15">
-    <div class="fs-18">Address</div>
-    <p>{{ shipping_info.address }}, {{ shipping_info.city }} {{ shipping_info.postal_code }}</p>
-</div>
-<div class="d-flex align-items-center justify-content-between mb_15">
-    <div class="fs-18">Country</div>
-    <p>{{ shipping_info.country|country_name }}</p>
-</div>
-<div class="d-flex align-items-center justify-content-between mb_15">
-    <div class="fs-18">Phone</div>
-    <p>{{ shipping_info.phone }}</p>
-</div>
-<div class="text-end mb_20">
-    <a href="{% url 'orders:shipping_info' %}" class="text-decoration-underline fs-14 text-primary">
-        Edit Shipping Info
-    </a>
-</div>
-
+                        <div class="fs-18">Name</div>
+                        <p>{{ shipping_info.first_name }} {{ shipping_info.last_name }}</p>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between mb_15">
+                        <div class="fs-18">Email</div>
+                        <p>{{ shipping_info.email }}</p>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between mb_15">
+                        <div class="fs-18">Address</div>
+                        <p>{{ shipping_info.address }}, {{ shipping_info.city }} {{ shipping_info.postal_code }}</p>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between mb_15">
+                        <div class="fs-18">Country</div>
+                        <p>{{ shipping_info.country|country_name }}</p>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between mb_15">
+                        <div class="fs-18">Phone</div>
+                        <p>{{ shipping_info.phone }}</p>
+                    </div>
+                    <div class="text-end mb_20">
+                        <a href="{% url 'orders:shipping_info' %}" class="text-decoration-underline fs-14 text-primary">
+                            Edit Shipping Info
+                        </a>
+                    </div>
 
                     <!-- Cart Items -->
                     {% for item in cart_items %}
@@ -113,9 +112,35 @@
                     </div>
 
                     <!-- Subtotal -->
-                    <div class="d-flex align-items-center justify-content-between mb_24 border-top pt-3">
-                        <div class="fs-22 fw-6">Subtotal</div>
+                    <div class="d-flex align-items-center justify-content-between border-top pt-3 mb_10">
+                        <div class="fs-18 fw-5">Subtotal</div>
                         <span class="total-value">${{ subtotal|floatformat:2 }}</span>
+                    </div>
+
+                    <!-- Gift Wrap (only show if non-zero) -->
+                    {% if gift_wrap_price > 0 %}
+                    <div class="d-flex align-items-center justify-content-between mb_10">
+                        <div class="fs-18 fw-5">Gift Wrap</div>
+                        <span class="total-value">${{ gift_wrap_price|floatformat:2 }}</span>
+                    </div>
+                    {% endif %}
+
+                    <!-- Shipping Fee -->
+                    <div class="d-flex align-items-center justify-content-between mb_10">
+                        <div class="fs-18 fw-5">Shipping</div>
+                        <span class="total-value">
+                            {% if shipping_fee == 0 %}
+                                Free
+                            {% else %}
+                                ${{ shipping_fee|floatformat:2 }}
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    <!-- Grand Total -->
+                    <div class="d-flex align-items-center justify-content-between mb_24 border-top pt-3">
+                        <div class="fs-22 fw-6">Total</div>
+                        <span class="total-value">${{ grand_total|floatformat:2 }}</span>
                     </div>
 
                     <!-- Confirm Button -->
@@ -139,5 +164,9 @@
         </div>
     </div>
 </section>
+
+
+
+
 
 {% endblock %}

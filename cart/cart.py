@@ -1,10 +1,11 @@
 from datetime import datetime, timedelta
 from decimal import Decimal
 from django.conf import settings
-from store.models import Product
+from store.models import Product, ShippingFee
 from .models import CartItem, CartSettings, Cart as CartModel  # Rename to avoid name clash
 import json
 import hashlib
+
 
 
 def get_cart_settings():
@@ -163,6 +164,53 @@ class Cart:
         if self.gift_wrap:
             total += self.gift_wrap_price
         return total
+    
+    
+    # NEW – total order weight in kg
+    def get_total_weight(self):
+        """
+        Returns the combined weight (kg) of all items in the cart.
+        """
+        total = Decimal('0.00')
+        for item in self.__iter__():          # reuse the iterator you already have
+            weight = getattr(item['product'], 'weight', 0) or Decimal('0.00')
+            total += weight * item['quantity']
+        return total
+    
+    
+    
+    # NEW – lookup the correct rule and return the cost
+    def get_shipping_fee(self):
+        total_weight = self.get_total_weight()
+
+        fee_rule = (ShippingFee.objects
+                    .filter(min_weight__lte=total_weight,
+                            max_weight__gte=total_weight)
+                    .order_by('min_weight')
+                    .first())
+
+        if not fee_rule:
+            return Decimal('0.00')  # fallback
+
+        fee = fee_rule.calculate_fee(total_weight)  # Pass only total_weight here
+
+        if self.get_total_price() >= self.FREE_SHIPPING_THRESHOLD:
+            return Decimal('0.00')
+
+        return fee
+
+
+
+
+    # NEW – subtotal + gift‑wrap + shipping
+    def get_grand_total(self):
+        subtotal      = self.get_total_price()   # includes gift‑wrap already
+        shipping_fee  = self.get_shipping_fee()
+        return subtotal + shipping_fee
+
+        
+        
+    
 
     def clear(self):
         if settings.CART_SESSION_ID in self.session:
@@ -170,6 +218,8 @@ class Cart:
         if 'gift_wrap' in self.session:
             del self.session['gift_wrap']
         self.session.modified = True
+        
+        
 
     def get_free_shipping_data(self):
         total = self.get_total_price()
@@ -238,6 +288,9 @@ class Cart:
             except Product.DoesNotExist:
                 return None
         return None
+    
+    
+    
 
 
 def sync_session_to_db_cart(session_cart, user):
