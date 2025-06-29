@@ -24,6 +24,23 @@
 }
 
 
+.full-width {
+    width: 100%;
+    display: block;
+    grid-column: 1 / -1; /* If you're using CSS Grid */
+}
+
+.tf-pagination-wrap.view-more-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0;
+}
+
+
+
+
+
 </style>
 
 {% endblock %}
@@ -148,50 +165,60 @@
                 </div>
                 <div class="grid-layout loadmore-item wow fadeInUp" data-wow-delay="0s" data-grid="grid-4">
 
+
+
                     {% for product in latest_products %}
-                    <!-- card product 1 -->
-                    <div class="card-product fl-item">
-                        <div class="card-product-wrapper">
-                            <a href="{{ product.get_absolute_url }}" class="product-img">
-                                {% if product.first_image %}
-                                <img class="lazyload img-product" data-src="{{ product.first_image.image.url }}"
-                                    src="{{ product.first_image.image.url }}" alt="{{ product.name }}">
-                                {% else %}
-                                 <img class="lazyload img-hover" data-src="{% static 'images/placeholder.png' %}"
-                                    src="{% static 'images/placeholder.png' %}" alt="{{ product.name }}">
-                                {% endif %}
+    <!-- card product -->
+    <div class="card-product fl-item">
+        <div class="card-product-wrapper">
+            <a href="{{ product.get_absolute_url }}" class="product-img">
+                {% if product.first_image %}
+                    <img class="lazyload img-product" data-src="{{ product.first_image.image.url }}"
+                         src="{{ product.first_image.image.url }}" alt="{{ product.name }}">
+                {% else %}
+                    <img class="lazyload img-hover" data-src="{% static 'images/placeholder.png' %}"
+                         src="{% static 'images/placeholder.png' %}" alt="{{ product.name }}">
+                {% endif %}
 
-                                {% if product.second_image %}
-                                 <img class="lazyload img-hover" data-src="{{ product.second_image.image.url }}"
-                                    src="{{ product.second_image.image.url }}" alt="{{ product.name }}">
-                                {% else %}
-                                 <img class="lazyload img-hover" data-src="{% static 'images/placeholder.png' %}"
-                                    src="{% static 'images/placeholder.png' %}" alt="{{ product.name }}">
-                                {% endif %}
-                            </a>
-                            
-                            
-                        </div>
-                        <div class="card-product-info">
-                            <a href="{{ product.get_absolute_url }}" class="title link">{{ product.name }}</a>
-                            <span class="price">
-                                {% if product.discounted_price %}
-                                   <del>${{ product.price }}</del> ${{ product.discounted_price }}
-                                {% else %}
-                                   ${{ product.price }}
-                                {% endif %}
-                            </span>
-                            
-                        </div>
-                    </div>
+                {% if product.second_image %}
+                    <img class="lazyload img-hover" data-src="{{ product.second_image.image.url }}"
+                         src="{{ product.second_image.image.url }}" alt="{{ product.name }}">
+                {% else %}
+                    <img class="lazyload img-hover" data-src="{% static 'images/placeholder.png' %}"
+                         src="{% static 'images/placeholder.png' %}" alt="{{ product.name }}">
+                {% endif %}
+            </a>
+        </div>
+        <div class="card-product-info">
+            <a href="{{ product.get_absolute_url }}" class="title link">{{ product.name }}</a>
+            <span class="price">
+                {% if product.discounted_price %}
+                    <del>${{ product.price }}</del> ${{ product.discounted_price }}
+                {% else %}
+                    ${{ product.price }}
+                {% endif %}
+            </span>
+        </div>
+    </div>
 
-                    {% endfor %}
+    {% if forloop.counter == 4 %}
+        <!-- Load more button after the 4th product -->
+       <!-- Force full-width inside product grid -->
+<div class="fl-item full-width text-center">
+    <div class="tf-pagination-wrap view-more-button text-center">
+        <button class="tf-btn-loading tf-loading-default style-2 btn-loadmore ">
+            <span class="text">Load more</span>
+        </button>
+    </div>
+</div>
 
-                    
-                <div class="tf-pagination-wrap view-more-button text-center">
-                    <button class="tf-btn-loading tf-loading-default style-2 btn-loadmore "><span class="text">Load
-                            more</span></button>
-                </div>
+    {% endif %}
+{% endfor %}
+
+
+
+
+
             </div>
         </section>
         <!-- /Seller -->

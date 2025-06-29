@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load store_filters %}
 
 {% block title %}
 {% if sub_category %}
@@ -14,6 +15,57 @@
 {% endblock %}
 
 
+{% block header %}
+<style>
+
+.custom-dropdown-menu {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  padding: 8px 0;
+  width: 220px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 15px;
+  color: #333;
+}
+
+.custom-dropdown-menu .filter-select-item {
+  display: block;
+  padding: 10px 20px;
+  color: #444;
+  text-decoration: none;
+  transition: background-color 0.25s ease, color 0.25s ease;
+  font-weight: 500;
+  border-left: 4px solid transparent;
+}
+
+.custom-dropdown-menu .filter-select-item:hover,
+.custom-dropdown-menu .filter-select-item:focus {
+  background-color: #f0f8ff;  /* subtle light blue */
+  color: #0078d7;              /* bright blue */
+  border-left-color: #0078d7;
+  outline: none;
+  cursor: pointer;
+}
+
+.custom-dropdown-menu .text-value-item {
+  /* optionally make it slightly bolder */
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.animate-hover-btn {
+  transition: none !important;
+  animation: none !important;
+}
+
+
+
+
+</style>
+
+{% endblock header %}
 
 {% block content %}
 
@@ -43,40 +95,41 @@
                     <ul class="tf-control-layout d-flex justify-content-center">
                        
                     </ul>
+
+
+
+
+                    <!-- feature filter -->
                     <div class="tf-control-sorting d-flex justify-content-end">
-                        <div class="tf-dropdown-sort" data-bs-toggle="dropdown">
-                            <div class="btn-select">
-                                <span class="text-sort-value">Featured</span>
-                                <span class="icon icon-arrow-down"></span>
-                            </div>
-                            <div class="dropdown-menu">
-                                <div class="select-item active">
-                                    <span class="text-value-item">Featured</span>
-                                </div>
-                                <div class="select-item">
-                                    <span class="text-value-item">Best selling</span>
-                                </div>
-                                <div class="select-item" data-sort-value="a-z">
-                                    <span class="text-value-item">Alphabetically, A-Z</span>
-                                </div>
-                                <div class="select-item" data-sort-value="z-a">
-                                    <span class="text-value-item">Alphabetically, Z-A</span>
-                                </div>
-                                <div class="select-item" data-sort-value="price-low-high">
-                                    <span class="text-value-item">Price, low to high</span>
-                                </div>
-                                <div class="select-item" data-sort-value="price-high-low">
-                                    <span class="text-value-item">Price, high to low</span>
-                                </div>
-                                <div class="select-item">
-                                    <span class="text-value-item">Date, old to new</span>
-                                </div>
-                                <div class="select-item">
-                                    <span class="text-value-item">Date, new to old</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+    <div class="tf-dropdown-sort position-relative" data-bs-toggle="dropdown">
+        <div class="btn-select">
+            <span class="text-sort-value">Featured</span>
+            <span class="icon icon-arrow-down"></span>
+        </div>
+
+       <div class="dropdown-menu custom-dropdown-menu">
+            <a class="filter-select-item" data-sort="featured"><span class="text-value-item">Featured</span></a>
+            <a class="filter-select-item" data-sort="a-z"><span class="text-value-item">Alphabetically, A-Z</span></a>
+            <a class="filter-select-item" data-sort="z-a"><span class="text-value-item">Alphabetically, Z-A</span></a>
+            <a class="filter-select-item" data-sort="price-low-high"><span class="text-value-item">Price, Low to High</span></a>
+            <a class="filter-select-item" data-sort="price-high-low"><span class="text-value-item">Price, High to Low</span></a>
+            <a class="filter-select-item" data-sort="date-old-new"><span class="text-value-item">Date, Old to New</span></a>
+            <a class="filter-select-item" data-sort="date-new-old"><span class="text-value-item">Date, New to Old</span></a>
+        </div>
+
+
+
+
+    </div>
+</div>
+
+                   
+                    <!-- end of feature filter -->
+
+
+
+
+
                 </div>
 
                 <!-- side menu bar -->
@@ -330,67 +383,84 @@
 
 
                     <div class="wrapper-control-shop tf-shop-content">
-                        
 
                         
-                        <!-- product display second layout -->
-                        <div class="tf-grid-layout wrapper-shop tf-col-3" id="gridLayout">
+                        
 
-                            {% for product in products %}
-                            <!-- card product 1 -->
-                            <div class="card-product grid" data-availability="In stock" data-brand="Ecomus">
+<!-- product show block -->
+                        
 
-                                <div class="card-product-wrapper">
-                                    <a href="{{ product.get_absolute_url }}" class="product-img">
+                            <!-- product display second layout -->
+                       <div id="productGrid" class="tf-grid-layout wrapper-shop tf-col-3">
+                            {% include 'store/_product_grid.html' %}
+                       
 
-                                        {% if product.first_image %}
-                                        <img class="lazyload img-product" data-src="{{ product.first_image.image.url }}"
-                                            src="{{ product.first_image.image.url }}" alt="{{ product.name}}">
-                                        {% endif %}
 
-                                        {% if product.second_image %}
-                                        <img class="lazyload img-hover" data-src="{{ product.second_image.image.url }}"
-                                            src="{{ product.second_image.image.url }}" alt="{{ product.name }}">
-                                        {% endif %}
-                                    </a>
-                                </div>
+                         
 
-                                <div class="card-product-info">
-                                    <a href="{{ product.get_absolute_url }}" class="title link">{{ product.name }}</a>
-                                    <span class="price current-price">
-                                        {% if product.discounted_price %}
-                                        <del>${{ product.price }}</del> ${{ product.discounted_price }}
-                                        {% else %}
-                                        ${{ product.price }}
-                                        {% endif %}
-                                    </span>   
-                                </div>
-                                
-                            </div>
 
-                            {% endfor %}
-                            
-                            <!-- pagination -->
-                            <ul class="wg-pagination tf-pagination-list">
+                    <!-- pagination -->
+                    <ul class="wg-pagination tf-pagination-list" id="pagination">
+                        {# « Prev #}
+                        {% if page_obj.has_previous %}
+                            <li>
+                                <a href="?{% query_string request.GET exclude='page' %}&page={{ page_obj.previous_page_number }}"
+                                class="pagination-link animate-hover-btn">
+                                    <span class="icon icon-arrow-left"></span>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="disabled pagination-link animate-hover-btn">
+                                <span class="icon icon-arrow-left"></span>
+                            </li>
+                        {% endif %}
+
+                        {# page numbers #}
+                        {% for num in paginator.page_range %}
+                            {% if num == page_obj.number %}
                                 <li class="active">
-                                    <a href="#" class="pagination-link">1</a>
+                                    <a href="?{% query_string request.GET exclude='page' %}&page={{ num }}"
+                                    class="pagination-link">{{ num }}</a>
                                 </li>
+                            {% else %}
                                 <li>
-                                    <a href="#" class="pagination-link animate-hover-btn">2</a>
+                                    <a href="?{% query_string request.GET exclude='page' %}&page={{ num }}"
+                                    class="pagination-link animate-hover-btn">{{ num }}</a>
                                 </li>
-                                <li>
-                                    <a href="#" class="pagination-link animate-hover-btn">3</a>
-                                </li>
-                                <li>
-                                    <a href="#" class="pagination-link animate-hover-btn">4</a>
-                                </li>
-                                <li>
-                                    <a href="#" class="pagination-link animate-hover-btn">
-                                        <span class="icon icon-arrow-right"></span>
-                                    </a>
-                                </li>
-                            </ul>
+                            {% endif %}
+                        {% endfor %}
+
+                        {# Next » #}
+                        {% if page_obj.has_next %}
+                            <li>
+                                <a href="?{% query_string request.GET exclude='page' %}&page={{ page_obj.next_page_number }}"
+                                class="pagination-link animate-hover-btn">
+                                    <span class="icon icon-arrow-right"></span>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="disabled pagination-link animate-hover-btn">
+                                <span class="icon icon-arrow-right"></span>
+                            </li>
+                        {% endif %}
+                    </ul>
+
+
+
+
+
                         </div>
+
+
+<!-- end o product show block -->
+
+
+
+
+
+                        
+                        
+
                     </div>
                 </div>
 
@@ -408,7 +478,7 @@
 
     
 
-    <!-- Filter -->
+    <!-- side menu Filter -->
     <div class="offcanvas offcanvas-start canvas-filter" id="filterShop">
         <div class="canvas-wrapper">
             <header class="canvas-header">
@@ -427,33 +497,30 @@
                     </div>
                     <div id="categories" class="collapse show">
 
+
+
+
                         <ul class="list-categoris current-scrollbar mb_36">
     {% for main in links %}
-        {% if main.id == active_main_category_id %}
+        {% if main.id == active_main_category_id or not active_main_category_id and forloop.first %}
             {% for category in main.categories.all %}
                 <div class="widget-facet wd-categories">
                     <div class="facet-title"
-                        data-bs-target="#categories-{{ category.id }}"
-                        data-bs-toggle="collapse"
-                        aria-expanded="{% if category.id == active_category_id %}true{% else %}false{% endif %}"
-                        aria-controls="categories-{{ category.id }}">
+                         data-bs-target="#categories-{{ category.id }}"
+                         data-bs-toggle="collapse"
+                         aria-expanded="{% if category.id == active_category_id %}true{% else %}false{% endif %}"
+                         aria-controls="categories-{{ category.id }}">
 
                         <span>{{ category.name }}</span>
                         <span class="icon icon-arrow-up"></span>
                     </div>
 
                     <div id="categories-{{ category.id }}"
-                         class="collapse {% if category.id == active_category_id %}show{% endif %}">
+                         class="collapse {% if category.id == active_category_id or not active_category_id and forloop.first %}show{% endif %}">
                         <ul class="list-categoris current-scrollbar mb_36">
 
                             {# 'All' link for this category #}
-                            {% if not sub_category %}
-                                <li class="cate-item current">
-                            {% elif sub_category.category.id == category.id and not sub_category.slug %}
-                                <li class="cate-item current">
-                            {% else %}
-                                <li class="cate-item">
-                            {% endif %}
+                            <li class="cate-item {% if not sub_category or sub_category.category.id == category.id and not sub_category.slug %}current{% endif %}">
                                 <a href="{% url 'store:store_category' main_slug=main.slug category_slug=category.slug %}">
                                     <span>All</span>&nbsp;<span>({{ category.product_count }})</span>
                                 </a>
@@ -476,6 +543,9 @@
     {% endfor %}
 </ul>
 
+
+
+                        
 
 
                         
@@ -675,6 +745,13 @@
 
 
 
+
+
+
+
+
+
+
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     var priceSlider = document.getElementById('price-value-range');
@@ -711,6 +788,120 @@
   });
 </script>
 
+
+
+
+<!-- filter feature -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const sortLinks = document.querySelectorAll('.filter-select-item');
+
+
+    sortLinks.forEach(link => {
+        link.addEventListener('click', function (e) {
+            e.preventDefault();
+
+            const sortValue = this.getAttribute('data-sort');
+            updateSortValue(sortValue);
+            fetchSortedProducts(sortValue);
+        });
+    });
+
+    function updateSortValue(sortValue) {
+        const sortText = document.querySelector(`[data-sort="${sortValue}"] .text-value-item`).textContent;
+        document.querySelector('.text-sort-value').textContent = sortText;
+    }
+
+    function fetchSortedProducts(sort) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('sort', sort);
+
+        fetch(url, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            // Replace #gridLayout innerHTML directly with partial HTML from server
+            document.querySelector('#productGrid').innerHTML = html;
+        })
+        .catch(error => {
+            console.error('Error updating product grid:', error);
+        });
+    }
+});
+</script>
+
+
+<!-- pagination product grid -->
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+  const productGrid = document.getElementById('productGrid');
+  const pagination  = document.getElementById('pagination');
+  if (!productGrid || !pagination) return;  // no grid, no script
+
+  /* -----------------------------------------------------------
+   *  Click on a pagination link → fetch partial via AJAX
+   * --------------------------------------------------------- */
+  pagination.addEventListener('click', (e) => {
+    const link = e.target.closest('.pagination-link');
+    if (!link) return;
+
+    // ignore empty "#" or javascript:void links
+    if (!link.getAttribute('href') || link.getAttribute('href') === '#') {
+      e.preventDefault();
+      return;
+    }
+
+    e.preventDefault();
+
+    // Build absolute URL, keep other query‑params intact
+    const url = new URL(link.href, window.location.origin);
+
+    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+      .then(res => res.text())
+      .then(html => {
+        const parser = new DOMParser();
+        const doc    = parser.parseFromString(html, 'text/html');
+
+        // Replace product cards
+        const newGrid = doc.getElementById('productGrid');
+        if (newGrid) productGrid.innerHTML = newGrid.innerHTML;
+
+        // Replace pagination markup
+        const newPagination = doc.getElementById('pagination');
+        if (newPagination) pagination.innerHTML = newPagination.innerHTML;
+
+        // Scroll to grid top (optional)
+        productGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        // Push new URL to browser history
+        history.pushState(null, '', url);
+      })
+      .catch(err => console.error('AJAX pagination error:', err));
+  });
+
+  /* -----------------------------------------------------------
+   *  Browser back / forward → refetch current state
+   * --------------------------------------------------------- */
+  window.addEventListener('popstate', () => {
+    fetch(window.location.href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+      .then(res => res.text())
+      .then(html => {
+        const parser = new DOMParser();
+        const doc    = parser.parseFromString(html, 'text/html');
+
+        productGrid.innerHTML = doc.getElementById('productGrid').innerHTML;
+        pagination.innerHTML  = doc.getElementById('pagination').innerHTML;
+      })
+      .catch(err => console.error('popstate reload error:', err));
+  });
+
+});
+</script>
 
 
     

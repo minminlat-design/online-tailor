@@ -21,6 +21,7 @@ from content.models import StaticPage
 import redis
 from django.conf import settings
 from django.db.models import F
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
 
@@ -42,70 +43,72 @@ r = redis.Redis(
 
 
 
-
-
 def store(
     request,
     main_slug: str | None = None,
     category_slug: str | None = None,
     subcategory_slug: str | None = None,
-    brand_slug: str | None = None,      # ← comes from /shop/brand/<slug>/
-    color_slug: str | None = None,      # ← comes from /shop/color/<slug>/
-):
-    """
-    Product catalogue with optional filters:
-      • main category / category / sub-category (via path)
-      • brand  (via /shop/brand/<slug>/   or legacy ?brand=<id>)
-      • color  (via /shop/color/<slug>/   or legacy ?color=<id>)
-    """
-
+    brand_slug: str | None = None,
+    color_slug: str | None = None,
+    ):
     # ------------------------------------------------------------------
-    # Base queryset
+    # Base queryset + availability
     # ------------------------------------------------------------------
     products = Product.objects.filter(is_available=True)
 
     # ------------------------------------------------------------------
-    # Brand filter (slug first, fall back to ?brand=id for backward compat)
+    # Brand filter
     # ------------------------------------------------------------------
     selected_brand = None
     if brand_slug:
         selected_brand = get_object_or_404(Brand, slug=brand_slug)
         products = products.filter(brand=selected_brand)
-    else:  # legacy query-string
+    else:
         brand_id = request.GET.get("brand")
         if brand_id and brand_id.isdigit():
             selected_brand = get_object_or_404(Brand, id=int(brand_id))
             products = products.filter(brand_id=selected_brand.id)
 
     # ------------------------------------------------------------------
-    # Color filter (slug first, fall back to ?color=id)
+    # Color filter
     # ------------------------------------------------------------------
     selected_color = None
     if color_slug:
         selected_color = get_object_or_404(Color, slug=color_slug)
         products = products.filter(color=selected_color)
-    else:  # legacy query-string
+    else:
         color_id = request.GET.get("color")
         if color_id and color_id.isdigit():
             selected_color = get_object_or_404(Color, id=int(color_id))
             products = products.filter(color_id=selected_color.id)
-            
-            
+
     # ------------------------------------------------------------------
-    # Price filter (?price_min=&price_max=)  ← ADD THIS BLOCK
+    # Price filter
     # ------------------------------------------------------------------
     price_min = request.GET.get("price_min")
     price_max = request.GET.get("price_max")
-
     if price_min and price_min.isnumeric():
         products = products.filter(price__gte=price_min)
-
     if price_max and price_max.isnumeric():
         products = products.filter(price__lte=price_max)
+        
+        
+    
+    # ------------------------------------------------------------------
+    # Keyword search  (?q=keyword)
+    # ------------------------------------------------------------------
+    search_query = request.GET.get("q", "").strip()
+
+    if search_query:
+        products = products.filter(
+            Q(name__icontains=search_query) |
+            Q(description__icontains=search_query) |
+            Q(brand__name__icontains=search_query)
+        ).distinct()
 
 
     # ------------------------------------------------------------------
-    # Category / sub-category filters (unchanged from your original logic)
+    # Category / sub‑category filters
     # ------------------------------------------------------------------
     main_category = category = sub_category = None
     subcategories = categories = None
@@ -129,16 +132,12 @@ def store(
         main_category = category.main_category
         active_main_category_id = main_category.id
 
-        # Annotate subcategories with product counts
         subcategories = category.subcategories.annotate(
             product_count=Count('products', filter=Q(products__is_available=True))
         )
-
-        # Include both products from subcategories and (optionally) directly assigned to the category
         products = products.filter(
-            Q(sub_category__in=subcategories) | Q(category=category)
+            Q(sub_category__in=subcategories) | Q(sub_category__category=category)
         )
-
         categories = _annotate_sidebar_categories(main_category)
 
     elif main_slug:
@@ -149,7 +148,39 @@ def store(
         products = products.filter(sub_category__in=all_subs)
 
     # ------------------------------------------------------------------
-    # Sidebar collections (brands & colors with counts)
+    # Sorting
+    # ------------------------------------------------------------------
+    sort = request.GET.get("sort", "featured")
+    if sort == "price-low-high":
+        products = products.order_by("price")
+    elif sort == "price-high-low":
+        products = products.order_by("-price")
+    elif sort == "a-z":
+        products = products.order_by("name")
+    elif sort == "z-a":
+        products = products.order_by("-name")
+    elif sort == "date-old-new":
+        products = products.order_by("created_at")
+    elif sort == "date-new-old":
+        products = products.order_by("-created_at")
+    else:                              # featured fallback
+        products = products.order_by("-created_at")
+
+    # ------------------------------------------------------------------
+    # Pagination  (12 items per page)
+    # ------------------------------------------------------------------
+    paginator   = Paginator(products, 12)
+    page_number = request.GET.get("page", 1)
+
+    try:
+        paged_products = paginator.page(page_number)
+    except PageNotAnInteger:
+        paged_products = paginator.page(1)
+    except EmptyPage:
+        paged_products = paginator.page(paginator.num_pages)
+
+    # ------------------------------------------------------------------
+    # Sidebar widgets & extras
     # ------------------------------------------------------------------
     brands = (
         Brand.objects
@@ -163,45 +194,50 @@ def store(
              .annotate(product_count=Count('products', filter=Q(products__is_available=True)))
              .distinct()
     )
-
-    # ------------------------------------------------------------------
-    # Extras
-    # ------------------------------------------------------------------
     sale_products = Product.is_sale.all()[:3]
     gallery = Product.objects.filter(is_available=True)[:6]
 
     # ------------------------------------------------------------------
-    # Context
+    # Context  — build once, BEFORE any return
     # ------------------------------------------------------------------
     context = {
-        "products": products,
-        "main_category": main_category,
-        "category": category,
-        "sub_category": sub_category,
-        "subcategories": subcategories,
-        "categories": categories,
-        "active_category_id": category.id if category else None,
+        "products"              : paged_products,
+        "paginator"             : paginator,
+        "page_obj"              : paged_products,
+
+        "main_category"         : main_category,
+        "category"              : category,
+        "sub_category"          : sub_category,
+        "subcategories"         : subcategories,
+        "categories"            : categories,
+        "active_category_id"    : category.id if category else None,
         "active_main_category_id": active_main_category_id,
 
-        # filter widgets
-        "brands": brands,
-        "colors": colors,
-        "selected_brand": selected_brand,
-        "selected_color": selected_color,
+        "brands"                : brands,
+        "colors"                : colors,
+        "selected_brand"        : selected_brand,
+        "selected_color"        : selected_color,
 
-        # extras
-        "sale_products": sale_products,
-        "gallery": gallery,
-        
-        "price_min": price_min,
-        "price_max": price_max,
+        "sale_products"         : sale_products,
+        "gallery"               : gallery,
+
+        "price_min"             : price_min,
+        "price_max"             : price_max,
+        "sort"                  : sort,
+        "search_query"          : search_query,
 
     }
+
+    # ------------------------------------------------------------------
+    # AJAX request → return partial
+    # ------------------------------------------------------------------
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return render(request, "store/_product_grid.html", context)
+
+    # ------------------------------------------------------------------
+    # Regular request → full page
+    # ------------------------------------------------------------------
     return render(request, "store/store.html", context)
-
-
-
-
 
 
 
@@ -244,219 +280,191 @@ def _annotate_sidebar_categories(main_category):
 
 
 
-
+# ----------------------------------------------------------------------
 def product_detail(request, main_slug, category_slug, subcategory_slug, product_slug):
+    """
+    Product detail page with:
+      • view counter (Redis)
+      • variations / customization logic
+      • review sorting + AJAX partial
+      • recently viewed products (session)
+    """
 
-    
-    
-    
+    # -------------------------------------------------- 1. PRODUCT OBJECT
     product = get_object_or_404(
         Product,
         slug=product_slug,
         sub_category__slug=subcategory_slug,
         sub_category__category__slug=category_slug,
-        sub_category__category__main_category__slug=main_slug
+        sub_category__category__main_category__slug=main_slug,
     )
-    
-    # Atomically increment and get the view count
+
+    # -------------------------------------------------- 2. RECENTLY VIEWED
+    rv_ids = request.session.get("recently_viewed", [])
+    if product.id in rv_ids:
+        rv_ids.remove(product.id)
+    rv_ids.insert(0, product.id)
+    rv_ids = rv_ids[:6]                           # keep only 6
+    request.session["recently_viewed"] = rv_ids
+
+    recently_viewed_products = []
+    if rv_ids:
+        qs = Product.objects.filter(id__in=rv_ids, is_available=True).exclude(id=product.id)
+        recently_viewed_products = sorted(qs, key=lambda p: rv_ids.index(p.id))
+
+    # -------------------------------------------------- 3. VIEW COUNTER
     should_count = (
         request.method == "GET"
         and request.headers.get("X-Requested-With") != "XMLHttpRequest"
         and not request.GET.get("partial")
-        and not request.headers.get("Purpose") == "prefetch"  # Chrome prefetch
-        and not request.headers.get("Sec-Fetch-Mode") == "navigate"
-        and not request.headers.get("Sec-Fetch-Site") == "none"
+        and request.headers.get("Purpose") != "prefetch"
+        and request.headers.get("Sec-Fetch-Mode") != "navigate"
+        and request.headers.get("Sec-Fetch-Site") != "none"
     )
 
     if should_count and not request.session.get(f"viewed_product_{product.id}"):
         total_views = r.incr(f"product:{product.id}:views")
         request.session[f"viewed_product_{product.id}"] = True
-
         if product.images.exists():
-            main_image_id = product.images.first().id
-            r.zincrby('product_view_ranking', 1, str(main_image_id))
+            r.zincrby("product_view_ranking", 1, str(product.images.first().id))
     else:
         total_views = r.get(f"product:{product.id}:views") or 0
 
-
-        
-   
-    
-    product_pieces = [piece.name.lower() for piece in product.pieces.all()]
-
+    # -------------------------------------------------- 4. VARIATIONS / CUSTOMIZATION
+    product_pieces = [p.name.lower() for p in product.pieces.all()]
     variations = product.variations.prefetch_related(
-        'option__type',
-        'option__type__target_items'
+        "option__type", "option__type__target_items"
     )
-    
-    monogram_price = None
-    vest_price = None
-    shirt_price = None
-    
-    set_items_unsorted = []
-    customization_by_target = defaultdict(lambda: defaultdict(list))
-    
-    for variation in variations:
-        option = variation.option
-        vtype = option.type
-        option.price_difference = variation.price_difference
-        
-        option.target_names = [target.name.lower() for target in vtype.target_items.all()]
-        
-        if vtype.name.lower() == "monogram" and monogram_price is None:
-            monogram_price = variation.price_difference
-            
-        if vtype.name.lower() == "vest" and option.name.lower() == "vest" and vest_price is None:
-            vest_price = variation.price_difference
-            
-        if vtype.name.lower() == "shirt" and option.name.lower() == "shirt" and shirt_price is None:
-            shirt_price = variation.price_difference
 
-        if vtype.name.lower() == 'set items':
-            set_items_unsorted.append(option)
+    monogram_price = vest_price = shirt_price = None
+    set_items_unsorted = []
+    custom_by_target = defaultdict(lambda: defaultdict(list))
+
+    for var in variations:
+        opt, vtype = var.option, var.option.type
+        opt.price_difference = var.price_difference
+        opt.target_names = [t.name.lower() for t in vtype.target_items.all()]
+
+        name_l = vtype.name.lower()
+        if name_l == "monogram" and monogram_price is None:
+            monogram_price = var.price_difference
+        if name_l == "vest" and opt.name.lower() == "vest" and vest_price is None:
+            vest_price = var.price_difference
+        if name_l == "shirt" and opt.name.lower() == "shirt" and shirt_price is None:
+            shirt_price = var.price_difference
+
+        if name_l == "set items":
+            set_items_unsorted.append(opt)
         else:
-            for target in vtype.target_items.all():
-                key = slugify(vtype.name).replace('-', ' ')
-                customization_by_target[target.name.lower()][key].append(option)
-                
+            key = slugify(vtype.name).replace("-", " ")
+            for tgt in vtype.target_items.all():
+                custom_by_target[tgt.name.lower()][key].append(opt)
+
     set_items = sorted(set_items_unsorted, key=lambda o: o.order)
 
+    # -------------------------------------------------- 5. CART FORM & IMAGES
     cart_product_form = CartAddProductForm()
-
-    images = ProductImage.objects.filter(product=product).select_related('color').order_by('order')
+    images = (
+        ProductImage.objects.filter(product=product)
+        .select_related("color")
+        .order_by("order")
+    )
 
     timer = 0
     if product.countdown_end:
         remaining = (product.countdown_end - timezone.now()).total_seconds()
         timer = max(int(remaining), 0)
-        
+
     monogram_keys = [
         "monogram_style", "monogram_color", "monogram_placement",
-        "shirt_monogram_placement", "shirt_monogram_color", "shirt_monogram_style"
+        "shirt_monogram_placement", "shirt_monogram_color", "shirt_monogram_style",
     ]
 
-    if request.method == "POST":
-        for key in request.POST:
-            if key.startswith(('jacket-', 'pants-', 'shirt-', 'vest-', 'monogram')):
-                values = request.POST.getlist(key)
-                print(f"Selected for {key}: {values}")
-                
-    # --- Review sorting logic starts here ---
-    sort_option = request.GET.get('sort', 'most_recent')
-
+    # -------------------------------------------------- 6. REVIEWS
+    sort_option = request.GET.get("sort", "most_recent")
     reviews = ReviewRating.objects.filter(product=product, status=True, parent__isnull=True)
 
-
-    if sort_option == 'most_recent':
-        reviews = reviews.order_by('-created_at')
-    elif sort_option == 'oldest':
-        reviews = reviews.order_by('created_at')
-    elif sort_option == 'most_popular':
-        # Change this to your actual popularity field; fallback to rating desc
-        reviews = reviews.order_by('-rating', '-created_at')  # Replace 'helpful_votes' if not present
+    if sort_option == "most_recent":
+        reviews = reviews.order_by("-created_at")
+    elif sort_option == "oldest":
+        reviews = reviews.order_by("created_at")
+    elif sort_option == "most_popular":
+        reviews = reviews.order_by("-rating", "-created_at")
     else:
-        reviews = reviews.order_by('-created_at')
+        reviews = reviews.order_by("-created_at")
 
     total_reviews = reviews.count()
-
-    # --- Rating breakdown with half-star support ---
     star_steps = [1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0]
 
-    rating_counts = reviews.values('rating').annotate(count=Count('rating'))
+    rating_counts = reviews.values("rating").annotate(count=Count("rating"))
     ratings_breakdown = dd(int)
-
     for item in rating_counts:
-        raw_rating = float(item['rating'])
-        star = float(Decimal(str(raw_rating)).quantize(Decimal('0.5'), rounding=ROUND_HALF_UP))
-        ratings_breakdown[star] += item['count']
+        raw = float(item["rating"])
+        star = float(Decimal(str(raw)).quantize(Decimal("0.5"), rounding=ROUND_HALF_UP))
+        ratings_breakdown[star] += item["count"]
 
     rating_percentages = {
-        str(star): (ratings_breakdown[star] / total_reviews) * 100 if total_reviews else 0
-        for star in star_steps
+        str(s): (ratings_breakdown[s] / total_reviews) * 100 if total_reviews else 0
+        for s in star_steps
     }
 
-    reply_forms = {review.id: ReviewReplyForm(prefix=str(review.id)) for review in reviews}
-    
-    
-    # Fetch privacy policy page
-    try:
-        shipping_policy = StaticPage.objects.get(slug='shipping-delivery', published=True)
-    except StaticPage.DoesNotExist:
-        shipping_policy = None
-        
-        
-    try:
-        return_policy = StaticPage.objects.get(slug='delivery-return', published=True)
-    except StaticPage.DoesNotExist:
-        return_policy = None
-        
-        
-    share_url = request.build_absolute_uri(product.get_absolute_url())
+    reply_forms = {rev.id: ReviewReplyForm(prefix=str(rev.id)) for rev in reviews}
 
+    # -------------------------------------------------- 7. POLICIES
+    shipping_policy = StaticPage.objects.filter(slug="shipping-delivery", published=True).first()
+    return_policy   = StaticPage.objects.filter(slug="delivery-return",  published=True).first()
 
-
+    # -------------------------------------------------- 8. CONTEXT
     context = {
-        'product': product,
-        'images': images,
-        'first_image': product.first_image(),
-        'timer': timer,
-        'cart_product_form': cart_product_form,
-        'set_items': set_items,
-        'customizations': {k: dict(v) for k, v in customization_by_target.items()},
-        'variations': variations,
-        'product_pieces': product_pieces,
-        'monogram_keys': monogram_keys,
-        'monogram_price': monogram_price or 0,
-        'vest_price': vest_price or 0,
-        'shirt_price': shirt_price or 0,
-        'reviews': reviews,
-        'total_reviews': total_reviews,
-        'average_rating': product.average_rating,
-        'ratings_breakdown': ratings_breakdown,
-        'rating_percentages': rating_percentages,
-        'star_steps': star_steps,
-        'reply_forms': reply_forms,
-        'sort_option': sort_option,  # To highlight active sort option in template
-        'shipping_policy': shipping_policy,  # pass privacy policy as 'shipping policy'
-        'return_policy': return_policy,  # pass return policy as 'return policy'
-        'is_customizable': product.is_customizable, 
-        'share_url': share_url,
-        'total_views': total_views,
+        "product": product,
+        "images": images,
+        "first_image": product.first_image(),
+        "timer": timer,
+        "cart_product_form": cart_product_form,
+        "set_items": set_items,
+        "customizations": {k: dict(v) for k, v in custom_by_target.items()},
+        "variations": variations,
+        "product_pieces": product_pieces,
+        "monogram_keys": monogram_keys,
+        "monogram_price": monogram_price or 0,
+        "vest_price": vest_price or 0,
+        "shirt_price": shirt_price or 0,
+        "reviews": reviews,
+        "total_reviews": total_reviews,
+        "average_rating": product.average_rating,
+        "ratings_breakdown": ratings_breakdown,
+        "rating_percentages": rating_percentages,
+        "star_steps": star_steps,
+        "reply_forms": reply_forms,
+        "sort_option": sort_option,
+        "shipping_policy": shipping_policy,
+        "return_policy": return_policy,
+        "is_customizable": product.is_customizable,
+        "share_url": request.build_absolute_uri(product.get_absolute_url()),
+        "total_views": total_views,
+        "recently_viewed_products": recently_viewed_products,
+        # pieces flags
+        "is_jacket_product": product.pieces.filter(name__iexact="jacket").exists(),
+        "is_vest_product":   product.pieces.filter(name__iexact="vest").exists(),
+        "is_pants_product":  product.pieces.filter(name__iexact="pants").exists(),
+        "is_shirt_product":  product.pieces.filter(name__iexact="shirt").exists(),
     }
-    
-    included_pieces = {
-        'is_jacket_product': product.pieces.filter(name__iexact="jacket").exists(),
-        'is_vest_product': product.pieces.filter(name__iexact="vest").exists(),
-        'is_pants_product': product.pieces.filter(name__iexact="pants").exists(),
-        'is_shirt_product': product.pieces.filter(name__iexact="shirt").exists(),
-    }
-    context.update(included_pieces)
-    
-    
-    
-    # --  AJAX fragment response  ------------------------------------------
+
+    # -------------------------------------------------- 9. AJAX REVIEW PARTIAL
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
         html = render_to_string(
-            "store/partials/review_list.html",        # fragment template
+            "store/partials/review_list.html",
             {
                 "reviews": reviews,
                 "reply_forms": reply_forms,
                 "sort_option": sort_option,
-                # add anything else the partial needs
             },
             request=request,
         )
         return JsonResponse({"html": html})
-    # ----------------------------------------------------------------------
 
-    
-    
-    
-    
-    
-
-    return render(request, 'store/product_detail.html', context)
-
+    # -------------------------------------------------- 10. FULL PAGE RENDER
+    return render(request, "store/product_detail.html", context)
 
 
 

@@ -1,0 +1,34 @@
+                        {% for product in products %}
+                            <!-- card product 1 -->
+                            <div class="card-product grid" data-availability="In stock" data-brand="Ecomus">
+
+                                <div class="card-product-wrapper">
+                                    <a href="{{ product.get_absolute_url }}" class="product-img">
+
+                                        {% if product.first_image %}
+                                        <img class="lazyload img-product" data-src="{{ product.first_image.image.url }}"
+                                            src="{{ product.first_image.image.url }}" alt="{{ product.name}}">
+                                        {% endif %}
+
+                                        {% if product.second_image %}
+                                        <img class="lazyload img-hover" data-src="{{ product.second_image.image.url }}"
+                                            src="{{ product.second_image.image.url }}" alt="{{ product.name }}">
+                                        {% endif %}
+                                    </a>
+                                </div>
+
+                                <div class="card-product-info">
+                                    <a href="{{ product.get_absolute_url }}" class="title link">{{ product.name }}</a>
+                                    <span class="price current-price">
+                                        {% if product.discounted_price %}
+                                        <del>${{ product.price }}</del> ${{ product.discounted_price }}
+                                        {% else %}
+                                        ${{ product.price }}
+                                        {% endif %}
+                                    </span>   
+                                </div>
+                                
+                            </div>
+
+                        {% endfor %}
+                            

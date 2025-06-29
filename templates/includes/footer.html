@@ -290,17 +290,17 @@
 
     
 
-         {% get_static_pages as pages %}
-                                    {% for page in pages %}
-              <li class="nav-mb-item" style="margin:5px;">
-                                        <a href="{% url 'content:static_page_detail' slug=page.slug %}" class="item-link">
-                                        {{ page.title }}
+        {# mobile‑menu static pages #}
+{% for page in navbar_static_pages %}
+    <li class="nav-mb-item" style="margin:5px;">
+        <a href="{% url 'content:static_page_detail' slug=page.slug %}" class="item-link">
+            {{ page.title }}
+        </a>
+    </li>
+{% endfor %}
 
-                                        </a>
-                                        
-                                    </li>
                                     
-                                    {% endfor %}
+                                    
                                
 
     </li>
@@ -310,12 +310,18 @@
 
 </ul>
 
+
+
+
+
+
                 
                 <br/><br/>
                 <div class="mb-other-content">
                     <div class="d-flex group-icon">
                         
-                        <a href="{% url 'search:search' %}" class="site-nav-icon"><i class="icon icon-search"></i>Search</a>
+                        <!--<a href="{% url 'search:search' %}" class="site-nav-icon"><i class="icon icon-search"></i>Search</a>-->
+                        
                     </div>
                     <div class="mb-notice">
                         <a href="{% url 'content:static_page_detail' slug='contact' %}" class="text-need">Need help ?</a>
@@ -392,99 +398,70 @@
 
 <!-- canvasSearch -->
 <div class="offcanvas offcanvas-end canvas-search" id="canvasSearch">
-<div class="canvas-wrapper">
+  <div class="canvas-wrapper">
     <header class="tf-search-head">
-        <div class="title fw-5">
-            Search our site
-            <div class="close">
-                <span class="icon-close icon-close-popup" data-bs-dismiss="offcanvas" aria-label="Close"></span>
-            </div>
+      <div class="title fw-5">
+        Search Products
+        <div class="close">
+          <span class="icon-close icon-close-popup" data-bs-dismiss="offcanvas" aria-label="Close"></span>
         </div>
-        <div class="tf-search-sticky">
-            <form class="tf-mini-search-frm">
-                <fieldset class="text">
-                    <input type="text" placeholder="Search" class="" name="text" tabindex="0" value=""
-                        aria-required="true" required="">
-                </fieldset>
-                <button class="" type="submit"><i class="icon-search"></i></button>
-            </form>
-        </div>
+      </div>
+      <div class="tf-search-sticky">
+        <form class="tf-mini-search-frm" action="{% url 'store:store' %}" method="get" autocomplete="off">
+          <fieldset class="text">
+            <input
+              type="text"
+              placeholder="Search"
+              class="canvas-search-input"
+              name="q"
+              tabindex="0"
+              aria-required="true"
+              required
+              value=""
+              autocomplete="off"
+              />
+          </fieldset>
+          <button type="submit"><i class="icon-search"></i></button>
+        </form>
+      </div>
     </header>
     <div class="canvas-body p-0">
-        <div class="tf-search-content">
-            <div class="tf-cart-hide-has-results">
-                <div class="tf-col-quicklink">
-                    <div class="tf-search-content-title fw-5">Quick link</div>
-                    <ul class="tf-quicklink-list">
-                        <li class="tf-quicklink-item">
-                            <a href="shop-default.html" class="">Fashion</a>
-                        </li>
-                        <li class="tf-quicklink-item">
-                            <a href="shop-default.html" class="">Men</a>
-                        </li>
-                        <li class="tf-quicklink-item">
-                            <a href="shop-default.html" class="">Women</a>
-                        </li>
-                        <li class="tf-quicklink-item">
-                            <a href="shop-default.html" class="">Accessories</a>
-                        </li>
-                    </ul>
-                </div>
-                <div class="tf-col-content">
-                    <div class="tf-search-content-title fw-5">Need some inspiration?</div>
-                    <div class="tf-search-hidden-inner">
-                        <div class="tf-loop-item">
-                            <div class="image">
-                                <a href="product-detail.html">
-                                    <img src="{% static 'images/products/white-3.jpg' %}" alt="">
-                                </a>
-                            </div>
-                            <div class="content">
-                                <a href="product-detail.html">Cotton jersey top</a>
-                                <div class="tf-product-info-price">
-                                    <div class="compare-at-price">$10.00</div>
-                                    <div class="price-on-sale fw-6">$8.00</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="tf-loop-item">
-                            <div class="image">
-                                <a href="product-detail.html">
-                                    <img src="{% static 'images/products/white-2.jpg' %}" alt="">
-                                </a>
-                            </div>
-                            <div class="content">
-                                <a href="product-detail.html">Mini crossbody bag</a>
-                                <div class="tf-product-info-price">
-                                    <div class="price fw-6">$18.00</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="tf-loop-item">
-                            <div class="image">
-                                <a href="product-detail.html">
-                                    <img src="{% static 'images/products/white-1.jpg' %}" alt="">
-                                </a>
-                            </div>
-                            <div class="content">
-                                <a href="product-detail.html">Oversized Printed T-shirt</a>
-                                <div class="tf-product-info-price">
-                                    <div class="price fw-6">$18.00</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+      <div class="tf-search-content">
+        <!-- This container holds the default quick links & inspiration -->
+        <div class="tf-cart-hide-has-results" id="defaultSearchContent">
+          <div class="tf-col-quicklink">
+            <div class="tf-search-content-title fw-5">Quick link</div>
+
+
+            <ul class="tf-quicklink-list">
+  {% for main in links %}
+    {% for category in main.categories.all %}
+      {% if forloop.parentloop.first and forloop.counter <= 10 %}
+        <li class="tf-quicklink-item">
+          <a href="{{ category.get_absolute_url }}">
+            {{ category.name }}
+          </a>
+        </li>
+      {% endif %}
+    {% endfor %}
+  {% endfor %}
+</ul>
+
+
+
+
+            
+          </div>
+        
         </div>
+
+        <!-- AJAX Search Results will be injected here -->
+        <div id="liveSearchResults" style="display:none; padding:1rem;"></div>
+      </div>
     </div>
-</div>
+  </div>
 </div>
 <!-- /canvasSearch -->
-
-
-
-
 
 
 
@@ -832,3 +809,56 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 
+
+
+<!-- canvasSerach-->
+<script>
+
+
+document.addEventListener('DOMContentLoaded', function () {
+  const input = document.querySelector('.canvas-search-input');
+  const resultsContainer = document.getElementById('liveSearchResults');
+  const defaultContent = document.getElementById('defaultSearchContent');
+  let timeout = null;
+
+  function fetchSearchResults(query) {
+    if (!query.trim()) {
+      resultsContainer.style.display = 'none';
+      resultsContainer.innerHTML = '';
+      defaultContent.style.display = '';
+      return;
+    }
+
+    fetch(`/store/?q=${encodeURIComponent(query)}`, {
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+    })
+      .then((response) => response.text())
+      .then((html) => {
+        resultsContainer.innerHTML = html;
+        resultsContainer.style.display = '';
+        defaultContent.style.display = 'none';
+      })
+      .catch(() => {
+        resultsContainer.innerHTML = '<p class="text-danger">Error loading results</p>';
+        resultsContainer.style.display = '';
+        defaultContent.style.display = 'none';
+      });
+  }
+
+  input.addEventListener('input', function () {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => {
+      fetchSearchResults(input.value);
+    }, 300); // debounce 300ms
+  });
+
+  // Optional: submit the form on enter, so user can go to full search page
+  const form = input.closest('form');
+  form.addEventListener('submit', function (e) {
+    if (!input.value.trim()) {
+      e.preventDefault();
+    }
+  });
+});
+
+</script>

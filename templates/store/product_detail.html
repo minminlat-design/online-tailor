@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 {% load form_tags %}
-{% load custom_filters %}
+{% load store_filters %}
 
 
 {% block title %}
@@ -1090,6 +1090,10 @@
             </div>
         </section>
         <!-- /tabs -->
+
+
+
+
         <!-- product -->
         <section class="flat-spacing-1 pt_0">
             <div class="container">
@@ -1229,8 +1233,11 @@
             </div>
         </section>
         <!-- /product -->
+        
+
 
         <!-- recent -->
+        {% if recently_viewed_products %}
         <section class="flat-spacing-4 pt_0">
             <div class="container">
                 <div class="flat-title">
@@ -1241,122 +1248,49 @@
                         data-mobile="2" data-space-lg="30" data-space-md="30" data-space="15" data-pagination="1"
                         data-pagination-md="1" data-pagination-lg="1">
                         <div class="swiper-wrapper">
-                            <div class="swiper-slide" lazy="true">
-                                <div class="card-product">
-                                    <div class="card-product-wrapper">
-                                        <a href="product-detail.html" class="product-img">
-                                            <img class="lazyload img-product"
-                                                data-src="{% static 'images/products/light-green-1.jpg' %}"
-                                                src="{% static 'images/products/light-green-1.jpg' %}" alt="image-product">
-                                            <img class="lazyload img-hover" data-src="{% static 'images/products/light-green-2.jpg' %}"
-                                                src="{% static 'images/products/light-green-2.jpg' %}" alt="image-product">
-                                        </a>
-                                        
-                                    </div>
-                                    <div class="card-product-info">
-                                        <a href="product-detail.html" class="title link">Loose Fit Sweatshirt</a>
-                                        <span class="price">$10.00</span>
-                                        
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="swiper-slide" lazy="true">
-                                <div class="card-product">
-                                    <div class="card-product-wrapper">
-                                        <a href="product-detail.html" class="product-img">
-                                            <img class="lazyload img-product" data-src="{% static 'images/products/brown-2.jpg' %}"
-                                                src="{% static 'images/products/brown-2.jpg' %}" alt="image-product">
-                                            <img class="lazyload img-hover" data-src="{% static 'images/products/brown-3.jpg' %}"
-                                                src="{% static 'images/products/brown-3.jpg' %}" alt="image-product">
-                                        </a>
-                                        
-                                        
-                                    </div>
-                                    <div class="card-product-info">
-                                        <a href="product-detail.html" class="title link">V-neck linen T-shirt</a>
-                                        <span class="price">$114.95</span>
-                                        
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="swiper-slide" lazy="true">
-                                <div class="card-product">
-                                    <div class="card-product-wrapper">
-                                        <a href="product-detail.html" class="product-img">
-                                            <img class="lazyload img-product" data-src="{% static 'images/products/white-2.jpg' %}"
-                                                src="{% static 'images/products/white-2.jpg' %}" alt="image-product">
-                                            <img class="lazyload img-hover" data-src="{% static 'images/products/pink-1.jpg' %}"
-                                                src="{% static 'images/products/pink-1.jpg' %}" alt="image-product">
-                                        </a>
-                                        
-                                    </div>
-                                    <div class="card-product-info">
-                                        <a href="product-detail.html" class="title">Oversized Printed T-shirt</a>
-                                        <span class="price">$16.95</span>
-                                        
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="swiper-slide" lazy="true">
-                                <div class="card-product">
-                                    <div class="card-product-wrapper">
-                                        <a href="product-detail.html" class="product-img">
-                                            <img class="lazyload img-product" data-src="{% static 'images/products/white-3.jpg' %}"
-                                                src="{% static 'images/products/white-3.jpg' %}" alt="image-product">
-                                            <img class="lazyload img-hover" data-src="{% static 'images/products/white-4.jpg' %}"
-                                                src="{% static 'images/products/white-4.jpg' %}" alt="image-product">
-                                        </a>
-                                        
-                                    </div>
-                                    <div class="card-product-info">
-                                        <a href="product-detail.html" class="title link">Oversized Printed T-shirt</a>
-                                        <span class="price">$10.00</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="swiper-slide" lazy="true">
-                                <div class="card-product">
-                                    <div class="card-product-wrapper">
-                                        <a href="product-detail.html" class="product-img">
-                                            <img class="lazyload img-product" data-src="{% static 'images/products/brown.jpg' %}"
-                                                src="{% static 'images/products/brown.jpg' %}" alt="image-product">
-                                            <img class="lazyload img-hover" data-src="{% static 'images/products/purple.jpg' %}"
-                                                src="{% static 'images/products/purple.jpg' %}" alt="image-product">
-                                        </a>
-                                        
-                                        <div class="on-sale-wrap">
-                                            <div class="on-sale-item">-33%</div>
-                                        </div>
-                                        <div class="countdown-box">
-                                            <div class="js-countdown" data-timer="1007500" data-labels="d :,h :,m :,s">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="card-product-info">
-                                        <a href="product-detail.html" class="title link">Ribbed modal T-shirt</a>
-                                        <span class="price">From $18.95</span>
-                                        
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="swiper-slide" lazy="true">
-                                <div class="card-product">
-                                    <div class="card-product-wrapper">
-                                        <a href="product-detail.html" class="product-img">
-                                            <img class="lazyload img-product" data-src="{% static 'images/products/orange-1.jpg' %}"
-                                                src="{% static 'images/products/orange-1.jpg' %}" alt="image-product">
-                                            <img class="lazyload img-hover" data-src="{% static 'images/products/white-1.jpg' %}"
-                                                src="{% static 'images/products/white-1.jpg' %}" alt="image-product">
-                                        </a>
-                                        
-                                    </div>
-                                    <div class="card-product-info">
-                                        <a href="product-detail.html" class="title link">Ribbed Tank Top</a>
-                                        <span class="price">$16.95</span>
-                                        
-                                    </div>
-                                </div>
-                            </div>
+
+
+
+{% for recent in recently_viewed_products %}
+<div class="swiper-slide" lazy="true">
+  <div class="card-product">
+    <div class="card-product-wrapper">
+      <a href="{{ recent.get_absolute_url }}" class="product-img">
+        {% if recent.first_image %}
+          <img class="lazyload img-product"
+               data-src="{{ recent.first_image.image.url }}"
+               src="{{ recent.first_image.image.url }}"
+               alt="{{ recent.name }}">
+        {% endif %}
+        {% if recent.second_image %}
+          <img class="lazyload img-hover"
+               data-src="{{ recent.second_image.image.url }}"
+               src="{{ recent.second_image.image.url }}"
+               alt="{{ recent.name }}">
+        {% endif %}
+      </a>
+    </div>
+    <div class="card-product-info">
+      <a href="{{ recent.get_absolute_url }}" class="title link">{{ recent.name }}</a>
+      {% if recent.discounted_price %}
+        <span class="price"><del>${{ recent.price }}</del> ${{ recent.discounted_price }}</span>
+      {% else %}
+        <span class="price">${{ recent.price }}</span>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% empty %}
+<p class="p-3 text-muted">Browse a few items to see them here.</p>
+{% endfor %}
+
+
+
+
+
+
+
+                           
                         </div>
                     </div>
                     <div class="nav-sw nav-next-slider nav-next-recent box-icon w_46 round"><span
@@ -1367,6 +1301,7 @@
                 </div>
             </div>
         </section>
+        {% endif %}
         <!-- /recent -->
         
 
