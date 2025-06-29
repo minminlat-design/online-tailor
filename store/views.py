@@ -313,22 +313,25 @@ def product_detail(request, main_slug, category_slug, subcategory_slug, product_
         recently_viewed_products = sorted(qs, key=lambda p: rv_ids.index(p.id))
 
     # -------------------------------------------------- 3. VIEW COUNTER
+    # 3. VIEW COUNTER  ──────────────────────────────────────────────
     should_count = (
         request.method == "GET"
         and request.headers.get("X-Requested-With") != "XMLHttpRequest"
         and not request.GET.get("partial")
         and request.headers.get("Purpose") != "prefetch"
-        and request.headers.get("Sec-Fetch-Mode") != "navigate"
-        and request.headers.get("Sec-Fetch-Site") != "none"
     )
 
+    redis_key = f"product:{product.id}:views"
+
     if should_count and not request.session.get(f"viewed_product_{product.id}"):
-        total_views = r.incr(f"product:{product.id}:views")
+        total_views = r.incr(redis_key)
         request.session[f"viewed_product_{product.id}"] = True
         if product.images.exists():
             r.zincrby("product_view_ranking", 1, str(product.images.first().id))
     else:
-        total_views = r.get(f"product:{product.id}:views") or 0
+        total_views = int(r.get(redis_key) or 0)   # always an int
+
+
 
     # -------------------------------------------------- 4. VARIATIONS / CUSTOMIZATION
     product_pieces = [p.name.lower() for p in product.pieces.all()]
