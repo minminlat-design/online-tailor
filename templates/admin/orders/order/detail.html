@@ -81,7 +81,31 @@ Order #{{ order.id }} | {{ block.super }}
       <tr><th scope="row">Gift Wrap Fee</th><td><strong>${{ order.gift_wrap_fee }}</strong></td></tr>
     {% endif %}
 
-    <tr><th scope="row">Total Amount</th><td><strong>${{ order.total_price }}</strong></td></tr>
+    {% if order.coupon %}
+  <tr>
+    <th scope="row">Coupon</th>
+    <td><strong>{{ order.coupon.code }}</strong></td>
+  </tr>
+{% endif %}
+
+{% if order.discount and order.discount > 0 %}
+  <tr>
+  <th scope="row" style="color: red;">Discount</th>
+  <td><strong style="color: red;">- ${{ order.discount }}</strong></td>
+</tr>
+
+{% endif %}
+
+
+    <tr>
+  <th scope="row">Total Amount</th>
+  <td>
+    <strong>
+      ${{ order.get_total_cost|floatformat:2 }}
+    </strong>
+  </td>
+</tr>
+
 
     <tr><th scope="row">Status</th><td>{{ order.get_status_display }}</td></tr>
     <tr><th scope="row">Payment</th>

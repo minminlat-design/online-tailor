@@ -5,6 +5,8 @@ from store.models import Product, ShippingFee
 from .models import CartItem, CartSettings, Cart as CartModel  # Rename to avoid name clash
 import json
 import hashlib
+from coupons.models import Coupon
+
 
 
 
@@ -22,11 +24,39 @@ class Cart:
         if not cart:
             cart = self.session[settings.CART_SESSION_ID] = {}
         self.cart = cart
+        
+        self.coupon_id = self.session.get('coupon_id')  # Load applied coupon ID
+
 
         settings_obj = get_cart_settings()
         self.FREE_SHIPPING_THRESHOLD = settings_obj.free_shipping_threshold
         self.gift_wrap_price = settings_obj.gift_wrap_price
         self.gift_wrap = self.session.get('gift_wrap', False)
+        
+        
+        
+    @property
+    def coupon(self):
+        if self.coupon_id:
+            try:
+                return Coupon.objects.get(id=self.coupon_id)
+            except Coupon.DoesNotExist:
+                pass
+        return None
+    
+    
+    def get_total_price_after_discount(self):
+        return self.get_total_price() - self.get_discount()
+
+    
+    
+    def get_discount(self):
+        if self.coupon:
+            return (self.coupon.discount / Decimal(100)) * self.get_total_price()
+        return Decimal('0.00')
+
+            
+        
 
     def _split_cart_key(self, cart_key):
         if ':' in cart_key:
@@ -162,8 +192,12 @@ class Cart:
         for item in self.__iter__():
             total += item['total_price']
         if self.gift_wrap:
+            print(f"[DEBUG] Adding gift wrap price: {self.gift_wrap_price}")
             total += self.gift_wrap_price
+        else:
+            print("[DEBUG] Gift wrap not enabled")
         return total
+
     
     
     # NEW – total order weight in kg
@@ -204,9 +238,10 @@ class Cart:
 
     # NEW – subtotal + gift‑wrap + shipping
     def get_grand_total(self):
-        subtotal      = self.get_total_price()   # includes gift‑wrap already
-        shipping_fee  = self.get_shipping_fee()
+        subtotal = self.get_total_price_after_discount()  # Use discounted subtotal
+        shipping_fee = self.get_shipping_fee()
         return subtotal + shipping_fee
+
 
         
         

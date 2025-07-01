@@ -42,6 +42,8 @@
 </div>
 
 
+
+
         <!-- Cart Summary -->
 <div class="tf-page-cart-footer bg-light rounded shadow-sm p-4 mt-4">
   <div class="tf-cart-footer-inner">
@@ -93,11 +95,40 @@
     </ul>
 
     <!-- Order Total -->
-    <div class="d-flex justify-content-between align-items-center mt-4 border-top pt-3">
-      <h6 class="fw-semibold mb-0">Total</h6>
-      <h6 class="total fw-bold text-black mb-0">${{ subtotal|floatformat:2 }}</h6>
+    <!-- Order Summary Breakdown -->
+<div class="mt-4 border-top pt-3">
 
+  <div class="d-flex justify-content-between mb-2">
+    <span class="fw-semibold text-muted">Subtotal</span>
+    <span>${{ subtotal|floatformat:2 }}</span>
+  </div>
+
+  {% if gift_wrap %}
+    <div class="d-flex justify-content-between mb-2">
+      <span class="fw-semibold text-muted">Gift Wrap</span>
+      <span>${{ gift_wrap_price|floatformat:2 }}</span>
     </div>
+  {% endif %}
+
+  {% if coupon %}
+    <div class="d-flex justify-content-between mb-2 text-success">
+      <span class="fw-semibold">Coupon "{{ coupon.code }}"</span>
+      <span>- ${{ discount_amount|floatformat:2 }}</span>
+    </div>
+  {% endif %}
+
+  <div class="d-flex justify-content-between align-items-center border-top pt-3 mt-2">
+    <h6 class="fw-bold mb-0">Total</h6>
+    <h6 class="fw-bold text-dark mb-0">${{ total_after_discount|floatformat:2 }}</h6>
+  </div>
+
+</div>
+
+
+
+
+
+
 
     <!-- Terms -->
     <div class="wd-check-payment mt-4">

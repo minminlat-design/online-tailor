@@ -157,6 +157,15 @@
         <td>${{ order.items_subtotal }}</td>
     </tr>
 
+    {% if order.discount and order.discount > 0 %}
+<tr>
+    <td colspan="3">Coupon Discount{% if order.coupon %} ({{ order.coupon.code }}){% endif %}</td>
+    <td>- ${{ order.discount }}</td>
+</tr>
+{% endif %}
+
+
+
     {% if order.gift_wrap_fee > 0 %}
     <tr>
         <td colspan="3">Gift Wrap</td>

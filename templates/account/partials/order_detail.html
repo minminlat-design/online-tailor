@@ -71,25 +71,33 @@
             </div>
             {% endfor %}
             <ul class="mt-4">
-                {% if order.shipping_fee and order.shipping_fee > 0 %}
-                <li class="d-flex justify-content-between text-2">
-                    <span>Shipping</span>
-                    <span class="fw-6">${{ order.shipping_fee }}</span>
-                </li>
-                {% endif %}
+    {% if order.shipping_fee and order.shipping_fee > 0 %}
+    <li class="d-flex justify-content-between text-2">
+        <span>Shipping</span>
+        <span class="fw-6">${{ order.shipping_fee }}</span>
+    </li>
+    {% endif %}
 
-                {% if order.gift_wrap_fee and order.gift_wrap_fee > 0 %}
-                <li class="d-flex justify-content-between text-2">
-                    <span>Gift Wrap</span>
-                    <span class="fw-6">${{ order.gift_wrap_fee }}</span>
-                </li>
-                {% endif %}
+    {% if order.gift_wrap_fee and order.gift_wrap_fee > 0 %}
+    <li class="d-flex justify-content-between text-2">
+        <span>Gift Wrap</span>
+        <span class="fw-6">${{ order.gift_wrap_fee }}</span>
+    </li>
+    {% endif %}
 
-                <li class="d-flex justify-content-between text-2 mt_8">
-                    <span>Order Total</span>
-                    <span class="fw-6">${{ order.total_price }}</span>
-                </li>
-            </ul>
+    {% if order.discount and order.discount > 0 %}
+    <li class="d-flex justify-content-between text-2 text-danger">
+        <span>Coupon Discount{% if order.coupon %} ({{ order.coupon.code }}){% endif %}</span>
+        <span class="fw-6">‑${{ order.discount }}</span>
+    </li>
+    {% endif %}
+
+    <li class="d-flex justify-content-between text-2 mt_8">
+        <span>Order Total</span>
+        <span class="fw-6">${{ order.total_price }}</span>
+    </li>
+</ul>
+
         </div>
     </div>
     <br/>

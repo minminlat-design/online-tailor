@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, transaction
 from decimal import Decimal
 from django.utils import timezone
 import uuid
@@ -6,6 +6,8 @@ from measurement.models import UserMeasurement
 from store.models import Product
 from django.contrib.postgres.fields import JSONField
 from django.contrib.auth import get_user_model
+       # ← make sure this import path matches your project
+
 
 User = get_user_model()
 
@@ -47,65 +49,111 @@ class CartSettings(models.Model):
 
 
 
+def current_wrap_fee() -> Decimal:
+    """
+    Returns the active gift‑wrap unit price.
+    Falls back to 5.00 USD if no CartSettings record exists.
+    """
+    try:
+        return CartSettings.objects.latest("id").gift_wrap_price
+    except CartSettings.DoesNotExist:
+        return Decimal("5.00")
+
+
 class CartItem(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)  # ✅ Add this
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, null=True, blank=True)
+    # -------------------------------- Core relations --------------------------------
+    user  = models.ForeignKey(User, on_delete=models.CASCADE,  null=True, blank=True)
+    cart  = models.ForeignKey("cart.Cart", on_delete=models.CASCADE, null=True, blank=True)
 
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.IntegerField()
-    is_active = models.BooleanField(default=True)
+    product     = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity    = models.PositiveIntegerField(default=1)
+    is_active   = models.BooleanField(default=True)
 
-    base_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    # -------------------------------- Pricing ---------------------------------------
+    base_price  = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
-    gift_wrap = models.BooleanField(default=False)  # ✅ Optional gift wrap
+    gift_wrap   = models.BooleanField(default=False)   # per‑item flag ✅
 
+    # -------------------------------- Measurements ----------------------------------
     user_measurement = models.ForeignKey(
         UserMeasurement,
         on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
+        null=True, blank=True,
         help_text="Measurement set used for this item"
     )
-
     frozen_measurement_data = models.JSONField(blank=True, null=True)
 
+    # -------------------------------- Options / custom --------------------------------
     selected_options = models.JSONField(default=dict, blank=True)
-    customizations = models.JSONField(blank=True, null=True)
+    customizations   = models.JSONField(blank=True, null=True)
 
-    def __str__(self):
-        return f"{self.product.name} x {self.quantity}"
+    # -------------------------------------------------------------------------------
+    def __str__(self) -> str:
+        return f"{self.product.name} × {self.quantity}"
 
-    def calculate_total_price(self):
-        extra_price = Decimal('0')
+    # -------------------------------------------------------------------------------
+    # Pricing helpers
+    # -------------------------------------------------------------------------------
+    def _selected_options_extra(self) -> Decimal:
+        """
+        Recursively sums positive `price_difference` values from `selected_options`.
+        """
+        extra_price = Decimal("0")
 
-        def extract_prices(data):
+        def walk(node):
             nonlocal extra_price
-            if isinstance(data, dict):
-                for key, value in data.items():
-                    if key == "price_difference":
+            if isinstance(node, dict):
+                for k, v in node.items():
+                    if k == "price_difference":
                         try:
-                            extra_price += Decimal(str(value))
+                            extra_price += Decimal(str(v))
                         except (TypeError, ValueError):
-                            continue
+                            pass
                     else:
-                        extract_prices(value)
-            elif isinstance(data, list):
-                for item in data:
-                    extract_prices(item)
+                        walk(v)
+            elif isinstance(node, list):
+                for itm in node:
+                    walk(itm)
 
-        extract_prices(self.selected_options)
+        walk(self.selected_options)
+        return extra_price
+
+    
+    def calculate_total_price(self) -> Decimal:
+        """
+        (base + selected‑option extras) × quantity
+        Gift‑wrap is handled at the cart/order level; do NOT add it here.
+        """
+        extra_price = Decimal("0")
+
+        def walk(node):
+            nonlocal extra_price
+            if isinstance(node, dict):
+                for k, v in node.items():
+                    if k == "price_difference":
+                        try:
+                            extra_price += Decimal(str(v))
+                        except (TypeError, ValueError):
+                            pass
+                    else:
+                        walk(v)
+            elif isinstance(node, list):
+                for itm in node:
+                    walk(itm)
+
+        walk(self.selected_options)
 
         total = (self.base_price + extra_price) * self.quantity
-
-        if self.gift_wrap:
-            total += Decimal('5.00')
-
-        return total
-
-
+        return total.quantize(Decimal("0.01"))
+    # -------------------------------------------------------------------------------
+    # Lifecycle
+    # -------------------------------------------------------------------------------
     def save(self, *args, **kwargs):
         self.total_price = self.calculate_total_price()
+
+        # Freeze measurements snapshot if not already frozen
         if self.user_measurement and not self.frozen_measurement_data:
             self.frozen_measurement_data = self.user_measurement.measurement_data
+
         super().save(*args, **kwargs)

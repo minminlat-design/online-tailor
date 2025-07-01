@@ -115,6 +115,10 @@ order_payment.short_description = 'Stripe Payment'
 
 
 
+
+
+
+
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
     readonly_fields = (
@@ -125,19 +129,36 @@ class OrderItemInline(admin.TabularInline):
         'selected_options', 'customizations'
     )
     can_delete = False
-    extra = 0  # No empty extra forms
+    extra = 0
+
+
+# New: helper to show discount in list_display
+def order_discount(obj):
+    return f"${obj.discount:.2f}"
+
+order_discount.short_description = "Discount"
+
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'created', 'paid', 'status', 'total_price', order_payment, order_detail, order_pdf, invoice_pdf)
+    list_display = (
+        'id', 'user', 'created', 'paid', 'status',
+        'total_price',         # Final price charged
+        order_discount,        # NEW: Discount shown
+        order_detail, order_pdf, invoice_pdf
+    )
     list_filter = ('paid', 'status', 'created')
     search_fields = ('id', 'user__email', 'email', 'first_name', 'last_name')
+
     readonly_fields = (
         'user', 'first_name', 'last_name', 'email',
         'phone', 'country',
         'address', 'postal_code', 'city',
-        'created', 'updated', 'total_price'
+        'created', 'updated',
+        'discount',             # NEW: Read-only discount
+        'total_price',
     )
+
     inlines = [OrderItemInline]
 
     fieldsets = (
@@ -153,14 +174,12 @@ class OrderAdmin(admin.ModelAdmin):
         }),
         ('Status & Metadata', {
             'fields': (
-                'paid', 'status', 'total_price', 'created', 'updated'
+                'paid', 'status',
+                'discount',         # NEW: Display discount here
+                'total_price',
+                'created', 'updated',
             )
         }),
     )
-    
+
     actions = [export_orders_with_items_to_csv]
-    
-    
-    
-    
-    

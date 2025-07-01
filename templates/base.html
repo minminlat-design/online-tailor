@@ -473,7 +473,10 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 
-<!-- Ajax updating quantity, item total price, cart total price, and remove item -->
+
+
+
+
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     // Helper: get CSRF token from cookie or hidden input
@@ -525,6 +528,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (data.success) {
                     input.value = newQuantity;
 
+                    // Update item total price in row
                     const itemRow = container.closest("[data-cart-key]");
                     if (itemRow) {
                         const itemTotalElement = itemRow.querySelector(".item-total");
@@ -533,21 +537,11 @@ document.addEventListener("DOMContentLoaded", function () {
                         }
                     }
 
-                    const totalCartPrice = document.querySelector("#cart-total, #cart-total-price");
-                    if (totalCartPrice && data.total_price !== undefined) {
-                        totalCartPrice.textContent = `$${parseFloat(data.total_price).toFixed(2)}`;
-                    }
+                    // Update cart total prices
+                    updateCartTotals(data);
 
-
-                    // ✅ Update cart count in navbar
-                    const cartCountElem = document.querySelector('.nav-cart .count-box');
-                    if (cartCountElem && data.item_count !== undefined) {
-                        cartCountElem.textContent = data.item_count;
-                    }
-
-
-
-                    
+                    // Update cart count in navbar
+                    updateCartCount(data);
 
                     if (typeof updateShippingProgress === "function") {
                         updateShippingProgress();
@@ -585,26 +579,15 @@ document.addEventListener("DOMContentLoaded", function () {
                     const row = document.querySelector(`[data-product-id="${productId}"]`);
                     if (row) row.remove();
 
-                    // Update cart total price display
-                    const totalPriceElem = document.querySelector('#cart-total, #cart-total-price');
-                    if (totalPriceElem && data.total_price !== undefined) {
-                        totalPriceElem.textContent = `$${parseFloat(data.total_price).toFixed(2)}`;
-                    }
-
-                    // ✅ Update cart item count in navbar
-                    const cartCountElem = document.querySelector('.nav-cart .count-box');
-                    if (cartCountElem && data.item_count !== undefined) {
-                        cartCountElem.textContent = data.item_count;
-                    }
+                    // Update cart totals & count
+                    updateCartTotals(data);
+                    updateCartCount(data);
 
                     // Remove note block if cart is empty
                     if (data.item_count === 0) {
                         const noteBlock = document.getElementById('cart-note-block');
-                        if (noteBlock) {
-                            noteBlock.remove();
-                        }
+                        if (noteBlock) noteBlock.remove();
                     }
-                    
 
                     if (typeof updateShippingProgress === "function") {
                         updateShippingProgress();
@@ -621,48 +604,37 @@ document.addEventListener("DOMContentLoaded", function () {
     function updateQuantityByProductId(productId, newQuantity) {
         if (!productId) return;
 
-        fetch(`/cart/update-quantity/`, {  // Adjust URL if needed
-            method: 'POST',
+        fetch("/cart/update-quantity/", {
+            method: "POST",
             headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken,
-                'X-Requested-With': 'XMLHttpRequest',
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrfToken,
+                "X-Requested-With": "XMLHttpRequest",
             },
-            body: JSON.stringify({
-                product_id: productId,
-                quantity: newQuantity
-            })
+            body: JSON.stringify({ product_id: productId, quantity: newQuantity })
         })
-        .then(response => response.json())
+        .then(r => r.json())
         .then(data => {
-            if (data.success) {
-                const row = document.querySelector(`[data-product-id="${productId}"]`);
-                if (row) {
-                    const qtyInput = row.querySelector('.quantity-input');
-                    if (qtyInput) qtyInput.value = data.quantity;
+            if (!data.success) { alert(data.error); return; }
 
-                    const totalCell = row.querySelector('.item-total');
-                    if (totalCell && data.item_total !== undefined) {
-                        totalCell.textContent = `$${parseFloat(data.item_total).toFixed(2)}`;
-                    }
-
-                    const totalPriceElem = document.querySelector('#cart-total, #cart-total-price');
-                    if (totalPriceElem && data.total_price !== undefined) {
-                        totalPriceElem.textContent = `$${parseFloat(data.total_price).toFixed(2)}`;
-                    }
-
-                    
-
+            // Update quantity & item total in row
+            const row = document.querySelector(`[data-product-id="${productId}"]`);
+            if (row) {
+                const qtyInput = row.querySelector(".quantity-input");
+                if (qtyInput) qtyInput.value = data.quantity;
+                const itemTotal = row.querySelector(".item-total");
+                if (itemTotal && data.item_total !== undefined) {
+                    itemTotal.textContent = `$${parseFloat(data.item_total).toFixed(2)}`;
                 }
-
-                if (typeof updateShippingProgress === "function") {
-                    updateShippingProgress();
-                }
-            } else {
-                alert('Failed to update quantity: ' + data.error);
             }
+
+            // Update cart totals & count
+            updateCartTotals(data);
+            updateCartCount(data);
+
+            if (typeof updateShippingProgress === "function") updateShippingProgress();
         })
-        .catch(error => console.error('Error updating quantity:', error));
+        .catch(err => console.error("Error updating quantity:", err));
     }
 
     // Bind increment buttons by product ID, but only those WITHOUT data-cart-key
@@ -692,8 +664,74 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     });
+
+    // --- Utility: Update cart total, subtotal, coupon discount blocks ---
+    function updateCartTotals(data) {
+        // Update total price elements (cart total, cart total price)
+        const totalPriceEls = document.querySelectorAll("#cart-total, #cart-total-price");
+        totalPriceEls.forEach(el => {
+            if (data.total_price !== undefined) {
+                el.textContent = `$${parseFloat(data.total_price).toFixed(2)}`;
+            }
+        });
+
+        // Update subtotal (shown when no coupon)
+        const cartSubtotalEl = document.getElementById("cart-subtotal");
+        if (cartSubtotalEl && data.total_price !== undefined) {
+            cartSubtotalEl.textContent = `$${parseFloat(data.total_price).toFixed(2)}`;
+        }
+
+        // Update coupon discount block
+        const discountContainer = document.querySelector(".tf-cart-totals-discounts");
+        if (!discountContainer) return;
+
+        if (data.has_coupon) {
+            if (!document.querySelector(".discount-amount")) {
+                // Insert coupon discount info
+                discountContainer.innerHTML = `
+                    <h3>Coupon Discount (${data.coupon_code})</h3>
+                    <span class="discount-amount">- $${parseFloat(data.discount).toFixed(2)}</span>
+                    <h3>Total after discount</h3>
+                    <span id="cart-total-after-discount">$${parseFloat(data.total_after_discount).toFixed(2)}</span>
+                `;
+            } else {
+                const discountAmountEl = document.querySelector(".discount-amount");
+                const totalAfterDiscountEl = document.getElementById("cart-total-after-discount");
+                if (discountAmountEl) discountAmountEl.textContent = `- $${parseFloat(data.discount).toFixed(2)}`;
+                if (totalAfterDiscountEl) totalAfterDiscountEl.textContent = `$${parseFloat(data.total_after_discount).toFixed(2)}`;
+            }
+        } else {
+            // No coupon: fallback to just total
+            if (!document.getElementById("cart-subtotal")) {
+                discountContainer.innerHTML = `
+                    <h3>Total</h3>
+                    <span id="cart-subtotal">$${parseFloat(data.total_price).toFixed(2)}</span>
+                `;
+            }
+        }
+    }
+
+    // --- Utility: Update cart count in navbar or cart icon ---
+    function updateCartCount(data) {
+        const cartCountElem = document.querySelector('.nav-cart .count-box, #cart-count');
+        if (cartCountElem && data.item_count !== undefined) {
+            cartCountElem.textContent = data.item_count;
+        }
+    }
+
 });
 </script>
+
+
+
+
+
+
+
+
+
+
+
 
 <!--gift wrap js -->
 

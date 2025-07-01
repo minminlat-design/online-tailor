@@ -23,7 +23,7 @@ from django.urls import path, include
 urlpatterns = [
     path("admin/", admin.site.urls),
     path('blog/', include('blog.urls', namespace='blog')),
-    path('', include('home.urls', namespace='home')),
+    
     path('cart/', include('cart.urls', namespace='cart')),
     #path('wishlist/', include('wishlist.urls', namespace='wishlist')),
     path('store/', include('store.urls', namespace='store')),
@@ -37,6 +37,11 @@ urlpatterns = [
     path('', include('content.urls', namespace='content')),
     
     path('newsletter/', include('newsletter.urls', namespace='newsletter')),
+    
+    path('coupons/', include('coupons.urls', namespace='coupons')),
+    
+    
+    path('', include('home.urls', namespace='home')),
    
 
 

@@ -189,10 +189,33 @@
       {% endfor %}
     </ul>
 
+
     <div class="d-flex justify-content-between align-items-center border-top pt-3 mb-3">
-      <h6 class="fw-bold mb-0">Subtotal</h6>
-      <h6 class="fw-bold mb-0">${{ subtotal|floatformat:2 }}</h6>
-    </div>
+  <h6 class="fw-bold mb-0">Subtotal</h6>
+  <h6 class="fw-bold mb-0">${{ subtotal|floatformat:2 }}</h6>
+</div>
+
+{% if coupon %}
+<div class="d-flex justify-content-between align-items-center mb-2">
+  <h6 class="fw-bold mb-0">
+      Coupon Discount&nbsp;(<span class="text-uppercase">{{ coupon.code }}</span>)
+  </h6>
+  <h6 class="fw-bold mb-0">‑ ${{ discount_amount|floatformat:2 }}</h6>
+</div>
+
+<div class="d-flex justify-content-between align-items-center border-top pt-3 mb-3">
+  <h6 class="fw-bold mb-0">Total&nbsp;after&nbsp;discount</h6>
+  <h6 class="fw-bold mb-0">${{ total_after_discount|floatformat:2 }}</h6>
+</div>
+{% else %}
+<div class="d-flex justify-content-between align-items-center border-top pt-3 mb-3">
+  <h6 class="fw-bold mb-0">Total</h6>
+  <h6 class="fw-bold mb-0">${{ subtotal|floatformat:2 }}</h6>
+</div>
+{% endif %}
+
+
+    
 
     <a href="{% url 'cart:cart_detail' %}" class="w-full bg-black text-white py-2 px-4 rounded hover:bg-gray-800 transition">
   Edit Cart

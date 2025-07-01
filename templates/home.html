@@ -404,24 +404,46 @@
 
 
                                
-
-                                {% with post.products.all as products %}
+{% comment %}Inside your post card, for the “bag” icon{% endcomment %}
+{% with products=post.products.all %}
     {% if products %}
         {% for product in products %}
-            <a href="{{ post.source_url }}" class="box-icon" target="_blank" rel="noopener noreferrer" 
-               title="View on Instagram - opens in a new tab">
-                <span class="icon icon-bag"></span>
-                <span class="tooltip">{{ product.name }} <br
-                                    class="d-xl-block d-none"> (View on Instagram)</span>
-            </a>
+            {# Prefer Instagram source if provided, else product page #}
+            {% if post.source_url %}
+                <a href="{{ post.source_url }}"
+                   class="box-icon"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   title="View on Instagram — opens in a new tab">
+                    <span class="icon icon-bag"></span>
+                    <span class="tooltip">
+                        {{ product.name }}<br class="d-xl-block d-none">
+                        (View on Instagram)
+                    </span>
+                </a>
+            {% else %}
+                <a href="{{ product.get_absolute_url }}"
+                   class="box-icon"
+                   title="{{ product.name }}">
+                    <span class="icon icon-bag"></span>
+                    <span class="tooltip">{{ product.name }}</span>
+                </a>
+            {% endif %}
         {% endfor %}
     {% else %}
-        <a href="#" class="box-icon" title="No products tagged">
+        {# No products tagged — optionally still link to Instagram if available #}
+        <a href="{{ post.source_url|default:'#' }}"
+           class="box-icon"
+           {% if post.source_url %}target="_blank" rel="noopener noreferrer"{% endif %}
+           title="No products tagged">
             <span class="icon icon-bag"></span>
-            <span class="tooltip">No products tagged</span>
+            <span class="tooltip">
+                {% if post.source_url %}View on Instagram{% else %}No products tagged{% endif %}
+            </span>
         </a>
     {% endif %}
 {% endwith %}
+
 
 
 

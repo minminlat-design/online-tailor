@@ -160,6 +160,24 @@ Your shopping cart
                                             </span>
                                             </a>
                                         </div>
+                                        <br/>
+
+
+                            <h6>Have a coupon?</h6>
+                            <br/>
+<form action="{% url 'coupons:apply' %}" method="post">
+    {% csrf_token %}
+    {{ coupon_apply_form.code.label_tag }}
+    {{ coupon_apply_form.code }}
+    <br/>
+    <button type="submit" class="tf-btn btn-sm radius-3 btn-fill">Apply</button>
+</form>
+
+
+{% if request.session.coupon_id %}
+    <p style="color: green;">Coupon applied successfully!</p>
+{% endif %}
+
 {% comment "" %}
 
 
@@ -230,6 +248,8 @@ Your shopping cart
 
 
 
+{% comment "" %}
+
 
                                 <div class="tf-cart-totals-discounts">
                                     <h3>Subtotal</h3>
@@ -238,8 +258,38 @@ Your shopping cart
 
                                     
                                 </div>
+{% endcomment %}
+<div class="tf-cart-totals-discounts">
+    <h3>Subtotal</h3>
+    <span id="cart-total">${{ cart.get_total_price|floatformat:2 }}</span>
+</div>
+
+{% if cart.coupon %}
+<div class="tf-cart-totals-discounts">
+    <h3>Coupon Discount ({{ cart.coupon.code }})</h3>
+    <span class="discount-amount">- ${{ cart.get_discount|floatformat:2 }}</span>
+</div>
+
+<div class="tf-cart-totals-discounts">
+    <h3>Total after discount</h3>
+    <span id="cart-total-after-discount">${{ cart.get_total_price_after_discount|floatformat:2 }}</span>
+</div>
+{% else %}
+<div class="tf-cart-totals-discounts">
+    <h3>Total</h3>
+    <span id="cart-subtotal">${{ cart.get_total_price|floatformat:2 }}</span>
+</div>
+{% endif %}
+
+
+
+
+
+
+
+
                                 <p class="tf-cart-tax">
-                                    Taxes and <a href="shipping-delivery.html">shipping</a> calculated at checkout
+                                    Taxes and <a href="{% url 'content:static_page_detail' slug='shipping-delivery' %}">shipping</a> calculated at checkout
                                 </p>
                                 
 
@@ -387,11 +437,89 @@ Your shopping cart
 
 
 
+
+         <!--you may also like - cart page -->
+         
+{% if recommended_products %}
+        <section class="flat-spacing-17 pt_0">
+            <div class="container">
+                <div class="flat-title">
+                    <span class="title">You may also like</span>
+                </div>
+                <div class="hover-sw-nav hover-sw-2">
+                    <div dir="ltr" class="swiper tf-sw-product-sell wrap-sw-over" data-preview="4" data-tablet="3"
+                        data-mobile="2" data-space-lg="30" data-space-md="15" data-pagination="2" data-pagination-md="3"
+                        data-pagination-lg="3">
+                        <div class="swiper-wrapper">
+
+
+    {% for product in recommended_products %}
+        <div class="swiper-slide" lazy="true">
+            <div class="card-product">
+                <div class="card-product-wrapper">
+                    <a href="{{ product.get_absolute_url }}" class="product-img">
+                        {% with first=product.first_image second=product.second_image %}
+                            {% if first %}
+                                <img class="lazyload img-product"
+                                     data-src="{{ first.image.url }}"
+                                     src="{{ first.image.url }}"
+                                     alt="{{ product.name }}">
+                            {% else %}
+                                <img class="img-product" src="{% static 'images/no-image.jpg' %}" alt="No Image">
+                            {% endif %}
+
+                            {% if second %}
+                                <img class="lazyload img-hover"
+                                     data-src="{{ second.image.url }}"
+                                     src="{{ second.image.url }}"
+                                     alt="{{ product.name }}">
+                            {% endif %}
+                        {% endwith %}
+                    </a>
+                </div>
+
+                <div class="card-product-info">
+                    <a href="{{ product.get_absolute_url }}" class="title link">{{ product.name }}</a>
+                    <span class="price">
+                        {% if product.discounted_price %}
+                            <del>${{ product.price }}</del>
+                            <ins>${{ product.discounted_price }}</ins>
+                        {% else %}
+                            ${{ product.price }}
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+
+
+
+
+
+
+                        </div>
+                    </div>
+                    <div class="nav-sw nav-next-slider nav-next-product box-icon w_46 round"><span
+                            class="icon icon-arrow-left"></span></div>
+                    <div class="nav-sw nav-prev-slider nav-prev-product box-icon w_46 round"><span
+                            class="icon icon-arrow-right"></span></div>
+                    <div class="sw-dots style-2 sw-pagination-product justify-content-center"></div>
+                </div>
+            </div>
+        </section>
+
+        {% endif %}
+        <!-- /product -->
+
+
+
 <!-- js goes to base.html -->
 
 
 
-    
+
+
     
 
 {% endblock content %}

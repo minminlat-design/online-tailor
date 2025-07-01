@@ -8,13 +8,17 @@ from django.views.decorators.csrf import csrf_exempt
 from measurement.forms import DynamicMeasurementForm
 from measurement.models import ProductType, UserMeasurement
 from store.models import Product, ProductVariation
+from store.recommender import Recommender
 from variation.models import VariationOption
-from .cart import Cart, CartSettings
+from .cart import Cart, CartSettings, get_cart_settings
 from .forms import CartAddProductForm
 from datetime import datetime, timedelta
 from .models import CartItem
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from coupons.forms import CouponApplyForm
+
+
 
 
 
@@ -206,8 +210,12 @@ def cart_remove(request, product_id):
         'total_price': f"{cart.get_total_price():.2f}",
         'item_count': len(cart),
     })
+    
+    
+    
+ 
 
-
+# Cart details
 def cart_detail(request):
     cart = Cart(request)
     free_shipping_data = cart.get_free_shipping_data()
@@ -221,21 +229,34 @@ def cart_detail(request):
             gift_wrap_price=Decimal('5.00')
         )
 
+    # Add update form to each cart item
+    cart_products = []
     for item in cart:
-        # Form to update quantity
         item['update_quantity_form'] = CartAddProductForm(
             initial={'quantity': item['quantity'], 'override': True}
         )
+        cart_products.append(item['product'])
 
-        
-   
+    # RECOMMENDATIONS
+    recommended_products = []
+    if cart_products:
+        recommender = Recommender()
+        recommended_products = recommender.suggest_products_for(cart_products, max_results=4)
+
+    coupon_apply_form = CouponApplyForm() 
 
     return render(request, 'cart/detail.html', {
-        'cart': cart,  # cart now includes delivery dates per item
+        'cart': cart,
         'free_shipping_data': free_shipping_data,
         'gift_wrap': gift_wrap_status,
         'gift_wrap_price': settings_obj.gift_wrap_price,
+        'coupon_apply_form': coupon_apply_form,
+        'recommended_products': recommended_products,
     })
+
+
+
+
 
 
 
@@ -282,6 +303,10 @@ def cart_update_quantity(request):
 
         item_total = cart.get_item_total(product, selected_options, customizations)
         total_price = cart.get_total_price()
+        
+        coupon = cart.coupon
+        discount = cart.get_discount()
+        total_after_discount = cart.get_total_price_after_discount()
 
         return JsonResponse({
             "success": True,
@@ -289,10 +314,17 @@ def cart_update_quantity(request):
             "total_price": f"{total_price:.2f}",
             "quantity": quantity,
             "item_count": len(cart),
+            "has_coupon": bool(coupon),
+            "coupon_code": coupon.code if coupon else "",
+            "discount": f"{discount:.2f}",
+            "total_after_discount": f"{total_after_discount:.2f}",
         })
 
     except Exception as e:
         return JsonResponse({"success": False, "error": str(e)})
+    
+    
+    
 
 @require_POST
 def toggle_gift_wrap(request):
@@ -407,138 +439,136 @@ def get_measurement_keys_for_product(product_type):
 
 
 
+
+
+
+
 @login_required
 def measurement_form_view(request):
-    # Get ALL cart items for this user (used for summary)
+    # --------------------- DB items & forms (unchanged) --------------------
     all_cart_items = CartItem.objects.filter(user=request.user)
-    
-    # Get ONLY items that need measurement (used for forms)
-    cart_items_needing_measurement = all_cart_items.filter(user_measurement__isnull=True, product__is_customizable=True)
-
-    # If no measurement needed, redirect to checkout
-    if not cart_items_needing_measurement.exists():
-        return redirect('cart:cart_to_checkout')
-
-    print(f"[DEBUG] Found {cart_items_needing_measurement.count()} cart items needing measurement.")
-    for item in cart_items_needing_measurement:
-        print(f"[DEBUG] → {item.product.name} | quantity: {item.quantity}")
+    cart_items_needing = all_cart_items.filter(
+        user_measurement__isnull=True,
+        product__is_customizable=True,
+    )
+    if not cart_items_needing.exists():
+        return redirect("cart:cart_to_checkout")
 
     existing_profiles = UserMeasurement.objects.filter(user=request.user)
     item_forms = []
 
+    # ---------- POST handling (unchanged) ----------
     if request.method == "POST":
         if "use_existing" in request.POST:
             profile_id = request.POST.get("existing_profile_id")
-            selected_profile = get_object_or_404(existing_profiles, id=profile_id)
-            cart_items_needing_measurement.update(user_measurement=selected_profile)
+            profile = get_object_or_404(existing_profiles, id=profile_id)
+            cart_items_needing.update(user_measurement=profile)
             messages.success(request, "Saved measurement profile applied successfully.")
-            return redirect('orders:shipping_info')
-
+            return redirect("orders:shipping_info")
 
         all_valid = True
-        item_forms = []
-
-        for item in cart_items_needing_measurement:
-            product_type = item.product.product_type
-            measurement_keys = get_measurement_keys_for_product(product_type)
+        for item in cart_items_needing:
+            keys = get_measurement_keys_for_product(item.product.product_type)
             form = DynamicMeasurementForm(
-                request.POST,
-                request.FILES,
+                request.POST, request.FILES,
                 prefix=f"item_{item.id}",
-                measurement_keys=measurement_keys
+                measurement_keys=keys,
             )
-
-            item_forms.append((item, form))  # Add form regardless of validity
-
+            item_forms.append((item, form))
             if not form.is_valid():
                 all_valid = False
-                continue  # Skip this item
-
+                continue
             measurement = form.save(user=request.user)
-
             item.user_measurement = measurement
             item.frozen_measurement_data = {
                 "fit_type": measurement.fit_type,
-                "data": measurement.measurement_data,
-                "photos": {
+                "data"   : measurement.measurement_data,
+                "photos" : {
                     "front": measurement.photo_front.url if measurement.photo_front else None,
-                    "side": measurement.photo_side.url if measurement.photo_side else None,
-                    "back": measurement.photo_back.url if measurement.photo_back else None,
-                }
+                    "side" : measurement.photo_side.url  if measurement.photo_side  else None,
+                    "back" : measurement.photo_back.url  if measurement.photo_back  else None,
+                },
             }
             item.save()
-        print(f"[DEBUG] Saved frozen data for item {item.id}: {item.frozen_measurement_data}")
-
 
         if all_valid:
             messages.success(request, "Measurements submitted successfully.")
-            return redirect('orders:shipping_info')
-        else:
-            messages.error(request, "There was an error in the form. Please correct the highlighted fields.")
-
-
+            return redirect("orders:shipping_info")
+        messages.error(request, "There was an error in the form. Please correct the highlighted fields.")
     else:
-        for item in cart_items_needing_measurement:
-            product_type = item.product.product_type
-            measurement_keys = get_measurement_keys_for_product(product_type)
-            form = DynamicMeasurementForm(prefix=f"item_{item.id}", measurement_keys=measurement_keys)
+        for item in cart_items_needing:
+            keys = get_measurement_keys_for_product(item.product.product_type)
+            form = DynamicMeasurementForm(prefix=f"item_{item.id}", measurement_keys=keys)
             item_forms.append((item, form))
-            
-            
-    for item, form in item_forms:
-       print(f"DEBUG ITEM ID: {item.id} | Product: {item.product.name}")
 
-
-    # Calculate extra options with prices for each cart item
+    # ---------------- extra‑options list with debug -----------------------
     extra_options_per_item = {}
-
     for item, form in item_forms:
-        item_key = item.pk or item.product.pk
-        extras = []
-        selected_options = item.selected_options or {}
+        extras, selected = [], item.selected_options or {}
+        for key, val in selected.items():
+            if isinstance(val, dict):
+                diff = val.get("price_difference")
+                if diff and Decimal(diff) > 0:
+                    extras.append({"label": key, "name": val.get("name"), "price": Decimal(diff)})
+                else:
+                    items = val.get("items")
+                    if isinstance(items, dict):
+                        for sub_k, sub_v in items.items():
+                            if isinstance(sub_v, dict):
+                                diff = sub_v.get("price_difference")
+                                if diff and Decimal(diff) > 0:
+                                    extras.append({
+                                        "label": f"{key} - {sub_k}",
+                                        "name" : sub_v.get("name"),
+                                        "price": Decimal(diff),
+                                    })
+                            else:
+                                print(f"[DEBUG] Non-dict sub-value at items[{sub_k}] for key '{key}': {sub_v} (type {type(sub_v)})")
+            else:
+                # val is not dict, likely causing error if .get() called
+                print(f"[DEBUG] Non-dict value for selected option '{key}': {val} (type {type(val)})")
+        extra_options_per_item[item.pk] = extras
 
-        for key, val in selected_options.items():
-            # Skip if val is not a dict
-            if not isinstance(val, dict):
-                continue
-
-            # Case 1: Direct option with price_difference
-            price_diff = val.get("price_difference")
-            if price_diff and Decimal(price_diff) > 0:
-                extras.append({
-                    "label": key,
-                    "name": val.get("name") or (val.get("items") or {}).get("name"),
-                    "price": Decimal(price_diff)
-                })
-
-            # Case 2: Nested sub-options
-            elif "items" in val and isinstance(val["items"], dict):
-                for subkey, subval in val["items"].items():
-                    if isinstance(subval, dict):
-                        sub_price = subval.get("price_difference")
-                        if sub_price and Decimal(sub_price) > 0:
-                            extras.append({
-                                "label": f"{key} - {subkey}",
-                                "name": subval.get("name"),
-                                "price": Decimal(sub_price)
-                            })
-
-        extra_options_per_item[item_key] = extras
-
-
-    # Annotate ALL cart items with unit_price for display
+    # ---------------- unit price annotation (unchanged) --------------------
     for item in all_cart_items:
         try:
             item.unit_price = item.total_price / item.quantity
         except (ZeroDivisionError, TypeError):
             item.unit_price = item.base_price
 
-    subtotal = sum(item.total_price for item in all_cart_items)
+    # ② ---------- Use the live Cart object for monetary totals -------------
+    cart            = Cart(request)                    # session cart
+    subtotal        = cart.get_total_price()           # includes *current* gift‑wrap
+    gift_wrap_fee   = cart.gift_wrap_price if cart.gift_wrap else Decimal("0.00")
 
-    return render(request, "cart/measurement_form.html", {
-        "item_forms": item_forms,
-        "existing_profiles": existing_profiles,
-        "cart_items": all_cart_items,  # full cart for summary
-        "subtotal": subtotal,
-        "extra_options_per_item": extra_options_per_item,
-    })
+    # ③ ---------- Coupon math uses the new subtotal ------------------------
+    coupon_id            = request.session.get("coupon_id")
+    coupon               = None
+    discount_amount      = Decimal("0.00")
+    total_after_discount = subtotal
+
+    if coupon_id:
+        from coupons.models import Coupon
+        try:
+            coupon = Coupon.objects.get(id=coupon_id, active=True)
+            discount_amount      = (coupon.discount / Decimal("100")) * subtotal
+            total_after_discount = subtotal - discount_amount
+        except Coupon.DoesNotExist:
+            pass
+
+    # ④ ---------- Render ---------------------------------------------------
+    return render(
+        request,
+        "cart/measurement_form.html",
+        {
+            "item_forms"            : item_forms,
+            "existing_profiles"     : existing_profiles,
+            "cart_items"            : all_cart_items,
+            "subtotal"              : subtotal,          # items + 10 if enabled
+            "gift_wrap_fee"         : gift_wrap_fee,     # optional for template
+            "coupon"                : coupon,
+            "discount_amount"       : discount_amount,
+            "total_after_discount"  : total_after_discount,
+            "extra_options_per_item": extra_options_per_item,
+        },
+    )

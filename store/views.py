@@ -22,6 +22,7 @@ import redis
 from django.conf import settings
 from django.db.models import F
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from .recommender import Recommender
 
 
 
@@ -279,18 +280,9 @@ def _annotate_sidebar_categories(main_category):
 
 
 
-
-# ----------------------------------------------------------------------
+# ──────────────────────────  View  ───────────────────────────────────────
 def product_detail(request, main_slug, category_slug, subcategory_slug, product_slug):
-    """
-    Product detail page with:
-      • view counter (Redis)
-      • variations / customization logic
-      • review sorting + AJAX partial
-      • recently viewed products (session)
-    """
-
-    # -------------------------------------------------- 1. PRODUCT OBJECT
+    # 1. PRODUCT OBJECT
     product = get_object_or_404(
         Product,
         slug=product_slug,
@@ -299,12 +291,16 @@ def product_detail(request, main_slug, category_slug, subcategory_slug, product_
         sub_category__category__main_category__slug=main_slug,
     )
 
-    # -------------------------------------------------- 2. RECENTLY VIEWED
+    # 2. RECOMMENDATIONS
+    recommender = Recommender()
+    recommended_products = recommender.suggest_products_for([product], max_results=4)
+
+    # 3. RECENTLY VIEWED
     rv_ids = request.session.get("recently_viewed", [])
     if product.id in rv_ids:
         rv_ids.remove(product.id)
     rv_ids.insert(0, product.id)
-    rv_ids = rv_ids[:6]                           # keep only 6
+    rv_ids = rv_ids[:6]
     request.session["recently_viewed"] = rv_ids
 
     recently_viewed_products = []
@@ -312,15 +308,13 @@ def product_detail(request, main_slug, category_slug, subcategory_slug, product_
         qs = Product.objects.filter(id__in=rv_ids, is_available=True).exclude(id=product.id)
         recently_viewed_products = sorted(qs, key=lambda p: rv_ids.index(p.id))
 
-    # -------------------------------------------------- 3. VIEW COUNTER
-    # 3. VIEW COUNTER  ──────────────────────────────────────────────
+    # 4. VIEW COUNTER (Redis)
     should_count = (
         request.method == "GET"
         and request.headers.get("X-Requested-With") != "XMLHttpRequest"
         and not request.GET.get("partial")
         and request.headers.get("Purpose") != "prefetch"
     )
-
     redis_key = f"product:{product.id}:views"
 
     if should_count and not request.session.get(f"viewed_product_{product.id}"):
@@ -329,19 +323,15 @@ def product_detail(request, main_slug, category_slug, subcategory_slug, product_
         if product.images.exists():
             r.zincrby("product_view_ranking", 1, str(product.images.first().id))
     else:
-        total_views = int(r.get(redis_key) or 0)   # always an int
+        total_views = int(r.get(redis_key) or 0)
 
-
-
-    # -------------------------------------------------- 4. VARIATIONS / CUSTOMIZATION
+    # 5. VARIATIONS / CUSTOMIZATION
     product_pieces = [p.name.lower() for p in product.pieces.all()]
-    variations = product.variations.prefetch_related(
-        "option__type", "option__type__target_items"
-    )
+    variations = product.variations.prefetch_related("option__type", "option__type__target_items")
 
     monogram_price = vest_price = shirt_price = None
     set_items_unsorted = []
-    custom_by_target = defaultdict(lambda: defaultdict(list))
+    custom_by_target = dd(lambda: defaultdict(list))
 
     for var in variations:
         opt, vtype = var.option, var.option.type
@@ -365,7 +355,7 @@ def product_detail(request, main_slug, category_slug, subcategory_slug, product_
 
     set_items = sorted(set_items_unsorted, key=lambda o: o.order)
 
-    # -------------------------------------------------- 5. CART FORM & IMAGES
+    # 6. CART FORM & IMAGES
     cart_product_form = CartAddProductForm()
     images = (
         ProductImage.objects.filter(product=product)
@@ -383,10 +373,9 @@ def product_detail(request, main_slug, category_slug, subcategory_slug, product_
         "shirt_monogram_placement", "shirt_monogram_color", "shirt_monogram_style",
     ]
 
-    # -------------------------------------------------- 6. REVIEWS
+    # 7. REVIEWS
     sort_option = request.GET.get("sort", "most_recent")
     reviews = ReviewRating.objects.filter(product=product, status=True, parent__isnull=True)
-
     if sort_option == "most_recent":
         reviews = reviews.order_by("-created_at")
     elif sort_option == "oldest":
@@ -413,11 +402,11 @@ def product_detail(request, main_slug, category_slug, subcategory_slug, product_
 
     reply_forms = {rev.id: ReviewReplyForm(prefix=str(rev.id)) for rev in reviews}
 
-    # -------------------------------------------------- 7. POLICIES
+    # 8. POLICIES
     shipping_policy = StaticPage.objects.filter(slug="shipping-delivery", published=True).first()
-    return_policy   = StaticPage.objects.filter(slug="delivery-return",  published=True).first()
+    return_policy = StaticPage.objects.filter(slug="delivery-return", published=True).first()
 
-    # -------------------------------------------------- 8. CONTEXT
+    # 9. CONTEXT
     context = {
         "product": product,
         "images": images,
@@ -446,15 +435,15 @@ def product_detail(request, main_slug, category_slug, subcategory_slug, product_
         "share_url": request.build_absolute_uri(product.get_absolute_url()),
         "total_views": total_views,
         "recently_viewed_products": recently_viewed_products,
-        # pieces flags
         "is_jacket_product": product.pieces.filter(name__iexact="jacket").exists(),
         "is_vest_product":   product.pieces.filter(name__iexact="vest").exists(),
         "is_pants_product":  product.pieces.filter(name__iexact="pants").exists(),
         "is_shirt_product":  product.pieces.filter(name__iexact="shirt").exists(),
+        "recommended_products": recommended_products,
     }
 
-    # -------------------------------------------------- 9. AJAX REVIEW PARTIAL
-    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+    # 10. AJAX REVIEW PARTIAL
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
         html = render_to_string(
             "store/partials/review_list.html",
             {
@@ -466,8 +455,9 @@ def product_detail(request, main_slug, category_slug, subcategory_slug, product_
         )
         return JsonResponse({"html": html})
 
-    # -------------------------------------------------- 10. FULL PAGE RENDER
+    # 11. FULL PAGE RENDER
     return render(request, "store/product_detail.html", context)
+
 
 
 

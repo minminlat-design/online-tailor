@@ -111,19 +111,22 @@
                         <a href="{% url 'cart:cart_detail' %}" class="text-decoration-underline fs-14 text-primary">Edit Cart</a>
                     </div>
 
-                    <!-- Subtotal -->
-                    <div class="d-flex align-items-center justify-content-between border-top pt-3 mb_10">
-                        <div class="fs-18 fw-5">Subtotal</div>
-                        <span class="total-value">${{ subtotal|floatformat:2 }}</span>
-                    </div>
 
-                    <!-- Gift Wrap (only show if non-zero) -->
-                    {% if gift_wrap_price > 0 %}
-                    <div class="d-flex align-items-center justify-content-between mb_10">
-                        <div class="fs-18 fw-5">Gift Wrap</div>
-                        <span class="total-value">${{ gift_wrap_price|floatformat:2 }}</span>
-                    </div>
-                    {% endif %}
+
+                  <!-- Original Subtotal -->
+<div class="d-flex align-items-center justify-content-between border-top pt-3 mb_10">
+    <div class="fs-18 fw-5">Subtotal</div>
+    <span class="total-value">${{ subtotal|floatformat:2 }}</span>
+</div>
+
+
+
+
+
+
+
+                    
+
 
                     <!-- Shipping Fee -->
                     <div class="d-flex align-items-center justify-content-between mb_10">
